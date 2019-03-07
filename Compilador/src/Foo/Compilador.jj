@@ -16,29 +16,37 @@ public class Compilador
   public static void main(String args []) throws ParseException
   {
     /* nombre del fichero */
+	
 	String nombreArchivo;
 	String path = "C:\\Users\\Gord\\Desktop\\programas\\";
 
-	System.out.print("Introduce el nombre del fichero: ");
+	if (args[0].equals("-v")) {
+	  	System.out.println("Compilacion en modo verbose");
+	  	nombreArchivo = args[1];
+	}
+	else {
+	    System.out.println("Compilacion sin modo verbose");
+	    nombreArchivo = args[0];
+    }
 
-	java.util.Scanner teclado = new java.util.Scanner(System.in);
-	nombreArchivo = teclado.nextLine();
+	/* Completar la ruta del path */
 	path += nombreArchivo;
 
-	
-    
+
     System.out.println("LEYENDO FICHERO " + nombreArchivo + "\n");
     try
     {
       /* Crear el parser con respecto al fichero */
       Compilador parser = new Compilador (new java.io.FileInputStream(path));
       int res = Compilador.leerFichero();
-      
+      if (args[0].equals("-v")) { 
       /* Mostrar total de tokens */
 	  TablaHash.mostrarTokensNormales();
 	
 	  /* Mostrar total de identificadores */
 	  TablaHash.mostrarIdentificadores();
+	  }
+	  System.out.println("El fichero introducido es correcto");
   	} 
     catch (Exception e)
     {
