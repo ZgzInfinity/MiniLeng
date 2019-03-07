@@ -93,7 +93,7 @@ public interface CompiladorConstants {
   /** RegularExpression Id. */
   int tLETRA = 51;
   /** RegularExpression Id. */
-  int tNUMERO = 52;
+  int tCONSTANTE_NUMERICA = 52;
   /** RegularExpression Id. */
   int tIDENTIFICADOR = 53;
   /** RegularExpression Id. */
@@ -166,7 +166,7 @@ public interface CompiladorConstants {
     "\"ref\"",
     "<tDIGITO>",
     "<tLETRA>",
-    "<tNUMERO>",
+    "<tCONSTANTE_NUMERICA>",
     "<tIDENTIFICADOR>",
     "\";\"",
     "\",\"",

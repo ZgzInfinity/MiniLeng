@@ -1,10 +1,20 @@
 /**
  * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
  */
-options{  static = true;
-  ignore_case = true;}PARSER_BEGIN(Compilador)package Foo;
 
-public class Compilador{  public static void main(String args []) throws ParseException  {
+options
+{
+  static = true;
+  ignore_case = true;
+}
+
+PARSER_BEGIN(Compilador)
+package Foo;
+
+public class Compilador
+{
+  public static void main(String args []) throws ParseException
+  {
     /* nombre del fichero */
 	String nombreArchivo;
 	String path = "C:\\Users\\Gord\\Desktop\\programas\\";
@@ -16,18 +26,46 @@ public class Compilador{  public static void main(String args []) throws Parse
 	path += nombreArchivo;
 
 	
-        System.out.println("LEYENDO FICHERO " + nombreArchivo + "\n");    try    {
+    
+    System.out.println("LEYENDO FICHERO " + nombreArchivo + "\n");
+    try
+    {
       /* Crear el parser con respecto al fichero */
-      Compilador parser = new Compilador (new java.io.FileInputStream(path));      int res = Compilador.leerFichero();
+      Compilador parser = new Compilador (new java.io.FileInputStream(path));
+      int res = Compilador.leerFichero();
       
       /* Mostrar total de tokens */
 	  TablaHash.mostrarTokensNormales();
 	
 	  /* Mostrar total de identificadores */
 	  TablaHash.mostrarIdentificadores();
-  	}     catch (Exception e)    {       System.out.println("INCORRECTO");       System.out.println(e.getMessage());       Compilador.ReInit(System.in);    }    catch (Error e)      {       System.out.println("FALLO");       System.out.println(e.getMessage());    }  }}PARSER_END(Compilador)SKIP : /* CARACTERES A IGNORAR */{  " "| "\r"| "\t"| "\n"
+  	} 
+    catch (Exception e)
+    {
+       System.out.println("INCORRECTO");
+       System.out.println(e.getMessage());
+       Compilador.ReInit(System.in);
+    }
+    catch (Error e)
+      {
+       System.out.println("FALLO");
+       System.out.println(e.getMessage());
+    }
+  }
+}
+
+PARSER_END(Compilador)
+
+SKIP : /* CARACTERES A IGNORAR */
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
 | "%%" : ComentLinea
-| "\"" : Cadena}
+| "\"" : Cadena
+}
+
 <ComentLinea> SKIP :
 {
   "%%" : DEFAULT
@@ -53,15 +91,22 @@ SPECIAL_TOKEN : /* Comentario de una linea */
 {
   <SINGLE_LINE_COMMENT: "%" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
 }
-TOKEN : /* OPERADORES ARITMETICOS */{  < tPLUS : "+" >
+
+TOKEN : /* OPERADORES ARITMETICOS */
+{
+  < tPLUS : "+" >
   {
-    TablaHash.anyadirHashTokens("tPLUS");  }| < tMINUS : "-" >
+    TablaHash.anyadirHashTokens("tPLUS");
+  }
+| < tMINUS : "-" >
   {
     TablaHash.anyadirHashTokens("tMINUS");
-  }| < tMULTIPLY : "*" >
+  }
+| < tMULTIPLY : "*" >
   {
     TablaHash.anyadirHashTokens("tMULTIPLY");
-  }| < tDIVIDE : "/" >
+  }
+| < tDIVIDE : "/" >
   {
     TablaHash.anyadirHashTokens("tDIVIDE");
   }
@@ -92,7 +137,9 @@ SPECIAL_TOKEN : /* Comentario de una linea */
 | < tOPAS : ":=" >
   {
     TablaHash.anyadirHashTokens("tOPAS");
-  }}
+  }
+}
+
 TOKEN : /* OPERADORES LOGICOS */
 {
   < tAND : "and" >
@@ -214,8 +261,11 @@ TOKEN : /* PALABRAS RESERVADAS */
 TOKEN :  /*EXPRESIONES */
 {
   < #tDIGITO : ["0"-"9"] >	
-| < #tLETRA : ["a"-"z","_"] >
-| < tNUMERO : (< tDIGITO >)+ >
+| < #tLETRA : ["a"-"z"] >
+| < tCONSTANTE_NUMERICA : (< tDIGITO >)+ >
+  {
+    TablaHash.anyadirHashTokens("tCONSTANTE_NUMERICA");
+  }
 | < tIDENTIFICADOR  : (< tLETRA > | ((< tLETRA > | "_")(< tLETRA > | "_" | < tDIGITO >)*(< tLETRA > | < tDIGITO >))) >
 	{
 	  TablaHash.anyadirHashTokens(image.toString());
@@ -245,7 +295,8 @@ TOKEN : /* OPERADORES SEPARADDORES */
 }
 
 
-int leerFichero() :
+
+int leerFichero() :
 {}
 {
   (
@@ -287,7 +338,7 @@ TOKEN : /* OPERADORES SEPARADDORES */
 	| < tACCION >
 	| < tVAL >
 	| < tREF >
-	| < tNUMERO >
+	| < tCONSTANTE_NUMERICA >
 	| < tIDENTIFICADOR >
 	| < tPUNTYCOM >
 	| < tCOMA >

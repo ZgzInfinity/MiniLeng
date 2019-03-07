@@ -160,8 +160,8 @@ public class Compilador implements CompiladorConstants {
       case tREF:
         jj_consume_token(tREF);
         break;
-      case tNUMERO:
-        jj_consume_token(tNUMERO);
+      case tCONSTANTE_NUMERICA:
+        jj_consume_token(tCONSTANTE_NUMERICA);
         break;
       case tIDENTIFICADOR:
         jj_consume_token(tIDENTIFICADOR);
@@ -222,7 +222,7 @@ public class Compilador implements CompiladorConstants {
       case tACCION:
       case tVAL:
       case tREF:
-      case tNUMERO:
+      case tCONSTANTE_NUMERICA:
       case tIDENTIFICADOR:
       case tPUNTYCOM:
       case tCOMA:
