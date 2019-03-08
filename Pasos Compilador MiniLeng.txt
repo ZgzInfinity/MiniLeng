@@ -1,0 +1,33 @@
+---------------------------------
+- Autor: ZgzInfinity ------------
+- NIP: 737215 -------------------
+---------------------------------
+
+Para hacer el compilador de MiniLeng se han seguido los siguientes pasos:
+
+1 - Construir el analizador léxico
+2 - Hacer ficheros de prueba para comprobar que va bien
+3 - Elaborar el analizador sintáctico
+4 - Hacer ficheros de prueba para comprobar que va bien
+5 - Implementar el analizador semántico
+6 - Hacer pruebas para comprobar el funcionamiento final
+
+
+Construir el analizador léxico - Práctica 2 
+-------------------------------------------------------
+1 - En primer lugar se han generado todos los tokens necesarios para admitir 
+    las palabras reservadas del lenguaje MiniLeng
+2 - Generar las expresiones regulares de los identificadores, comentarios y 
+    constantes númericas
+3 - Crear las expreisones regulares para reconocer cadenas de caracteres de 
+    longitud diversa
+4 - Implementar la opción -v "modo verbose"
+5 - Programar una tabla Hash que reconozca y cuente tokens e identificadoresç
+6 - Definir en el fichero TokenMgError.java un metodo adicional para mostrar 
+    los errores usando sobrecarga y poliformismo
+7 - Probar todos los programas facilitados por el profesor
+8 - Desarrollar cinco programas adicionales
+
+Construcción del analizador sintáctico - Práctica 3
+-------------------------------------------------------
+
