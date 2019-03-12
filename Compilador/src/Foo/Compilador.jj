@@ -71,7 +71,6 @@ SKIP : /* CARACTERES A IGNORAR */
 | "\t"
 | "\n"
 | "%%" : ComentLinea
-| "\"" : Cadena
 }
 
 <ComentLinea> SKIP :
@@ -83,17 +82,6 @@ SKIP : /* CARACTERES A IGNORAR */
 {
   <~[]>
 }
-
-<Cadena> SKIP :
-{
-  "\"" : DEFAULT
-}
-
-<Cadena> MORE :
-{
-  <~[]>
-}
-
 
 SPECIAL_TOKEN : /* Comentario de una linea */
 {
@@ -270,6 +258,14 @@ TOKEN :  /*EXPRESIONES */
 {
   < #tDIGITO : ["0"-"9"] >	
 | < #tLETRA : ["a"-"z"] >
+| < tCHAR : ("\"")(~["\""])("\"") >
+  {
+    TablaHash.anyadirHashTokens("tCHAR");
+  }
+| < tSTRING :  ("\"")(~["\""])+("\"") >
+  {
+    TablaHash.anyadirHashTokens("tSTRING");
+  }
 | < tCONSTANTE_NUMERICA : (< tDIGITO >)+ >
   {
     TablaHash.anyadirHashTokens("tCONSTANTE_NUMERICA");
@@ -352,6 +348,8 @@ int leerFichero() :
 	| < tCOMA >
 	| < tPARENTESIS_IZDA >
 	| < tPARENTESIS_DCHA >
+	| < tCHAR >
+	| < tSTRING >
   )+
   < EOF >
   {
