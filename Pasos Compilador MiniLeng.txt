@@ -5,29 +5,46 @@
 
 Para hacer el compilador de MiniLeng se han seguido los siguientes pasos:
 
-1 - Construir el analizador léxico
+1 - Construir el analizador lÃ©xico
 2 - Hacer ficheros de prueba para comprobar que va bien
-3 - Elaborar el analizador sintáctico
+3 - Elaborar el analizador sintÃ¡ctico
 4 - Hacer ficheros de prueba para comprobar que va bien
-5 - Implementar el analizador semántico
+5 - Implementar el analizador semÃ¡ntico
 6 - Hacer pruebas para comprobar el funcionamiento final
 
 
-Construir el analizador léxico - Práctica 2 
+Construir el analizador lÃ©xico - PrÃ¡ctica 2 
 -------------------------------------------------------
 1 - En primer lugar se han generado todos los tokens necesarios para admitir 
     las palabras reservadas del lenguaje MiniLeng
 2 - Generar las expresiones regulares de los identificadores, comentarios y 
-    constantes númericas
+    constantes nÃºmericas
 3 - Crear las expreisones regulares para reconocer cadenas de caracteres de 
     longitud diversa
-4 - Implementar la opción -v "modo verbose"
-5 - Programar una tabla Hash que reconozca y cuente tokens e identificadoresç
+4 - Implementar la opciÃ³n -v "modo verbose"
+5 - Programar una tabla Hash que reconozca y cuente tokens e identificadoresÃ§
 6 - Definir en el fichero TokenMgError.java un metodo adicional para mostrar 
     los errores usando sobrecarga y poliformismo
 7 - Probar todos los programas facilitados por el profesor
 8 - Desarrollar cinco programas adicionales
+9 - Programar modo verbose con flag "-v" 
+10 - Corregir error lexico
 
-Construcción del analizador sintáctico - Práctica 3
+ConstrucciÃ³n del analizador sintÃ¡ctico - PrÃ¡ctica 3
 -------------------------------------------------------
 
+1 - Modificar funcion leer fichero por programa y comprobar que funciona correctamente
+2 - Implementada regla "clase_parametros"
+3 - Implementada regla "tipos_variables"
+4 - Implementada regla "identificadores"
+5 - Implementada regla "declaracion"
+6 - Implementada regla "declaracion de variables"
+7 - Implementada regla "parametros" --> es una secuencia de parametros de un mismo tipo para evitar poner val|ref y el tipo 
+    varias veces
+8 - Implementada regla "lista parametros" como "parametros" + puntoYcoma
+9 - Implementada regla "parametros formales" como varias listas de parametros separadas por punto y coma
+10 - Implementada regla "cabecera_accion" como accion nombre_funcion (parametros formales)
+11 - Implementada regla "declaracion_accion"
+12 - Implementada regla "declaracion_acciones"
+
+ 
