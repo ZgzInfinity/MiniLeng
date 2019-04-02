@@ -1,0 +1,792 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+
+options
+{
+  static = true;
+  ignore_case = true;
+}
+
+PARSER_BEGIN(Compilador)
+package Foo;
+
+public class Compilador
+{
+  public static void main(String args []) throws ParseException
+  {
+    /* nombre del fichero */
+	
+	String nombreArchivo;
+	String path = "C:\\Users\\Gord\\Desktop\\programas\\";
+
+	if (args[0].equals("-v")) {
+	  	System.out.println("Compilacion en modo verbose");
+	  	nombreArchivo = args[1];
+	}
+	else {
+	    System.out.println("Compilacion sin modo verbose");
+	    nombreArchivo = args[0];
+    }
+
+	/* Completar la ruta del path */
+	path += nombreArchivo;
+
+
+    System.out.println("LEYENDO FICHERO " + nombreArchivo + "\n");
+    try
+    {
+      /* Crear el parser con respecto al fichero */
+      Compilador parser = new Compilador (new java.io.FileInputStream(path));
+      int res = Compilador.programa();
+      if (args[0].equals("-v")) { 
+      /* Mostrar total de tokens */
+	  TablaHash.mostrarTokensNormales();
+	
+	  /* Mostrar total de identificadores */
+	  TablaHash.mostrarIdentificadores();
+	  }
+	  System.out.println("El fichero introducido es correcto");
+  	} 
+    catch (Exception e)
+    {
+       System.out.println("INCORRECTO");
+       System.out.println(e.getMessage());
+       Compilador.ReInit(System.in);
+    }
+    catch (Error e)
+      {
+       System.out.println("FALLO");
+       System.out.println(e.getMessage());
+    }
+  }
+}
+
+PARSER_END(Compilador)
+
+SKIP : /* CARACTERES A IGNORAR */
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+| "%%" : ComentLinea
+}
+
+<ComentLinea> SKIP :
+{
+  "%%" : DEFAULT
+}
+
+<ComentLinea> MORE :
+{
+  <~[]>
+}
+
+SPECIAL_TOKEN : /* Comentario de una linea */
+{
+  <SINGLE_LINE_COMMENT: "%" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+}
+
+TOKEN : /* OPERADORES ARITMETICOS */
+{
+  < tPLUS : "+" >
+  {
+    TablaHash.anyadirHashTokens("tPLUS");
+  }
+| < tMINUS : "-" >
+  {
+    TablaHash.anyadirHashTokens("tMINUS");
+  }
+| < tMULTIPLY : "*" >
+  {
+    TablaHash.anyadirHashTokens("tMULTIPLY");
+  }
+| < tDIVIDE : "/" >
+  {
+    TablaHash.anyadirHashTokens("tDIVIDE");
+  }
+| < tMAYOR : ">" >
+  {
+    TablaHash.anyadirHashTokens("tMAYOR");
+  }
+| < tMENOR : "<" >
+  {
+    TablaHash.anyadirHashTokens("tMENOR");
+  }
+| < tIGUAL : "=" >
+  {
+    TablaHash.anyadirHashTokens("tIGUAL");
+  }
+| < tMAI : ">=" >
+  {
+    TablaHash.anyadirHashTokens("tMAI");
+  }
+| < tMEI : "<=" >
+  {
+    TablaHash.anyadirHashTokens("tMEI");
+  }
+| < tNI : "<>" >
+  {
+    TablaHash.anyadirHashTokens("tNI");
+  }
+| < tOPAS : ":=" >
+  {
+    TablaHash.anyadirHashTokens("tOPAS");
+  }
+}
+
+TOKEN : /* OPERADORES LOGICOS */
+{
+  < tAND : "and" >
+   {
+    TablaHash.anyadirHashTokens("tAND");
+   }
+| < tOR : "or" >
+  {
+    TablaHash.anyadirHashTokens("tOR");
+  }
+| < tNOT : "not" >
+  {
+    TablaHash.anyadirHashTokens("tNOT");
+  }
+}
+
+
+TOKEN : /* PALABRAS RESERVADAS */
+{
+  < tPROGRAMA : "programa" >
+   {
+    TablaHash.anyadirHashTokens("tPROGRAMA");
+   }
+| < tVAR : "var" >
+  {
+    TablaHash.anyadirHashTokens("tVAR");
+  }
+| < tPRINCIPIO : "principio" >
+  {
+    TablaHash.anyadirHashTokens("tPRINCIPIO");
+  }
+| < tFIN : "fin" >
+  {
+    TablaHash.anyadirHashTokens("tFIN");
+  }
+| < tSI : "si" >
+  {
+    TablaHash.anyadirHashTokens("tSI");
+  }
+| < tENT : "ent" >
+  {
+    TablaHash.anyadirHashTokens("tENT");
+  }
+| < tSI_NO : "si_no" >
+  {
+    TablaHash.anyadirHashTokens("tSI_NO");
+  }
+| < tFSI : "fsi" >
+  {
+    TablaHash.anyadirHashTokens("tFSI");
+  }
+| < tMQ : "mq" >
+  {
+    TablaHash.anyadirHashTokens("tMQ");
+  }
+| < tFMQ : "fmq" >
+  {
+    TablaHash.anyadirHashTokens("tFMQ");
+  }
+| < tESCRIBIR : "escribir" >
+  {
+    TablaHash.anyadirHashTokens("tESCRIBIR");
+  }
+| < tLEER : "leer" >
+  {
+    TablaHash.anyadirHashTokens("tLEER");
+  }
+| < tMOD : "mod" >
+  {
+    TablaHash.anyadirHashTokens("tMOD");
+  }
+| < tDIV : "div" >
+  {
+    TablaHash.anyadirHashTokens("tDIV");
+  }
+| < tENTERO : "entero" >
+  {
+    TablaHash.anyadirHashTokens("tENTERO");
+  }
+| < tBOOLEANO : "booleano" >
+  {
+    TablaHash.anyadirHashTokens("tBOOLEANO");
+  }
+| < tCARACTER : "caracter" >
+  {
+    TablaHash.anyadirHashTokens("tCARACTER");
+  }
+| < tTRUE : "true" >
+  {
+    TablaHash.anyadirHashTokens("tTRUE");
+  }
+| < tFALSE : "false" >
+  {
+    TablaHash.anyadirHashTokens("tFALSE");
+  }
+| < tENTACAR : "entacar" >
+  {
+    TablaHash.anyadirHashTokens("tENTACAR");
+  }
+| < tCARAENT : "caraent" >
+  {
+    TablaHash.anyadirHashTokens("tCARAENT");
+  }
+| < tACCION : "accion" >
+  {
+    TablaHash.anyadirHashTokens("tACCION");
+  }
+| < tVAL : "val" >
+  {
+    TablaHash.anyadirHashTokens("tVAL");
+  }
+| < tREF : "ref" >
+  {
+    TablaHash.anyadirHashTokens("tREF");
+  }
+}
+
+
+TOKEN :  /*EXPRESIONES */
+{
+  < #tDIGITO : ["0"-"9"] >	
+| < #tLETRA : ["a"-"z"] >
+| < tCONSTCHAR : ("\"")(~["\""])("\"") >
+  {
+    TablaHash.anyadirHashTokens("tCONSTCHAR");
+  }
+| < tCONSTCAD :  ("\"")(~["\""])+("\"") >
+  {
+    TablaHash.anyadirHashTokens("tCONSTCAD");
+  }
+| < tCONSTANTE_NUMERICA : (< tDIGITO >)+ >
+  {
+    TablaHash.anyadirHashTokens("tCONSTANTE_NUMERICA");
+  }
+| < tIDENTIFICADOR  : (< tLETRA > | ((< tLETRA > | "_")(< tLETRA > | "_" | < tDIGITO >)*(< tLETRA > | < tDIGITO >))) >
+	{
+	  TablaHash.anyadirHashTokens(image.toString());
+	  TablaHash.anyadirHashIdentificadores(image.toString());
+	}
+}
+
+
+TOKEN : /* OPERADORES SEPARADDORES */
+{
+  < tPUNTYCOM : ";" >
+  {
+    TablaHash.anyadirHashTokens("tPUNTYCOM");
+  }
+| < tCOMA : "," >
+  {
+    TablaHash.anyadirHashTokens("tCOMA");
+  }
+| < tPARENTESIS_IZDA : "(" >
+  {
+    TablaHash.anyadirHashTokens("tPARENTESIS_IZDA");
+  }
+| < tPARENTESIS_DCHA : ")" >
+  {
+    TablaHash.anyadirHashTokens("tPARENTESIS_DCHA");
+  }
+}
+
+
+/* Construccion del analizador sintactico */
+
+// Regla de programa
+int programa():
+{
+}
+{
+  try{
+       < tPROGRAMA > < tIDENTIFICADOR > < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias() < EOF >
+       {
+         return 0;
+       }
+  }
+  catch (Exception e){
+     System.out.println("Error en programa");
+     return 1;
+  }
+}
+
+
+// Regla de bloque_sentencias
+void bloque_sentencias():
+{
+}
+{
+  try {
+       < tPRINCIPIO > lista_sentencias() < tFIN >
+  }
+  catch (Exception e){
+     System.out.println("Error en bloque_sentencias");
+  }
+}
+
+// Regla de lista_sentencias
+void lista_sentencias():
+{
+}
+{
+  try{
+      (sentencia())+
+  }
+  catch (Exception e){
+     System.out.println("Error en lista_sentencias");
+  }
+}
+
+
+// Regla de sentencia
+void sentencia():
+{
+}
+{
+ try{
+      leer() < tPUNTYCOM >
+   	| escribir() < tPUNTYCOM >
+   	| asignacion()
+   	| invocacion_accion()
+   	| seleccion()
+   	| mientras_que()
+  }
+  catch (Exception e){
+     System.out.println("Error en sentencia");
+  }
+}
+
+// Regla de escribir
+void escribir():
+{
+}
+{
+  try {
+      < tESCRIBIR > <tPARENTESIS_IZDA > lista_escribibles() < tPARENTESIS_DCHA >
+  }
+  catch (Exception e){
+     System.out.println("Error en escribir");
+  }
+}
+
+// Regla de asignacion
+void asignacion():
+{
+}
+{
+  try {
+       < tIDENTIFICADOR > < tOPAS > expresion() < tPUNTYCOM >
+  }
+  catch (Exception e){
+     System.out.println("Error en asignacion");
+  }
+}
+
+
+// Regla de lista_asignables
+void lista_asignables():
+{
+}
+{
+  try {
+       < tIDENTIFICADOR >(< tCOMA ><tIDENTIFICADOR >)*
+  }
+  catch (Exception e){
+     System.out.println("Error en lista_asignables");
+  }
+}
+
+// Regla de leer
+void leer():
+{
+}
+{
+  try {
+       < tLEER >< tPARENTESIS_IZDA > lista_asignables() < tPARENTESIS_DCHA >
+  }
+  catch (Exception e){
+     System.out.println("Error en leer");
+  }
+}
+
+
+// Regla de lista_escribibles MIERDA
+void lista_escribibles():
+{
+}
+{
+  try {
+       < tIDENTIFICADOR >
+     | < tCONSTCHAR >
+     | < tCONSTCAD >
+  }
+  catch (Exception e){
+     System.out.println("Error en lista_escribibles");
+  }
+}
+
+
+
+// Regla de invocacion accion
+void invocacion_accion():
+{
+}
+{
+  try {
+     < tIDENTIFICADOR > argumentos() < tPUNTYCOM >
+  }
+  catch (Exception e){
+     System.out.println("Error en invocacion_accion");
+  }
+}
+
+//Regla de mientras que
+void mientras_que():
+{
+}
+{
+  try {
+     < tMQ > expresion() lista_sentencias() < tFMQ >
+  }
+  catch (Exception e){
+     System.out.println("Error en mientras_que");
+  }
+}
+
+// Regla para los argumentos
+void argumentos():
+{
+}
+{
+  try {
+      < tPARENTESIS_IZDA > <tPARENTESIS_DCHA >
+    | < tPARENTESIS_IZDA > lista_expresiones() < tPARENTESIS_DCHA >
+  }
+  catch (Exception e){
+     System.out.println("Error en argumentos");
+  }
+  
+}
+
+
+
+// Regla de lista de expresiones
+void lista_expresiones():
+{
+}
+{
+  try {
+     ((expresion())< tPUNTYCOM >)+
+  }
+  catch (Exception e) {
+    System.out.println("Error en secuencia");
+  }
+}
+
+
+// Regla de expresion
+void expresion():
+{
+}
+{
+ try {
+  	  expresion_simple() (operador_relacional() expresion_simple())*
+  }
+  catch (Exception e) {
+     System.out.println("Error en expresion");
+  }
+}
+
+
+// Regla de operador_relacional
+void operador_relacional():
+{
+}
+{
+  try {
+      < tIGUAL >
+    | < tMENOR >
+    | < tMEI >
+    | < tNI >
+    | < tMAI >
+    | < tMAYOR >
+  }
+  catch (Exception e) {
+     System.out.println("Error en operador_relacional");
+  }
+}
+
+
+// Regla operador aditivo
+void operador_aditivo():
+{
+}
+{
+  try {
+      < tPLUS > 
+	| < tMINUS >
+	| < tOR >
+  }
+  catch (Exception e) {
+	System.out.println("Error en operador aditivo");
+  }
+}
+
+// regla de expresion simple
+void expresion_simple():
+{
+}
+{
+  try {
+       (< tPLUS > |< tMINUS >) termino() (operador_aditivo() termino())*
+  }
+  catch (Exception e) {
+     System.out.println("Error en expresion simple");
+  }
+}
+
+
+// Regla de termino
+void termino():
+{
+}
+{
+  try {
+     factor() (operador_multiplicativo() factor())*
+  }
+  catch (Exception e) {
+     System.out.println("Error en termino");
+  }
+}
+
+
+
+// Regla de operador multiplicativo
+void operador_multiplicativo():
+{
+}
+{
+  try { 
+ 	  < tMULTIPLY >
+ 	| < tDIVIDE >
+ 	| < tDIV >
+ 	| < tMOD >
+ 	| < tAND >
+  }
+  catch(Exception e) {
+    System.out.println("Error en operador_multiplicativo");
+  }
+}
+
+
+
+// Regla de expresion simple
+void factor():
+{
+}
+{
+  try {
+	  < tIDENTIFICADOR >
+	| < tCONSTANTE_NUMERICA >
+	| < tNOT > factor()
+	| < tPARENTESIS_IZDA > expresion() < tPARENTESIS_DCHA >
+	| < tENTACAR >< tPARENTESIS_IZDA > expresion() < tPARENTESIS_DCHA >
+	| < tCARAENT >< tPARENTESIS_IZDA > expresion() < tPARENTESIS_DCHA >
+	| < tCONSTANTE_NUMERICA >
+	| < tCONSTCHAR >
+	| < tCONSTCAD >
+	| < tTRUE >
+	| < tFALSE >
+  }
+  catch (Exception e) {
+	  System.out.println("Error en factor");
+  }
+}
+
+// Regla de seelccion
+void seleccion():
+{
+}
+{
+  try {
+    < tSI > expresion() < tENT > lista_sentencias() (< tSI_NO > lista_sentencias())? < tFSI >
+  }
+  catch (Exception e) {
+  	System.out.println("Error en seleccion");
+  }
+}
+
+
+// Regla de declaracion_acciones
+void declaracion_acciones():
+{
+}
+{
+  try { 
+ 	(declaracion_accion())*
+  }
+  catch(Exception e) {
+    System.out.println("Error en declaracion_acciones");
+  }
+}
+
+
+// Regla de declaracion_Accion
+void declaracion_accion():
+{
+}
+{
+  try { 
+ 	(cabecera_accion()) < tPUNTYCOM >
+  }
+  catch(Exception e) {
+    System.out.println("Error en declaracion_accion");
+  }
+}
+
+
+
+// Regla de cabecera_accion
+void cabecera_accion():
+{
+}
+{
+  try { 
+ 	 < tACCION > < tIDENTIFICADOR > parametros_formales()
+  }
+  catch(Exception e) {
+    System.out.println("Error en cabecera_accion");
+  }
+}
+
+
+// Regla de parametros formales
+void parametros_formales():
+{
+}
+{
+  try { 
+ 	 < tPARENTESIS_IZDA > (lista_parametros())* < tPARENTESIS_DCHA >
+  }
+  catch(Exception e) {
+    System.out.println("Error en parametros_formales");
+  }
+}
+
+
+// Regla para lista_parametros
+void lista_parametros():
+{
+}
+{
+  try {
+     parametros() < tPUNTYCOM >
+  }
+  catch (Exception e){
+     System.out.println("Error en lista_parametros");
+  }
+}
+
+
+// Regla de parametros
+void parametros():
+{
+}
+{
+  try {
+     ((clase_parametros())(tipos_variables())(identificadores()))+
+  }
+  catch (Exception e){
+     System.out.println("Error en parametros");
+  }
+}
+
+
+// Regla de declaracion variables
+void declaracion_variables():
+{
+}
+{
+  try {
+     ((declaracion()) < tPUNTYCOM >)*
+  }
+  catch (Exception e){
+     System.out.println("Error en declaracion_variables");
+  }
+}
+
+// Regla de declaracion
+void declaracion():
+{
+}
+{
+  try {
+     tipos_variables() identificadores()
+  }
+  catch (Exception e){
+     System.out.println("Error en declaracion");
+  }
+}
+
+
+// Regla para los identificadores
+void identificadores():
+{
+}
+{
+  try {
+     < tIDENTIFICADOR > (< tCOMA > < tIDENTIFICADOR >)*
+  }
+  catch (Exception e){
+     System.out.println("Error en identificadores");
+  }
+}
+
+
+// Regla para los tipos de variables
+void tipos_variables():
+{
+}
+{
+  try {
+    < tENTERO >
+  | < tCARACTER >
+  | < tBOOLEANO >
+  }
+  catch (Exception e){
+   	 System.out.println("Error en tipos_variables\n");
+  }
+}
+
+
+// Regla para las clases de parametros
+void clase_parametros():
+{
+}
+{
+  try {
+    < tVAL >
+  | < tREF >
+  }
+  catch (Exception e){
+   	 System.out.println("Error en clase_parametros\n");
+  }
+}
+
+
+
+
+
+
+
+
+
+
