@@ -11,106 +11,108 @@ public interface CompiladorConstants {
   /** End of File. */
   int EOF = 0;
   /** RegularExpression Id. */
-  int SINGLE_LINE_COMMENT = 11;
+  int SINGLE_LINE_COMMENT = 8;
   /** RegularExpression Id. */
-  int tPLUS = 12;
+  int tPLUS = 9;
   /** RegularExpression Id. */
-  int tMINUS = 13;
+  int tMINUS = 10;
   /** RegularExpression Id. */
-  int tMULTIPLY = 14;
+  int tMULTIPLY = 11;
   /** RegularExpression Id. */
-  int tDIVIDE = 15;
+  int tDIVIDE = 12;
   /** RegularExpression Id. */
-  int tMAYOR = 16;
+  int tMAYOR = 13;
   /** RegularExpression Id. */
-  int tMENOR = 17;
+  int tMENOR = 14;
   /** RegularExpression Id. */
-  int tIGUAL = 18;
+  int tIGUAL = 15;
   /** RegularExpression Id. */
-  int tMAI = 19;
+  int tMAI = 16;
   /** RegularExpression Id. */
-  int tMEI = 20;
+  int tMEI = 17;
   /** RegularExpression Id. */
-  int tNI = 21;
+  int tNI = 18;
   /** RegularExpression Id. */
-  int tOPAS = 22;
+  int tOPAS = 19;
   /** RegularExpression Id. */
-  int tAND = 23;
+  int tAND = 20;
   /** RegularExpression Id. */
-  int tOR = 24;
+  int tOR = 21;
   /** RegularExpression Id. */
-  int tNOT = 25;
+  int tNOT = 22;
   /** RegularExpression Id. */
-  int tPROGRAMA = 26;
+  int tPROGRAMA = 23;
   /** RegularExpression Id. */
-  int tVAR = 27;
+  int tVAR = 24;
   /** RegularExpression Id. */
-  int tPRINCIPIO = 28;
+  int tPRINCIPIO = 25;
   /** RegularExpression Id. */
-  int tFIN = 29;
+  int tFIN = 26;
   /** RegularExpression Id. */
-  int tSI = 30;
+  int tSI = 27;
   /** RegularExpression Id. */
-  int tENT = 31;
+  int tENT = 28;
   /** RegularExpression Id. */
-  int tSI_NO = 32;
+  int tSI_NO = 29;
   /** RegularExpression Id. */
-  int tFSI = 33;
+  int tFSI = 30;
   /** RegularExpression Id. */
-  int tMQ = 34;
+  int tMQ = 31;
   /** RegularExpression Id. */
-  int tFMQ = 35;
+  int tFMQ = 32;
   /** RegularExpression Id. */
-  int tESCRIBIR = 36;
+  int tESCRIBIR = 33;
   /** RegularExpression Id. */
-  int tLEER = 37;
+  int tLEER = 34;
   /** RegularExpression Id. */
-  int tMOD = 38;
+  int tMOD = 35;
   /** RegularExpression Id. */
-  int tDIV = 39;
+  int tDIV = 36;
   /** RegularExpression Id. */
-  int tENTERO = 40;
+  int tENTERO = 37;
   /** RegularExpression Id. */
-  int tBOOLEANO = 41;
+  int tBOOLEANO = 38;
   /** RegularExpression Id. */
-  int tCARACTER = 42;
+  int tCARACTER = 39;
   /** RegularExpression Id. */
-  int tTRUE = 43;
+  int tTRUE = 40;
   /** RegularExpression Id. */
-  int tFALSE = 44;
+  int tFALSE = 41;
   /** RegularExpression Id. */
-  int tENTACAR = 45;
+  int tENTACAR = 42;
   /** RegularExpression Id. */
-  int tCARAENT = 46;
+  int tCARAENT = 43;
   /** RegularExpression Id. */
-  int tACCION = 47;
+  int tACCION = 44;
   /** RegularExpression Id. */
-  int tVAL = 48;
+  int tVAL = 45;
   /** RegularExpression Id. */
-  int tREF = 49;
+  int tREF = 46;
   /** RegularExpression Id. */
-  int tDIGITO = 50;
+  int tDIGITO = 47;
   /** RegularExpression Id. */
-  int tLETRA = 51;
+  int tLETRA = 48;
   /** RegularExpression Id. */
-  int tCONSTANTE_NUMERICA = 52;
+  int tCONSTCHAR = 49;
   /** RegularExpression Id. */
-  int tIDENTIFICADOR = 53;
+  int tCONSTCAD = 50;
   /** RegularExpression Id. */
-  int tPUNTYCOM = 54;
+  int tCONSTANTE_NUMERICA = 51;
   /** RegularExpression Id. */
-  int tCOMA = 55;
+  int tIDENTIFICADOR = 52;
   /** RegularExpression Id. */
-  int tPARENTESIS_IZDA = 56;
+  int tPUNTYCOM = 53;
   /** RegularExpression Id. */
-  int tPARENTESIS_DCHA = 57;
+  int tCOMA = 54;
+  /** RegularExpression Id. */
+  int tPARENTESIS_IZDA = 55;
+  /** RegularExpression Id. */
+  int tPARENTESIS_DCHA = 56;
 
   /** Lexical state. */
   int DEFAULT = 0;
   /** Lexical state. */
   int ComentLinea = 1;
-  /** Lexical state. */
-  int Cadena = 2;
 
   /** Literal token values. */
   String[] tokenImage = {
@@ -120,11 +122,8 @@ public interface CompiladorConstants {
     "\"\\t\"",
     "\"\\n\"",
     "\"%%\"",
-    "\"\\\"\"",
     "\"%%\"",
-    "<token of kind 8>",
-    "\"\\\"\"",
-    "<token of kind 10>",
+    "<token of kind 7>",
     "<SINGLE_LINE_COMMENT>",
     "\"+\"",
     "\"-\"",
@@ -166,6 +165,8 @@ public interface CompiladorConstants {
     "\"ref\"",
     "<tDIGITO>",
     "<tLETRA>",
+    "<tCONSTCHAR>",
+    "<tCONSTCAD>",
     "<tCONSTANTE_NUMERICA>",
     "<tIDENTIFICADOR>",
     "\";\"",

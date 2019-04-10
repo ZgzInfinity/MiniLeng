@@ -5,15 +5,21 @@ public class Compilador implements CompiladorConstants {
   public static void main(String args []) throws ParseException
   {
     /* nombre del fichero */
+
         String nombreArchivo;
         String path = "C:\u005c\u005cUsers\u005c\u005cGord\u005c\u005cDesktop\u005c\u005cprogramas\u005c\u005c";
 
-        System.out.print("Introduce el nombre del fichero: ");
+        if (args[0].equals("-v")) {
+                System.out.println("Compilacion en modo verbose");
+                nombreArchivo = args[1];
+        }
+        else {
+            System.out.println("Compilacion sin modo verbose");
+            nombreArchivo = args[0];
+    }
 
-        java.util.Scanner teclado = new java.util.Scanner(System.in);
-        nombreArchivo = teclado.nextLine();
+        /* Completar la ruta del path */
         path += nombreArchivo;
-
 
 
     System.out.println("LEYENDO FICHERO " + nombreArchivo + "\u005cn");
@@ -21,13 +27,15 @@ public class Compilador implements CompiladorConstants {
     {
       /* Crear el parser con respecto al fichero */
       Compilador parser = new Compilador (new java.io.FileInputStream(path));
-      int res = Compilador.leerFichero();
-
+      int res = Compilador.programa();
+      if (args[0].equals("-v")) {
       /* Mostrar total de tokens */
           TablaHash.mostrarTokensNormales();
 
           /* Mostrar total de identificadores */
           TablaHash.mostrarIdentificadores();
+          }
+          System.out.println("El fichero introducido es correcto");
         }
     catch (Exception e)
     {
@@ -42,48 +50,324 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-  static final public int leerFichero() throws ParseException {
-    label_1:
-    while (true) {
+/* Construccion del analizador sintactico */
+
+// Regla de programa
+  static final public int programa() throws ParseException {
+    try {
+      jj_consume_token(tPROGRAMA);
+      jj_consume_token(tIDENTIFICADOR);
+      jj_consume_token(tPUNTYCOM);
+      declaracion_variables();
+      declaracion_acciones();
+      bloque_sentencias();
+      jj_consume_token(0);
+         {if (true) return 0;}
+    } catch (Exception e) {
+     System.out.println("Error en programa");
+     {if (true) return 1;}
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+// Regla de bloque_sentencias OK
+  static final public void bloque_sentencias() throws ParseException {
+    try {
+      jj_consume_token(tPRINCIPIO);
+      lista_sentencias();
+      jj_consume_token(tFIN);
+    } catch (Exception e) {
+     System.out.println("Error en bloque_sentencias");
+    }
+  }
+
+// Regla de lista_sentencias OK EN DUDA
+  static final public void lista_sentencias() throws ParseException {
+    try {
+      label_1:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tSI:
+        case tMQ:
+        case tESCRIBIR:
+        case tLEER:
+        case tIDENTIFICADOR:
+          ;
+          break;
+        default:
+          jj_la1[0] = jj_gen;
+          break label_1;
+        }
+        sentencia();
+      }
+    } catch (Exception e) {
+     System.out.println("Error en lista_sentencias");
+    }
+  }
+
+// Regla de sentencia OK
+  static final public void sentencia() throws ParseException {
+    try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case tPROGRAMA:
-        jj_consume_token(tPROGRAMA);
+      case tLEER:
+        leer();
+        jj_consume_token(tPUNTYCOM);
         break;
-      case tVAR:
-        jj_consume_token(tVAR);
+      case tESCRIBIR:
+        escribir();
+        jj_consume_token(tPUNTYCOM);
         break;
-      case tAND:
-        jj_consume_token(tAND);
+      case tIDENTIFICADOR:
+        asig_invoc();
         break;
-      case tOR:
-        jj_consume_token(tOR);
+      case tSI:
+        seleccion();
         break;
-      case tNOT:
-        jj_consume_token(tNOT);
+      case tMQ:
+        mientras_que();
         break;
+      default:
+        jj_la1[1] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    } catch (Exception e) {
+     System.out.println("Error en sentencia");
+    }
+  }
+
+  static final public void asig_invoc() throws ParseException {
+    try {
+      jj_consume_token(tIDENTIFICADOR);
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tOPAS:
+        asignacion();
+        break;
+      case tPUNTYCOM:
+      case tPARENTESIS_IZDA:
+        invocacion_accion();
+        break;
+      default:
+        jj_la1[2] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    } catch (Exception e) {
+     System.out.println("Error en asignacion");
+    }
+  }
+
+// Regla de asignacion OK
+  static final public void asignacion() throws ParseException {
+    try {
+      jj_consume_token(tOPAS);
+      expresion();
+      jj_consume_token(tPUNTYCOM);
+    } catch (Exception e) {
+     System.out.println("Error en asignacion");
+    }
+  }
+
+// Regla de lista_asignables OK
+  static final public void lista_asignables() throws ParseException {
+    try {
+      identificadores();
+    } catch (Exception e) {
+     System.out.println("Error en lista_asignables");
+    }
+  }
+
+// Regla de leer OK
+  static final public void leer() throws ParseException {
+    try {
+      jj_consume_token(tLEER);
+      jj_consume_token(tPARENTESIS_IZDA);
+      lista_asignables();
+      jj_consume_token(tPARENTESIS_DCHA);
+    } catch (Exception e) {
+     System.out.println("Error en leer");
+    }
+  }
+
+// Regla de escribir OK
+  static final public void escribir() throws ParseException {
+    try {
+      jj_consume_token(tESCRIBIR);
+      jj_consume_token(tPARENTESIS_IZDA);
+      lista_escribibles();
+      jj_consume_token(tPARENTESIS_DCHA);
+    } catch (Exception e) {
+     System.out.println("Error en lista_escribibles");
+    }
+  }
+
+// Regla de lista_escribibles OK
+  static final public void lista_escribibles() throws ParseException {
+    try {
+      escribible();
+      label_2:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tCOMA:
+          ;
+          break;
+        default:
+          jj_la1[3] = jj_gen;
+          break label_2;
+        }
+        jj_consume_token(tCOMA);
+        escribible();
+      }
+    } catch (Exception e) {
+     System.out.println("Error en lista_escribibles");
+    }
+  }
+
+// Regla de lista_escribibles OK
+  static final public void escribible() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tCONSTCHAR:
+        jj_consume_token(tCONSTCHAR);
+        break;
+      case tCONSTCAD:
+        jj_consume_token(tCONSTCAD);
+        break;
+      case tENTACAR:
+        jj_consume_token(tENTACAR);
+        jj_consume_token(tPARENTESIS_IZDA);
+        jj_consume_token(tCONSTANTE_NUMERICA);
+        jj_consume_token(tPARENTESIS_DCHA);
+        break;
+      case tIDENTIFICADOR:
+        jj_consume_token(tIDENTIFICADOR);
+        break;
+      default:
+        jj_la1[4] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    } catch (Exception e) {
+     System.out.println("Error en lista_escribibles");
+    }
+  }
+
+// Regla de invocacion accion OK
+  static final public void invocacion_accion() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tPARENTESIS_IZDA:
+        argumentos();
+        break;
+      default:
+        jj_la1[5] = jj_gen;
+        ;
+      }
+      jj_consume_token(tPUNTYCOM);
+    } catch (Exception e) {
+     System.out.println("Error en invocacion_accion");
+    }
+  }
+
+//Regla de mientras que OK
+  static final public void mientras_que() throws ParseException {
+    try {
+      jj_consume_token(tMQ);
+      expresion();
+      lista_sentencias();
+      jj_consume_token(tFMQ);
+    } catch (Exception e) {
+     System.out.println("Error en mientras_que");
+    }
+  }
+
+// Regla para los argumentos OK
+  static final public void argumentos() throws ParseException {
+    try {
+      jj_consume_token(tPARENTESIS_IZDA);
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPLUS:
-        jj_consume_token(tPLUS);
-        break;
       case tMINUS:
-        jj_consume_token(tMINUS);
+      case tNOT:
+      case tTRUE:
+      case tFALSE:
+      case tENTACAR:
+      case tCARAENT:
+      case tCONSTCHAR:
+      case tCONSTCAD:
+      case tCONSTANTE_NUMERICA:
+      case tIDENTIFICADOR:
+      case tPARENTESIS_IZDA:
+        lista_expresiones();
         break;
-      case tMULTIPLY:
-        jj_consume_token(tMULTIPLY);
-        break;
-      case tDIVIDE:
-        jj_consume_token(tDIVIDE);
-        break;
-      case tMAYOR:
-        jj_consume_token(tMAYOR);
-        break;
-      case tMENOR:
-        jj_consume_token(tMENOR);
-        break;
+      default:
+        jj_la1[6] = jj_gen;
+        ;
+      }
+      jj_consume_token(tPARENTESIS_DCHA);
+    } catch (Exception e) {
+     System.out.println("Error en argumentos");
+    }
+  }
+
+// Regla de lista de expresiones
+  static final public void lista_expresiones() throws ParseException {
+    try {
+      expresion();
+      label_3:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tCOMA:
+          ;
+          break;
+        default:
+          jj_la1[7] = jj_gen;
+          break label_3;
+        }
+        jj_consume_token(tCOMA);
+        expresion();
+      }
+    } catch (Exception e) {
+    System.out.println("Error en secuencia");
+    }
+  }
+
+// Regla de expresion OK
+  static final public void expresion() throws ParseException {
+    try {
+      expresion_simple();
+      label_4:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tMAYOR:
+        case tMENOR:
+        case tIGUAL:
+        case tMAI:
+        case tMEI:
+        case tNI:
+          ;
+          break;
+        default:
+          jj_la1[8] = jj_gen;
+          break label_4;
+        }
+        operador_relacional();
+        expresion_simple();
+      }
+    } catch (Exception e) {
+     System.out.println("Error en expresion");
+    }
+  }
+
+// Regla de operador_relacional OK
+  static final public void operador_relacional() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tIGUAL:
         jj_consume_token(tIGUAL);
         break;
-      case tMAI:
-        jj_consume_token(tMAI);
+      case tMENOR:
+        jj_consume_token(tMENOR);
         break;
       case tMEI:
         jj_consume_token(tMEI);
@@ -91,53 +375,172 @@ public class Compilador implements CompiladorConstants {
       case tNI:
         jj_consume_token(tNI);
         break;
-      case tOPAS:
-        jj_consume_token(tOPAS);
+      case tMAI:
+        jj_consume_token(tMAI);
         break;
-      case tPRINCIPIO:
-        jj_consume_token(tPRINCIPIO);
+      case tMAYOR:
+        jj_consume_token(tMAYOR);
         break;
-      case tFIN:
-        jj_consume_token(tFIN);
+      default:
+        jj_la1[9] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    } catch (Exception e) {
+     System.out.println("Error en operador_relacional");
+    }
+  }
+
+// Regla operador aditivo OK
+  static final public void operador_aditivo() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tPLUS:
+        jj_consume_token(tPLUS);
         break;
-      case tSI_NO:
-        jj_consume_token(tSI_NO);
+      case tMINUS:
+        jj_consume_token(tMINUS);
         break;
-      case tSI:
-        jj_consume_token(tSI);
+      case tOR:
+        jj_consume_token(tOR);
         break;
-      case tENT:
-        jj_consume_token(tENT);
+      default:
+        jj_la1[10] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    } catch (Exception e) {
+        System.out.println("Error en operador aditivo");
+    }
+  }
+
+// regla de expresion simple OK
+  static final public void expresion_simple() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tPLUS:
+        jj_consume_token(tPLUS);
         break;
-      case tFSI:
-        jj_consume_token(tFSI);
+      default:
+        jj_la1[11] = jj_gen;
+        ;
+      }
+      termino();
+      label_5:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tPLUS:
+        case tMINUS:
+        case tOR:
+          ;
+          break;
+        default:
+          jj_la1[12] = jj_gen;
+          break label_5;
+        }
+        operador_aditivo();
+        termino();
+      }
+    } catch (Exception e) {
+     System.out.println("Error en expresion simple");
+    }
+  }
+
+// Regla de termino OK
+  static final public void termino() throws ParseException {
+    try {
+      factor();
+      label_6:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tMULTIPLY:
+        case tDIVIDE:
+        case tAND:
+        case tMOD:
+        case tDIV:
+          ;
+          break;
+        default:
+          jj_la1[13] = jj_gen;
+          break label_6;
+        }
+        operador_multiplicativo();
+        factor();
+      }
+    } catch (Exception e) {
+     System.out.println("Error en termino");
+    }
+  }
+
+// Regla de operador multiplicativo OK
+  static final public void operador_multiplicativo() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tMULTIPLY:
+        jj_consume_token(tMULTIPLY);
         break;
-      case tMQ:
-        jj_consume_token(tMQ);
-        break;
-      case tFMQ:
-        jj_consume_token(tFMQ);
-        break;
-      case tESCRIBIR:
-        jj_consume_token(tESCRIBIR);
-        break;
-      case tLEER:
-        jj_consume_token(tLEER);
-        break;
-      case tMOD:
-        jj_consume_token(tMOD);
+      case tDIVIDE:
+        jj_consume_token(tDIVIDE);
         break;
       case tDIV:
         jj_consume_token(tDIV);
         break;
-      case tENTERO:
-        jj_consume_token(tENTERO);
+      case tMOD:
+        jj_consume_token(tMOD);
         break;
-      case tBOOLEANO:
-        jj_consume_token(tBOOLEANO);
+      case tAND:
+        jj_consume_token(tAND);
         break;
-      case tCARACTER:
-        jj_consume_token(tCARACTER);
+      default:
+        jj_la1[14] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    } catch (Exception e) {
+    System.out.println("Error en operador_multiplicativo");
+    }
+  }
+
+// Regla de factor OK
+  static final public void factor() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tMINUS:
+        jj_consume_token(tMINUS);
+        factor();
+        break;
+      case tNOT:
+        jj_consume_token(tNOT);
+        factor();
+        break;
+      case tPARENTESIS_IZDA:
+        jj_consume_token(tPARENTESIS_IZDA);
+        expresion();
+        jj_consume_token(tPARENTESIS_DCHA);
+        break;
+      case tENTACAR:
+        jj_consume_token(tENTACAR);
+        jj_consume_token(tPARENTESIS_IZDA);
+        expresion();
+        jj_consume_token(tPARENTESIS_DCHA);
+        break;
+      case tCARAENT:
+        jj_consume_token(tCARAENT);
+        jj_consume_token(tPARENTESIS_IZDA);
+        expresion();
+        jj_consume_token(tPARENTESIS_DCHA);
+        break;
+      case tIDENTIFICADOR:
+        jj_consume_token(tIDENTIFICADOR);
+        break;
+      case tCONSTANTE_NUMERICA:
+        jj_consume_token(tCONSTANTE_NUMERICA);
+        break;
+      case tCONSTCHAR:
+        jj_consume_token(tCONSTCHAR);
+        break;
+      case tCONSTCAD:
+        jj_consume_token(tCONSTCAD);
         break;
       case tTRUE:
         jj_consume_token(tTRUE);
@@ -145,100 +548,229 @@ public class Compilador implements CompiladorConstants {
       case tFALSE:
         jj_consume_token(tFALSE);
         break;
-      case tENTACAR:
-        jj_consume_token(tENTACAR);
+      default:
+        jj_la1[15] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    } catch (Exception e) {
+          System.out.println("Error en factor");
+    }
+  }
+
+// Regla de seelccion OK
+  static final public void seleccion() throws ParseException {
+    try {
+      jj_consume_token(tSI);
+      expresion();
+      jj_consume_token(tENT);
+      lista_sentencias();
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tSI_NO:
+        jj_consume_token(tSI_NO);
+        lista_sentencias();
         break;
-      case tCARAENT:
-        jj_consume_token(tCARAENT);
+      default:
+        jj_la1[16] = jj_gen;
+        ;
+      }
+      jj_consume_token(tFSI);
+    } catch (Exception e) {
+        System.out.println("Error en seleccion");
+    }
+  }
+
+// Regla de declaracion_acciones OK
+  static final public void declaracion_acciones() throws ParseException {
+    try {
+      label_7:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tACCION:
+          ;
+          break;
+        default:
+          jj_la1[17] = jj_gen;
+          break label_7;
+        }
+        declaracion_accion();
+      }
+    } catch (Exception e) {
+    System.out.println("Error en declaracion_acciones");
+    }
+  }
+
+// Regla de declaracion_Accion OK
+  static final public void declaracion_accion() throws ParseException {
+    try {
+      cabecera_accion();
+      jj_consume_token(tPUNTYCOM);
+      declaracion_variables();
+      declaracion_acciones();
+      bloque_sentencias();
+    } catch (Exception e) {
+    System.out.println("Error en declaracion_accion");
+    }
+  }
+
+// Regla de cabecera_accion OK
+  static final public void cabecera_accion() throws ParseException {
+    try {
+      jj_consume_token(tACCION);
+      jj_consume_token(tIDENTIFICADOR);
+      parametros_formales();
+    } catch (Exception e) {
+    System.out.println("Error en cabecera_accion");
+    }
+  }
+
+// Regla de parametros formales OK
+  static final public void parametros_formales() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tPARENTESIS_IZDA:
+        lista_parametros();
         break;
-      case tACCION:
-        jj_consume_token(tACCION);
+      default:
+        jj_la1[18] = jj_gen;
+        ;
+      }
+    } catch (Exception e) {
+    System.out.println("Error en parametros_formales");
+    }
+  }
+
+// Regla para lista_parametros OK
+  static final public void lista_parametros() throws ParseException {
+    try {
+      jj_consume_token(tPARENTESIS_IZDA);
+      parametros();
+      label_8:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tPUNTYCOM:
+          ;
+          break;
+        default:
+          jj_la1[19] = jj_gen;
+          break label_8;
+        }
+        jj_consume_token(tPUNTYCOM);
+        parametros();
+      }
+      jj_consume_token(tPARENTESIS_DCHA);
+    } catch (Exception e) {
+     System.out.println("Error en lista_parametros");
+    }
+  }
+
+// Regla de parametros OK
+  static final public void parametros() throws ParseException {
+    try {
+      clase_parametros();
+      tipos_variables();
+      identificadores();
+    } catch (Exception e) {
+     System.out.println("Error en parametros");
+    }
+  }
+
+// Regla de declaracion variables OK
+  static final public void declaracion_variables() throws ParseException {
+    try {
+      label_9:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tENTERO:
+        case tBOOLEANO:
+        case tCARACTER:
+          ;
+          break;
+        default:
+          jj_la1[20] = jj_gen;
+          break label_9;
+        }
+        declaracion();
+        jj_consume_token(tPUNTYCOM);
+      }
+    } catch (Exception e) {
+     System.out.println("Error en declaracion_variables");
+    }
+  }
+
+// Regla de declaracion OK
+  static final public void declaracion() throws ParseException {
+    try {
+      tipos_variables();
+      identificadores();
+    } catch (Exception e) {
+     System.out.println("Error en declaracion");
+    }
+  }
+
+// Regla para los identificadores OK
+  static final public void identificadores() throws ParseException {
+    try {
+      jj_consume_token(tIDENTIFICADOR);
+      label_10:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case tCOMA:
+          ;
+          break;
+        default:
+          jj_la1[21] = jj_gen;
+          break label_10;
+        }
+        jj_consume_token(tCOMA);
+        jj_consume_token(tIDENTIFICADOR);
+      }
+    } catch (Exception e) {
+     System.out.println("Error en identificadores");
+    }
+  }
+
+// Regla para los tipos de variables OK
+  static final public void tipos_variables() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tENTERO:
+        jj_consume_token(tENTERO);
         break;
+      case tCARACTER:
+        jj_consume_token(tCARACTER);
+        break;
+      case tBOOLEANO:
+        jj_consume_token(tBOOLEANO);
+        break;
+      default:
+        jj_la1[22] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    } catch (Exception e) {
+         System.out.println("Error en tipos_variables\u005cn");
+    }
+  }
+
+// Regla para las clases de parametros OK
+  static final public void clase_parametros() throws ParseException {
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tVAL:
         jj_consume_token(tVAL);
         break;
       case tREF:
         jj_consume_token(tREF);
         break;
-      case tCONSTANTE_NUMERICA:
-        jj_consume_token(tCONSTANTE_NUMERICA);
-        break;
-      case tIDENTIFICADOR:
-        jj_consume_token(tIDENTIFICADOR);
-        break;
-      case tPUNTYCOM:
-        jj_consume_token(tPUNTYCOM);
-        break;
-      case tCOMA:
-        jj_consume_token(tCOMA);
-        break;
-      case tPARENTESIS_IZDA:
-        jj_consume_token(tPARENTESIS_IZDA);
-        break;
-      case tPARENTESIS_DCHA:
-        jj_consume_token(tPARENTESIS_DCHA);
-        break;
       default:
-        jj_la1[0] = jj_gen;
+        jj_la1[23] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case tPLUS:
-      case tMINUS:
-      case tMULTIPLY:
-      case tDIVIDE:
-      case tMAYOR:
-      case tMENOR:
-      case tIGUAL:
-      case tMAI:
-      case tMEI:
-      case tNI:
-      case tOPAS:
-      case tAND:
-      case tOR:
-      case tNOT:
-      case tPROGRAMA:
-      case tVAR:
-      case tPRINCIPIO:
-      case tFIN:
-      case tSI:
-      case tENT:
-      case tSI_NO:
-      case tFSI:
-      case tMQ:
-      case tFMQ:
-      case tESCRIBIR:
-      case tLEER:
-      case tMOD:
-      case tDIV:
-      case tENTERO:
-      case tBOOLEANO:
-      case tCARACTER:
-      case tTRUE:
-      case tFALSE:
-      case tENTACAR:
-      case tCARAENT:
-      case tACCION:
-      case tVAL:
-      case tREF:
-      case tCONSTANTE_NUMERICA:
-      case tIDENTIFICADOR:
-      case tPUNTYCOM:
-      case tCOMA:
-      case tPARENTESIS_IZDA:
-      case tPARENTESIS_DCHA:
-        ;
-        break;
-      default:
-        jj_la1[1] = jj_gen;
-        break label_1;
-      }
+    } catch (Exception e) {
+         System.out.println("Error en clase_parametros\u005cn");
     }
-    jj_consume_token(0);
-    /* Correcto */
-    {if (true) return 0;}
-    throw new Error("Missing return statement in function");
   }
 
   static private boolean jj_initialized_once = false;
@@ -251,7 +783,7 @@ public class Compilador implements CompiladorConstants {
   static public Token jj_nt;
   static private int jj_ntk;
   static private int jj_gen;
-  static final private int[] jj_la1 = new int[2];
+  static final private int[] jj_la1 = new int[24];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -259,10 +791,10 @@ public class Compilador implements CompiladorConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0xfffff000,0xfffff000,};
+      jj_la1_0 = new int[] {0x88000000,0x88000000,0x80000,0x0,0x0,0x0,0x400600,0x0,0x7e000,0x7e000,0x200600,0x200,0x200600,0x101800,0x101800,0x400400,0x20000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x3f3ffff,0x3f3ffff,};
+      jj_la1_1 = new int[] {0x100006,0x100006,0xa00000,0x400000,0x160400,0x800000,0x9e0f00,0x400000,0x0,0x0,0x0,0x0,0x0,0x18,0x18,0x9e0f00,0x0,0x1000,0x800000,0x200000,0xe0,0x400000,0xe0,0x6000,};
    }
 
   /** Constructor with InputStream. */
@@ -283,7 +815,7 @@ public class Compilador implements CompiladorConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -297,7 +829,7 @@ public class Compilador implements CompiladorConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
@@ -314,7 +846,7 @@ public class Compilador implements CompiladorConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -324,7 +856,7 @@ public class Compilador implements CompiladorConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
@@ -340,7 +872,7 @@ public class Compilador implements CompiladorConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -349,7 +881,7 @@ public class Compilador implements CompiladorConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 24; i++) jj_la1[i] = -1;
   }
 
   static private Token jj_consume_token(int kind) throws ParseException {
@@ -400,12 +932,12 @@ public class Compilador implements CompiladorConstants {
   /** Generate ParseException. */
   static public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[58];
+    boolean[] la1tokens = new boolean[57];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 24; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -417,7 +949,7 @@ public class Compilador implements CompiladorConstants {
         }
       }
     }
-    for (int i = 0; i < 58; i++) {
+    for (int i = 0; i < 57; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
