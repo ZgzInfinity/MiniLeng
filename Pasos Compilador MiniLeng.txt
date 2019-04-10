@@ -47,4 +47,13 @@ Construcción del analizador sintáctico - Práctica 3
 11 - Implementada regla "declaracion_accion"
 12 - Implementada regla "declaracion_acciones"
 
+.......
+
+Asi sucesivamente hasta completar todas las reglas del compilador detalladas en las transparencias de la asignatura
+y en el guión de la práctica.
+
+A continuación se ha procedido a factorizar las reglas que daban conflicto choice debido a que el compilador no sabe por 
+cuál continuar y a solucionar los bucles infinitos por la izquierda directos e indirectos.
+
+
  
