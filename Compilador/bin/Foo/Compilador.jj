@@ -9,7 +9,9 @@ options
 }
 
 PARSER_BEGIN(Compilador)
+
 package Foo;
+import Foo.Tabla_Simbolos;
 
 public class Compilador
 {
@@ -48,7 +50,15 @@ public class Compilador
       /* Crear el parser con respecto al fichero */
       Compilador parser = new Compilador (new java.io.FileInputStream(path));
       int res = Compilador.programa();
-      if (args[0].equals("-v")) { 
+      if (args[0].equals("-v")) {
+
+	  // Instancia de la tabla de simbolos
+	  Tabla_Simbolos tabla = new Tabla_Simbolos();
+
+	  // Inicializacion de la tabla de simbolos
+	  tabla.inicializar_tabla();
+
+        
       /* Mostrar total de tokens */
 	  TablaHash.mostrarTokensNormales();
 	
@@ -66,9 +76,9 @@ public class Compilador
     catch (Error e)
       {
        // Obtencion del error sintactico 
-       int fila = MyNewGrammarTokenManager.input_stream.getBeginLine();
-       int columna = MyNewGrammarTokenManager.input_stream.getBeginColumn();
-       String tokenMalo = MyNewGrammarTokenManager.input_stream.GetImage();
+       int fila = CompiladorTokenManager.input_stream.getBeginLine();
+       int columna = CompiladorTokenManager.input_stream.getBeginColumn();
+       String tokenMalo = CompiladorTokenManager.input_stream.GetImage();
        
        // Muestreo de los errores
        System.out.println(" ERROR LEXICO <(" + fila + " , " + columna + " >):"

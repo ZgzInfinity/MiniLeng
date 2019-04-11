@@ -6,7 +6,7 @@ package Foo;
 
 import java.util.Enumeration;
 
-class TablaHash {
+public class TablaHash {
 	
 	/* Tablas Hash de los tokens y de los identificadores */
 	static java.util.Hashtable<String, Integer> tokensNormales = new java.util.Hashtable<String, Integer>();

@@ -22,6 +22,7 @@ public class Simbolo {
 		VAL, REF 
 	}
 	
+	
 	/* ATRIBUTOS */
 	
 	// Representacion del nombre
@@ -43,10 +44,24 @@ public class Simbolo {
 	private boolean visible;
 	
 	// Lista de simbolos que representa los parametros de un simbolo
-	private LinkedList<Tipo_simbolo> lista_parametros;
+	private LinkedList<Simbolo> lista_parametros;
 	
 	// Representacion de la direccion del simbolo
 	private long dir;
+	
+	
+	// CONSTRUCTOR DEL DATO SIMBOLO
+	public Simbolo (Tipo_simbolo tipo, Tipo_variable variable, Clase_parametro parametro,
+							String nombre, int nivel, long dir) {
+			this.tipo = tipo;
+			this.variable = variable;
+			this.parametro = parametro;
+			this.nombre = nombre;
+			this.nivel = nivel;
+			this.visible = true;
+			this.dir = dir;
+			this.lista_parametros = new LinkedList<Simbolo>();
+	}
 	
 	
 	/* GETTERS AND SETTERS */
@@ -99,11 +114,11 @@ public class Simbolo {
 		this.visible = visible;
 	}
 
-	public LinkedList<Tipo_simbolo> getLista_parametros() {
+	public LinkedList<Simbolo> getLista_parametros() {
 		return lista_parametros;
 	}
 
-	public void setLista_parametros(LinkedList<Tipo_simbolo> lista_parametros) {
+	public void setLista_parametros(LinkedList<Simbolo> lista_parametros) {
 		this.lista_parametros = lista_parametros;
 	}
 
