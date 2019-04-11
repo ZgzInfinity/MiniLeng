@@ -29,31 +29,60 @@ Construir el analizador léxico - Práctica 2
 8 - Desarrollar cinco programas adicionales
 9 - Programar modo verbose con flag "-v" 
 10 - Corregir error lexico
+    
+Para generar el error léxico ha sido necesario profundizar en las clases TokenMgError.java y CompiladorTokenManager.java
+ya que en esos ficheros reside la información necesaria para generar el código del error de acuerdo al guión de la práctica.
 
 Construcción del analizador sintáctico - Práctica 3
 -------------------------------------------------------
 
 1 - Modificar funcion leer fichero por programa y comprobar que funciona correctamente
-2 - Implementada regla "clase_parametros"
-3 - Implementada regla "tipos_variables"
-4 - Implementada regla "identificadores"
-5 - Implementada regla "declaracion"
-6 - Implementada regla "declaracion de variables"
-7 - Implementada regla "parametros" --> es una secuencia de parametros de un mismo tipo para evitar poner val|ref y el tipo 
-    varias veces
-8 - Implementada regla "lista parametros" como "parametros" + puntoYcoma
-9 - Implementada regla "parametros formales" como varias listas de parametros separadas por punto y coma
-10 - Implementada regla "cabecera_accion" como accion nombre_funcion (parametros formales)
-11 - Implementada regla "declaracion_accion"
-12 - Implementada regla "declaracion_acciones"
+2 - Implementada regla "programa"    
+3 - Implementada regla "bloque_sentencias"
+4 - Implementada regla "lista_sentencias"   
+5 - Implementada regla "sentencia"    
+6 - Implementada regla "asig_invoc"    
+7 - Implementada regla "asignacion"    
+8 - Implementada regla "lista_asignables"    
+9 - Implementada regla "leer"    
+10 - Implementada regla "escribir"     
+11 - Implementada regla "lista_escribibles"    
+12 - Implementada regla "escribible"    
+13 - Implementada la regla "invocacion_accion"  
+14 - Implementada la regla "mientras_que"  
+15 - Implementada la regla "argumentos"
+16 - Implementada la regla "lista_expresiones"
+17 - Implementada la regla "expresion"
+18 - Implementada la regla "operador_relacional"
+19 - Implementada la regla "operador aditivo"
+20 - Implementada la regla "expresion_simple"
+21 - Implementada la regla "termino"
+22 - Implementada la regla "operador_multiplicativo"
+23 - Implementada la regla "factor"
+24 - Implementada la regla "seleccion"
+25 - Implementada la regla "declaracion_acciones"
+26 - Implementada la regla "declaracion_accion"
+27 - Implementada la regla "cabecera_accion"
+28 - Implementada la regla "parametros_formales"
+29 - Implementada la regla "lista_parametros"
+30 - Implementada la regla "parametros"
+31 - Implementada la regla "declaracion_variables"
+32 - Implementada la regla "declaracion"
+33 - Implementada la regla "identificadores"
+34 - Implementada la regla "tipos_variables"
+35 - Implementada la regla "clase_parametros"
 
-.......
+La regla asig_invoc ha sido implementada mediante factorización dado que la regla "asignacion" y la regla "invocacion" 
+empezaban por el token <tIENTIFICADOR> y, por ello, el compilador no sabía cual escoger.
 
-Asi sucesivamente hasta completar todas las reglas del compilador detalladas en las transparencias de la asignatura
-y en el guión de la práctica.
+Para generar el error sintáctico ha bastado con poner en cada regla un bloque try-catch e investigar en el fichero
+ParserError.java como se generaba el error por defecto. En base a este fichero se ha establecido el mensaje de error
+según el formato del guión.
 
-A continuación se ha procedido a factorizar las reglas que daban conflicto choice debido a que el compilador no sabe por 
-cuál continuar y a solucionar los bucles infinitos por la izquierda directos e indirectos.
-
+Seguídamente se ha procedido a implementar el código de la tabla de la tabla de símbolos para poder hacer el analizador 
+sintáctico. Para poder implementarla se han usado las clase Simbolo.java y Tabla_Simbolos.java con una colección de métodos
+en sendas clases para trabajar adecuadamente y lograr una adecuada encapsulación. Para implementar la tabla se ha usado un 
+vector de listas enlazadas y como función Hash se ha escodigo la función de dispersión de Pearson dado que es la que proporciona
+una mejor distribución.
 
  
