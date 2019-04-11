@@ -8,17 +8,17 @@ public class Simbolo {
 	/* ENUMS */
 	
 	// Representacion del tipo simbolo con enum
-	private enum Tipo_simbolo {
+	enum Tipo_simbolo {
 		PROGRAMA, VARIABLE, ACCION, PARAMETRO
 	}
 	
 	// Representacion del tipo variable con enum
-	private enum Tipo_variable {
+	enum Tipo_variable {
 		DESCONOCIDO, ENTERO, BOOLEANO, CHAR, CADENA 
 	}
 	
 	// Representacion de la clase parametro con enum
-	private enum Clase_parametro{
+	enum Clase_parametro{
 		VAL, REF 
 	}
 	
