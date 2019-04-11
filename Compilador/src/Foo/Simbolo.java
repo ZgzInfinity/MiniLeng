@@ -134,25 +134,25 @@ public class Simbolo {
 	/* METODOS AUXILIARES PARA SIMBOLOS EN ANALISIS SEMANTICO */
 	
 	// Comprobar si simbolo es PROGRAMA
-	boolean es_Simbolo_Programa(Tipo_simbolo tipo) {
+	boolean es_Simbolo_Programa() {
 		return tipo.equals(Tipo_simbolo.PROGRAMA);
 	}
 	
 	
 	// Comprobar si simbolo es VARIABLE
-	boolean es_Simbolo_Variable(Tipo_simbolo tipo) {
+	boolean es_Simbolo_Variable() {
 		return tipo.equals(Tipo_simbolo.VARIABLE);
 	}
 	
 	
 	// Comprobar si simbolo es ACCION
-	boolean es_Simbolo_Accion(Tipo_simbolo tipo) {
+	boolean es_Simbolo_Accion() {
 		return tipo.equals(Tipo_simbolo.ACCION);
 	}
 	
 	
 	// Comprobar si simbolo es PARAMETRO
-	boolean es_Simbolo_Parametro(Tipo_simbolo tipo) {
+	boolean es_Simbolo_Parametro() {
 		return tipo.equals(Tipo_simbolo.PARAMETRO);
 	}
 	
@@ -160,31 +160,31 @@ public class Simbolo {
 	/* METODOS AUXILIARES PARA TIPO_VARIABLE EN ANALISIS SINTACTICO */
 	
 	// Comprobar si variable es DESCONOCIDO
-	boolean es_Variable_Desconocido(Tipo_variable tipo) {
+	boolean es_Variable_Desconocido() {
 		return tipo.equals(Tipo_variable.DESCONOCIDO);
 	}
 	
 	
 	// Comprobar si variable es ENTERO
-	boolean es_Variable_Entero(Tipo_variable tipo) {
+	boolean es_Variable_Entero() {
 		return tipo.equals(Tipo_variable.ENTERO);
 	}
 	
 	
 	// Comprobar si variable es BOOLEANO
-	boolean es_Variable_Booleano(Tipo_variable tipo) {
+	boolean es_Variable_Booleano() {
 		return tipo.equals(Tipo_variable.BOOLEANO);
 	}
 	
 	
 	// Comprobar si variable es CHAR
-	boolean es_Variable_Char(Tipo_variable tipo) {
+	boolean es_Variable_Char() {
 		return tipo.equals(Tipo_variable.CHAR);
 	}
 	
 	
 	// Comprobar si variable es CADENA
-	boolean es_Variable_Cadena(Tipo_variable tipo) {
+	boolean es_Variable_Cadena() {
 		return tipo.equals(Tipo_variable.CADENA);
 	}
 	
@@ -193,13 +193,13 @@ public class Simbolo {
 	
 	
 	// Comprobar si variable es VAL
-	boolean es_Parametro_Valor(Clase_parametro parametro) {
+	boolean es_Parametro_Valor() {
 		return parametro.equals(Clase_parametro.VAL);
 	}
 	
 	
 	// Comprobar si variable es REF
-	boolean es_Parametro_Referencia(Clase_parametro parametro) {
+	boolean es_Parametro_Referencia() {
 		return parametro.equals(Clase_parametro.REF);
 	}
 	

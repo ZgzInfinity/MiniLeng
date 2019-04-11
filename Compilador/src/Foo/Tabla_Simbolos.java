@@ -195,7 +195,7 @@ public class Tabla_Simbolos {
 	public void eliminar_programa() {
 		for (LinkedList<Simbolo> ls : tabla) {
 			for (Simbolo s : ls) {
-				if(s.es_Simbolo_Programa(null) && s.getNivel() == 0) {
+				if(s.es_Simbolo_Programa() && s.getNivel() == 0) {
 					ls.remove(s);
 				}	
 			}
@@ -216,7 +216,7 @@ public class Tabla_Simbolos {
 			Iterator<Simbolo> simb = l.iterator();
 			while (simb.hasNext()) {
 				Simbolo s = simb.next();
-				if(s.es_Simbolo_Variable(null) && s.getNivel() == nivel) {
+				if(s.es_Simbolo_Variable() && s.getNivel() == nivel) {
 					simb.remove();
 				}
 			}
@@ -235,7 +235,7 @@ public class Tabla_Simbolos {
 	public void ocultar_parametros(int nivel) { 
 		for (LinkedList<Simbolo> ls : tabla) {
 			for ( Simbolo s : ls) {
-				if(s.es_Simbolo_Parametro(null) && s.getNivel() == nivel) {
+				if(s.es_Simbolo_Parametro() && s.getNivel() == nivel) {
 					s.setVisible(false);
 				}	
 			}
@@ -256,7 +256,7 @@ public class Tabla_Simbolos {
 			Iterator<Simbolo> simb = l.iterator();
 			while (simb.hasNext()) {
 				Simbolo s = simb.next();
-				if(s.es_Simbolo_Parametro(null) && s.getNivel() == nivel && !s.isVisible()) {
+				if(s.es_Simbolo_Parametro() && s.getNivel() == nivel && !s.isVisible()) {
 					simb.remove();
 				}
 			}
@@ -277,7 +277,7 @@ public class Tabla_Simbolos {
 				Iterator<Simbolo> simb = l.iterator();
 				while (simb.hasNext()) {
 					Simbolo s = simb.next();
-					if(s.es_Simbolo_Accion(null) && s.getNivel() == nivel) {
+					if(s.es_Simbolo_Accion() && s.getNivel() == nivel) {
 						simb.remove();
 					}
 				}
