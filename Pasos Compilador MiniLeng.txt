@@ -79,10 +79,14 @@ Para generar el error sintáctico ha bastado con poner en cada regla un bloque t
 ParserError.java como se generaba el error por defecto. En base a este fichero se ha establecido el mensaje de error
 según el formato del guión.
 
+Construcción de una tabla de símbolos - Práctica 4 - Parte 1
+
 Seguídamente se ha procedido a implementar el código de la tabla de la tabla de símbolos para poder hacer el analizador 
 sintáctico. Para poder implementarla se han usado las clase Simbolo.java y Tabla_Simbolos.java con una colección de métodos
 en sendas clases para trabajar adecuadamente y lograr una adecuada encapsulación. Para implementar la tabla se ha usado un 
 vector de listas enlazadas y como función Hash se ha escodigo la función de dispersión de Pearson dado que es la que proporciona
 una mejor distribución.
+
+Se han implementado dos excepciones una para detectar que un simbolo ya existe en la tabla y otro para lo contrario.
 
  
