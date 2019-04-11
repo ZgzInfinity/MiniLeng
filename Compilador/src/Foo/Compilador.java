@@ -2,12 +2,21 @@
 package Foo;
 
 public class Compilador implements CompiladorConstants {
+
+  // Error sintactico personalizado para el compilador
+  public static void errorSintactico(ParseException e) {
+      System.out.println(" ERROR SINTACTICO (< " + e.currentToken.beginLine + " , "
+                                                  + e.currentToken.beginColumn + " >): "
+                                                  + " detectado token incorrecto: " + e.currentToken.next + "\u005cn");
+  }
+
   public static void main(String args []) throws ParseException
   {
     /* nombre del fichero */
 
         String nombreArchivo;
         String path = "C:\u005c\u005cUsers\u005c\u005cGord\u005c\u005cDesktop\u005c\u005cprogramas\u005c\u005c";
+
 
         if (args[0].equals("-v")) {
                 System.out.println("Compilacion en modo verbose");
@@ -45,8 +54,13 @@ public class Compilador implements CompiladorConstants {
     }
     catch (Error e)
       {
-       System.out.println("FALLO");
-       System.out.println(e.getMessage());
+       // Obtencion del error sintactico 
+       int fila = MyNewGrammarTokenManager.input_stream.getBeginLine();
+       int columna = MyNewGrammarTokenManager.input_stream.getBeginColumn();
+       String tokenMalo = MyNewGrammarTokenManager.input_stream.GetImage();
+       // Muestreo de los errores
+       System.out.println(" ERROR LEXICO <(" + fila + " , " + columna + " >):"
+                                                                                 + " simbolo no reconocido " + tokenMalo);
     }
   }
 
@@ -63,8 +77,8 @@ public class Compilador implements CompiladorConstants {
       bloque_sentencias();
       jj_consume_token(0);
          {if (true) return 0;}
-    } catch (Exception e) {
-     System.out.println("Error en programa");
+    } catch (ParseException e) {
+     errorSintactico(e);
      {if (true) return 1;}
     }
     throw new Error("Missing return statement in function");
@@ -76,8 +90,8 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tPRINCIPIO);
       lista_sentencias();
       jj_consume_token(tFIN);
-    } catch (Exception e) {
-     System.out.println("Error en bloque_sentencias");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -100,8 +114,8 @@ public class Compilador implements CompiladorConstants {
         }
         sentencia();
       }
-    } catch (Exception e) {
-     System.out.println("Error en lista_sentencias");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -131,8 +145,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } catch (Exception e) {
-     System.out.println("Error en sentencia");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -152,8 +166,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } catch (Exception e) {
-     System.out.println("Error en asignacion");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -163,8 +177,8 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tOPAS);
       expresion();
       jj_consume_token(tPUNTYCOM);
-    } catch (Exception e) {
-     System.out.println("Error en asignacion");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -172,8 +186,8 @@ public class Compilador implements CompiladorConstants {
   static final public void lista_asignables() throws ParseException {
     try {
       identificadores();
-    } catch (Exception e) {
-     System.out.println("Error en lista_asignables");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -184,8 +198,8 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tPARENTESIS_IZDA);
       lista_asignables();
       jj_consume_token(tPARENTESIS_DCHA);
-    } catch (Exception e) {
-     System.out.println("Error en leer");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -196,8 +210,8 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tPARENTESIS_IZDA);
       lista_escribibles();
       jj_consume_token(tPARENTESIS_DCHA);
-    } catch (Exception e) {
-     System.out.println("Error en lista_escribibles");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -218,8 +232,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(tCOMA);
         escribible();
       }
-    } catch (Exception e) {
-     System.out.println("Error en lista_escribibles");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -247,8 +261,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } catch (Exception e) {
-     System.out.println("Error en lista_escribibles");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -264,8 +278,8 @@ public class Compilador implements CompiladorConstants {
         ;
       }
       jj_consume_token(tPUNTYCOM);
-    } catch (Exception e) {
-     System.out.println("Error en invocacion_accion");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -276,8 +290,8 @@ public class Compilador implements CompiladorConstants {
       expresion();
       lista_sentencias();
       jj_consume_token(tFMQ);
-    } catch (Exception e) {
-     System.out.println("Error en mientras_que");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -305,8 +319,8 @@ public class Compilador implements CompiladorConstants {
         ;
       }
       jj_consume_token(tPARENTESIS_DCHA);
-    } catch (Exception e) {
-     System.out.println("Error en argumentos");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -327,8 +341,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(tCOMA);
         expresion();
       }
-    } catch (Exception e) {
-    System.out.println("Error en secuencia");
+    } catch (ParseException e) {
+    errorSintactico(e);
     }
   }
 
@@ -354,8 +368,8 @@ public class Compilador implements CompiladorConstants {
         operador_relacional();
         expresion_simple();
       }
-    } catch (Exception e) {
-     System.out.println("Error en expresion");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -386,8 +400,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } catch (Exception e) {
-     System.out.println("Error en operador_relacional");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -409,8 +423,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } catch (Exception e) {
-        System.out.println("Error en operador aditivo");
+    } catch (ParseException e) {
+        errorSintactico(e);
     }
   }
 
@@ -441,8 +455,8 @@ public class Compilador implements CompiladorConstants {
         operador_aditivo();
         termino();
       }
-    } catch (Exception e) {
-     System.out.println("Error en expresion simple");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -467,8 +481,8 @@ public class Compilador implements CompiladorConstants {
         operador_multiplicativo();
         factor();
       }
-    } catch (Exception e) {
-     System.out.println("Error en termino");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -496,8 +510,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } catch (Exception e) {
-    System.out.println("Error en operador_multiplicativo");
+    } catch (ParseException e) {
+    errorSintactico(e);
     }
   }
 
@@ -553,8 +567,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } catch (Exception e) {
-          System.out.println("Error en factor");
+    } catch (ParseException e) {
+          errorSintactico(e);
     }
   }
 
@@ -575,8 +589,8 @@ public class Compilador implements CompiladorConstants {
         ;
       }
       jj_consume_token(tFSI);
-    } catch (Exception e) {
-        System.out.println("Error en seleccion");
+    } catch (ParseException e) {
+        errorSintactico(e);
     }
   }
 
@@ -595,8 +609,8 @@ public class Compilador implements CompiladorConstants {
         }
         declaracion_accion();
       }
-    } catch (Exception e) {
-    System.out.println("Error en declaracion_acciones");
+    } catch (ParseException e) {
+    errorSintactico(e);
     }
   }
 
@@ -608,8 +622,8 @@ public class Compilador implements CompiladorConstants {
       declaracion_variables();
       declaracion_acciones();
       bloque_sentencias();
-    } catch (Exception e) {
-    System.out.println("Error en declaracion_accion");
+    } catch (ParseException e) {
+    errorSintactico(e);
     }
   }
 
@@ -619,8 +633,8 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tACCION);
       jj_consume_token(tIDENTIFICADOR);
       parametros_formales();
-    } catch (Exception e) {
-    System.out.println("Error en cabecera_accion");
+    } catch (ParseException e) {
+    errorSintactico(e);
     }
   }
 
@@ -635,8 +649,8 @@ public class Compilador implements CompiladorConstants {
         jj_la1[18] = jj_gen;
         ;
       }
-    } catch (Exception e) {
-    System.out.println("Error en parametros_formales");
+    } catch (ParseException e) {
+    errorSintactico(e);
     }
   }
 
@@ -659,8 +673,8 @@ public class Compilador implements CompiladorConstants {
         parametros();
       }
       jj_consume_token(tPARENTESIS_DCHA);
-    } catch (Exception e) {
-     System.out.println("Error en lista_parametros");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -670,8 +684,8 @@ public class Compilador implements CompiladorConstants {
       clase_parametros();
       tipos_variables();
       identificadores();
-    } catch (Exception e) {
-     System.out.println("Error en parametros");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -693,8 +707,8 @@ public class Compilador implements CompiladorConstants {
         declaracion();
         jj_consume_token(tPUNTYCOM);
       }
-    } catch (Exception e) {
-     System.out.println("Error en declaracion_variables");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -703,8 +717,8 @@ public class Compilador implements CompiladorConstants {
     try {
       tipos_variables();
       identificadores();
-    } catch (Exception e) {
-     System.out.println("Error en declaracion");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -725,8 +739,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(tCOMA);
         jj_consume_token(tIDENTIFICADOR);
       }
-    } catch (Exception e) {
-     System.out.println("Error en identificadores");
+    } catch (ParseException e) {
+     errorSintactico(e);
     }
   }
 
@@ -748,8 +762,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } catch (Exception e) {
-         System.out.println("Error en tipos_variables\u005cn");
+    } catch (ParseException e) {
+         errorSintactico(e);
     }
   }
 
@@ -768,8 +782,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-    } catch (Exception e) {
-         System.out.println("Error en clase_parametros\u005cn");
+    } catch (ParseException e) {
+         errorSintactico(e);
     }
   }
 

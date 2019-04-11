@@ -1,4 +1,4 @@
-/*
+/**
  * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
  */
 
@@ -13,12 +13,21 @@ package Foo;
 
 public class Compilador
 {
+
+  // Error sintactico personalizado para el compilador
+  public static void errorSintactico(ParseException e) {
+      System.out.println(" ERROR SINTACTICO (< " + e.currentToken.beginLine + " , "
+                                                  + e.currentToken.beginColumn + " >): "
+                                                  + " detectado token incorrecto: " + e.currentToken.next + "\n");
+  } 
+  
   public static void main(String args []) throws ParseException
   {
     /* nombre del fichero */
 	
 	String nombreArchivo;
 	String path = "C:\\Users\\Gord\\Desktop\\programas\\";
+
 
 	if (args[0].equals("-v")) {
 	  	System.out.println("Compilacion en modo verbose");
@@ -56,8 +65,14 @@ public class Compilador
     }
     catch (Error e)
       {
-       System.out.println("FALLO");
-       System.out.println(e.getMessage());
+       // Obtencion del error sintactico 
+       int fila = MyNewGrammarTokenManager.input_stream.getBeginLine();
+       int columna = MyNewGrammarTokenManager.input_stream.getBeginColumn();
+       String tokenMalo = MyNewGrammarTokenManager.input_stream.GetImage();
+       
+       // Muestreo de los errores
+       System.out.println(" ERROR LEXICO <(" + fila + " , " + columna + " >):"
+       										 + " simbolo no reconocido " + tokenMalo);
     }
   }
 }
@@ -358,8 +373,8 @@ int programa():
          return 0;
        }
   }
-  catch (Exception e){
-     System.out.println("Error en programa");
+  catch (ParseException e){
+     errorSintactico(e);
      return 1;
   }
 }
@@ -373,8 +388,8 @@ void bloque_sentencias():
   try {
        < tPRINCIPIO > lista_sentencias() < tFIN >
   }
-  catch (Exception e){
-     System.out.println("Error en bloque_sentencias");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -386,8 +401,8 @@ void lista_sentencias():
   try{
       (sentencia())*
   }
-  catch (Exception e){
-     System.out.println("Error en lista_sentencias");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -404,8 +419,8 @@ void sentencia():
    	| seleccion()
    	| mientras_que()
   }
-  catch (Exception e){
-     System.out.println("Error en sentencia");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -417,8 +432,8 @@ void asig_invoc():
 try {
        < tIDENTIFICADOR > (asignacion() | invocacion_accion())
   }
-  catch (Exception e){
-     System.out.println("Error en asignacion");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -431,8 +446,8 @@ void asignacion():
   try {
        < tOPAS > expresion() < tPUNTYCOM >
   }
-  catch (Exception e){
-     System.out.println("Error en asignacion");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -445,8 +460,8 @@ void lista_asignables():
   try {
       identificadores()
   }
-  catch (Exception e){
-     System.out.println("Error en lista_asignables");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -458,8 +473,8 @@ void leer():
   try {
        < tLEER >< tPARENTESIS_IZDA > lista_asignables() < tPARENTESIS_DCHA >
   }
-  catch (Exception e){
-     System.out.println("Error en leer");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -473,8 +488,8 @@ void escribir():
   try {
        < tESCRIBIR >< tPARENTESIS_IZDA > lista_escribibles() < tPARENTESIS_DCHA >
   }
-  catch (Exception e){
-     System.out.println("Error en lista_escribibles");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -487,8 +502,8 @@ void lista_escribibles():
   try {
        escribible() ( < tCOMA > escribible() )*
   }
-  catch (Exception e){
-     System.out.println("Error en lista_escribibles");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -504,8 +519,8 @@ void escribible():
      | < tENTACAR > <tPARENTESIS_IZDA > <tCONSTANTE_NUMERICA > <tPARENTESIS_DCHA >
      | < tIDENTIFICADOR >
   }
-  catch (Exception e){
-     System.out.println("Error en lista_escribibles");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -519,8 +534,8 @@ void invocacion_accion():
   try {
      (argumentos())? < tPUNTYCOM >
   }
-  catch (Exception e){
-     System.out.println("Error en invocacion_accion");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -534,8 +549,8 @@ void mientras_que():
   try {
      < tMQ > expresion() lista_sentencias() < tFMQ >
   }
-  catch (Exception e){
-     System.out.println("Error en mientras_que");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -548,8 +563,8 @@ void argumentos():
   try {
       < tPARENTESIS_IZDA > (lista_expresiones())? < tPARENTESIS_DCHA >
   }
-  catch (Exception e){
-     System.out.println("Error en argumentos");
+  catch (ParseException e){
+     errorSintactico(e);
   }
   
 }
@@ -564,8 +579,8 @@ void lista_expresiones():
   try {
      expresion()(< tCOMA > expresion())*
   }
-  catch (Exception e) {
-    System.out.println("Error en secuencia");
+  catch (ParseException e) {
+    errorSintactico(e);
   }
 }
 
@@ -578,8 +593,8 @@ void expresion():
  try {
   	  expresion_simple() (operador_relacional() expresion_simple())*
   }
-  catch (Exception e) {
-     System.out.println("Error en expresion");
+  catch (ParseException e) {
+     errorSintactico(e);
   }
 }
 
@@ -597,8 +612,8 @@ void operador_relacional():
     | < tMAI >
     | < tMAYOR >
   }
-  catch (Exception e) {
-     System.out.println("Error en operador_relacional");
+  catch (ParseException e) {
+     errorSintactico(e);
   }
 }
 
@@ -613,8 +628,8 @@ void operador_aditivo():
 	| < tMINUS >
 	| < tOR >
   }
-  catch (Exception e) {
-	System.out.println("Error en operador aditivo");
+  catch (ParseException e) {
+	errorSintactico(e);
   }
 }
 
@@ -626,8 +641,8 @@ void expresion_simple():
   try {
        (< tPLUS > )? termino() (operador_aditivo() termino())*
   }
-  catch (Exception e) {
-     System.out.println("Error en expresion simple");
+  catch (ParseException e) {
+     errorSintactico(e);
   }
 }
  
@@ -640,8 +655,8 @@ void termino():
   try {
      factor() (operador_multiplicativo() factor())*
   }
-  catch (Exception e) {
-     System.out.println("Error en termino");
+  catch (ParseException e) {
+     errorSintactico(e);
   }
 }
 
@@ -659,8 +674,8 @@ void operador_multiplicativo():
  	| < tMOD >
  	| < tAND >
   }
-  catch(Exception e) {
-    System.out.println("Error en operador_multiplicativo");
+  catch(ParseException e) {
+    errorSintactico(e);
   }
 }
 
@@ -684,8 +699,8 @@ void factor():
 	| < tTRUE >
 	| < tFALSE >
   }
-  catch (Exception e) {
-	  System.out.println("Error en factor");
+  catch (ParseException e) {
+	  errorSintactico(e);
   }
 }
 
@@ -699,8 +714,8 @@ void seleccion():
   try {
     < tSI > expresion() < tENT > lista_sentencias() (< tSI_NO > lista_sentencias())? < tFSI >
   }
-  catch (Exception e) {
-  	System.out.println("Error en seleccion");
+  catch (ParseException e) {
+  	errorSintactico(e);
   }
 }
 
@@ -714,8 +729,8 @@ void declaracion_acciones():
   try { 
  	(declaracion_accion())*
   }
-  catch(Exception e) {
-    System.out.println("Error en declaracion_acciones");
+  catch(ParseException e) {
+    errorSintactico(e);
   }
 }
 
@@ -728,8 +743,8 @@ void declaracion_accion():
   try { 
  	   cabecera_accion() < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias()
   }
-  catch(Exception e) {
-    System.out.println("Error en declaracion_accion");
+  catch(ParseException e) {
+    errorSintactico(e);
   }
 }
 
@@ -743,8 +758,8 @@ void cabecera_accion():
   try { 
  	 < tACCION > < tIDENTIFICADOR > parametros_formales()
   }
-  catch(Exception e) {
-    System.out.println("Error en cabecera_accion");
+  catch(ParseException e) {
+    errorSintactico(e);
   }
 }
 
@@ -757,8 +772,8 @@ void parametros_formales():
   try { 
  	 (lista_parametros())?
   }
-  catch(Exception e) {
-    System.out.println("Error en parametros_formales");
+  catch(ParseException e) {
+    errorSintactico(e);
   }
 }
 
@@ -773,8 +788,8 @@ void lista_parametros():
   try {
      < tPARENTESIS_IZDA > parametros() ( < tPUNTYCOM  > parametros() )* < tPARENTESIS_DCHA >
   }
-  catch (Exception e){
-     System.out.println("Error en lista_parametros");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -787,8 +802,8 @@ void parametros():
   try {
      clase_parametros() tipos_variables() identificadores()
   }
-  catch (Exception e){
-     System.out.println("Error en parametros");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -801,8 +816,8 @@ void declaracion_variables():
   try {
      ((declaracion()) < tPUNTYCOM >)*
   }
-  catch (Exception e){
-     System.out.println("Error en declaracion_variables");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -814,8 +829,8 @@ void declaracion():
   try {
      tipos_variables() identificadores()
   }
-  catch (Exception e){
-     System.out.println("Error en declaracion");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -828,8 +843,8 @@ void identificadores():
   try {
      < tIDENTIFICADOR > (< tCOMA > < tIDENTIFICADOR >)*
   }
-  catch (Exception e){
-     System.out.println("Error en identificadores");
+  catch (ParseException e){
+     errorSintactico(e);
   }
 }
 
@@ -844,8 +859,8 @@ void tipos_variables():
   | < tCARACTER >
   | < tBOOLEANO >
   }
-  catch (Exception e){
-   	 System.out.println("Error en tipos_variables\n");
+  catch (ParseException e){
+   	 errorSintactico(e);
   }
 }
 
@@ -859,10 +874,11 @@ void clase_parametros():
     < tVAL >
   | < tREF >
   }
-  catch (Exception e){
-   	 System.out.println("Error en clase_parametros\n");
+  catch (ParseException e){
+   	 errorSintactico(e);
   }
 }
+
 
 
 

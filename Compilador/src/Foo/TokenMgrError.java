@@ -105,29 +105,13 @@ public class TokenMgrError extends Error
    * Note: You can customize the lexical error message by modifying this method.
    */
   protected static String LexicalError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, char curChar) {
-	    return("Lexical error at line " +
-	          errorLine + ", column " +
-	          errorColumn + ".  Encountered: " +
-	          (EOFSeen ? "<EOF> " : ("\"" + addEscapes(String.valueOf(curChar)) + "\"") + " (" + (int)curChar + "), ") +
-	          "after : \"" + addEscapes(errorAfter) + "\"");
-	}
-  
-  
-  /**
-   * Returns a detailed message for the Error when it is thrown by the
-   * token manager to indicate a lexical error.
-   * Parameters :
-   *    errorLine   : line number when the error occurred
-   *    errorColumn : column number when the error occurred
-   *    curchar     : the offending character
-   * NOTA SI ES NECESARIO ELIMINAR ESTE METODO
-   */
-  protected static String LexicalError(int errorLine, int errorColumn, char curChar) {
-	    return("ERROR LEXICO  (<" +
-	          errorLine + ", " + errorColumn + ">): simbolo no reconocido: " + (int)curChar);    
+    return("Lexical error at line " +
+          errorLine + ", column " +
+          errorColumn + ".  Encountered: " +
+          (EOFSeen ? "<EOF> " : ("\"" + addEscapes(String.valueOf(curChar)) + "\"") + " (" + (int)curChar + "), ") +
+          "after : \"" + addEscapes(errorAfter) + "\"");
   }
-  
-  
+
   /**
    * You can also modify the body of this method to customize your error messages.
    * For example, cases like LOOP_DETECTED and INVALID_LEXICAL_STATE are not
@@ -157,8 +141,7 @@ public class TokenMgrError extends Error
 
   /** Full Constructor. */
   public TokenMgrError(boolean EOFSeen, int lexState, int errorLine, int errorColumn, String errorAfter, char curChar, int reason) {
-	  // this(LexicalError(EOFSeen, lexState, errorLine, errorColumn, errorAfter, curChar), reason);
-	  LexicalError(errorLine, errorColumn, curChar);
+    this(LexicalError(EOFSeen, lexState, errorLine, errorColumn, errorAfter, curChar), reason);
   }
 }
 /* JavaCC - OriginalChecksum=6cd7a7ec061ed263a1558b923b746e3c (do not edit this line) */
