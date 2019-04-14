@@ -89,4 +89,8 @@ una mejor distribución.
 
 Se han implementado dos excepciones una para detectar que un simbolo ya existe en la tabla y otro para lo contrario.
 
+Para comprobar que la matriz funciona adecuadamente se ha insertado un conjunto de símbolos para poder afirmar que funciona
+correctamente. A continuación se ha procedido a elaborar el error semántico con los errores correspondientes.
+
+
  
