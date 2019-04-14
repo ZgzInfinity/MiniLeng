@@ -1,0 +1,936 @@
+/**
+ * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
+ */
+
+options
+{
+  static = true;
+  ignore_case = true;
+}
+
+PARSER_BEGIN(Compilador)
+
+package Foo;
+import Foo.Tabla_Simbolos;
+
+public class Compilador
+{
+
+   // Inivio del nivel de declaraciones anidadas
+   public static int nivel = 0;
+
+   public static Tabla_Simbolos tabla;
+
+  // Error sintactico personalizado para el compilador
+  public static void errorSintactico(ParseException e) {
+      System.out.println(" ERROR SINTACTICO (< " + e.currentToken.beginLine + " , "
+                                                  + e.currentToken.beginColumn + " >): "
+                                                  + " detectado token incorrecto: " + e.currentToken.next + "\n");
+  } 
+
+
+  // Error semantico personalizado del compilador
+  public static void errorSemantico(String msg) {
+     System.out.println(" ERROR SEMANTICO : " + msg);
+  }
+  
+  public static void main(String args []) throws ParseException
+  {
+    /* nombre del fichero */
+	
+	String nombreArchivo;
+	String path = "C:\\Users\\Gord\\Desktop\\programas\\";
+
+
+	if (args[0].equals("-v")) {
+	  	System.out.println("Compilacion en modo verbose");
+	  	nombreArchivo = args[1];
+	}
+	else {
+	    System.out.println("Compilacion sin modo verbose");
+	    nombreArchivo = args[0];
+    }
+
+	/* Completar la ruta del path */
+	path += nombreArchivo;
+
+
+    System.out.println("LEYENDO FICHERO " + nombreArchivo + "\n");
+    try
+    {
+      /* Crear el parser con respecto al fichero */
+      Compilador parser = new Compilador (new java.io.FileInputStream(path));
+      int res = Compilador.programa();
+      if (args[0].equals("-v")) {
+
+	  // Instancia de la tabla de simbolos
+	  Tabla_Simbolos tabla = new Tabla_Simbolos();
+
+	  // Inicializacion de la tabla de simbolos
+	  tabla.inicializar_tabla();
+
+        
+      /* Mostrar total de tokens */
+	  TablaHash.mostrarTokensNormales();
+	
+	  /* Mostrar total de identificadores */
+	  TablaHash.mostrarIdentificadores();
+	  }
+	  System.out.println("El fichero introducido es correcto");
+  	} 
+    catch (Exception e)
+    {
+       System.out.println("INCORRECTO");
+       System.out.println(e.getMessage());
+       Compilador.ReInit(System.in);
+    }
+    catch (Error e)
+      {
+       // Obtencion del error sintactico 
+       int fila = CompiladorTokenManager.input_stream.getBeginLine();
+       int columna = CompiladorTokenManager.input_stream.getBeginColumn();
+       String tokenMalo = CompiladorTokenManager.input_stream.GetImage();
+       
+       // Muestreo de los errores
+       System.out.println(" ERROR LEXICO <(" + fila + " , " + columna + " >):"
+       										 + " simbolo no reconocido " + tokenMalo);
+    }
+  }
+}
+
+PARSER_END(Compilador)
+
+SKIP : /* CARACTERES A IGNORAR */
+{
+  " "
+| "\r"
+| "\t"
+| "\n"
+| "%%" : ComentLinea
+}
+
+<ComentLinea> SKIP :
+{
+  "%%" : DEFAULT
+}
+
+<ComentLinea> MORE :
+{
+  <~[]>
+}
+
+SPECIAL_TOKEN : /* Comentario de una linea */
+{
+  <SINGLE_LINE_COMMENT: "%" (~["\n","\r"])* ("\n"|"\r"|"\r\n")>
+}
+
+TOKEN : /* OPERADORES ARITMETICOS */
+{
+  < tPLUS : "+" >
+  {
+    TablaHash.anyadirHashTokens("tPLUS");
+    System.out.println("tPLUS");
+  }
+| < tMINUS : "-" >
+  {
+    TablaHash.anyadirHashTokens("tMINUS");
+    System.out.println("tMINUS");
+  }
+| < tMULTIPLY : "*" >
+  {
+    TablaHash.anyadirHashTokens("tMULTIPLY");
+    System.out.println("tMULTIPLY");
+  }
+| < tDIVIDE : "/" >
+  {
+    TablaHash.anyadirHashTokens("tDIVIDE");
+    System.out.println("tDIVIDE");
+  }
+| < tMAYOR : ">" >
+  {
+    TablaHash.anyadirHashTokens("tMAYOR");
+    System.out.println("tMAYOR");
+  }
+| < tMENOR : "<" >
+  {
+    TablaHash.anyadirHashTokens("tMENOR");
+    System.out.println("tMENOR");
+  }
+| < tIGUAL : "=" >
+  {
+    TablaHash.anyadirHashTokens("tIGUAL");
+    System.out.println("tIGUAL");
+  }
+| < tMAI : ">=" >
+  {
+    TablaHash.anyadirHashTokens("tMAI");
+    System.out.println("tMAI");
+  }
+| < tMEI : "<=" >
+  {
+    TablaHash.anyadirHashTokens("tMEI");
+    System.out.println("tMEI");
+  }
+| < tNI : "<>" >
+  {
+    TablaHash.anyadirHashTokens("tNI");
+    System.out.println("tNI");
+  }
+| < tOPAS : ":=" >
+  {
+    TablaHash.anyadirHashTokens("tOPAS");
+    System.out.println("tOPAS");
+  }
+}
+
+TOKEN : /* OPERADORES LOGICOS */
+{
+  < tAND : "and" >
+   {
+    TablaHash.anyadirHashTokens("tAND");
+    System.out.println("tAND");
+   }
+| < tOR : "or" >
+  {
+    TablaHash.anyadirHashTokens("tOR");
+    System.out.println("tOR");
+  }
+| < tNOT : "not" >
+  {
+    TablaHash.anyadirHashTokens("tNOT");
+    System.out.println("tNOT");
+  }
+}
+
+
+TOKEN : /* PALABRAS RESERVADAS */
+{
+  < tPROGRAMA : "programa" >
+   {
+    TablaHash.anyadirHashTokens("tPROGRAMA");
+    System.out.println("tPROGRAMA");
+   }
+| < tVAR : "var" >
+  {
+    TablaHash.anyadirHashTokens("tVAR");
+    System.out.println("tVAR");
+  }
+| < tPRINCIPIO : "principio" >
+  {
+    TablaHash.anyadirHashTokens("tPRINCIPIO");
+    System.out.println("tPRINCIPIO");
+  }
+| < tFIN : "fin" >
+  {
+    TablaHash.anyadirHashTokens("tFIN");
+    System.out.println("tFIN");
+  }
+| < tSI : "si" >
+  {
+    TablaHash.anyadirHashTokens("tSI");
+    System.out.println("tSI");
+  }
+| < tENT : "ent" >
+  {
+    TablaHash.anyadirHashTokens("tENT");
+    System.out.println("tENT");
+  }
+| < tSI_NO : "si_no" >
+  {
+    TablaHash.anyadirHashTokens("tSI_NO");
+    System.out.println("tSI_NO");
+  }
+| < tFSI : "fsi" >
+  {
+    TablaHash.anyadirHashTokens("tFSI");
+    System.out.println("tFSI");
+  }
+| < tMQ : "mq" >
+  {
+    TablaHash.anyadirHashTokens("tMQ");
+    System.out.println("tMQ");
+  }
+| < tFMQ : "fmq" >
+  {
+    TablaHash.anyadirHashTokens("tFMQ");
+    System.out.println("tFMQ");
+  }
+| < tESCRIBIR : "escribir" >
+  {
+    TablaHash.anyadirHashTokens("tESCRIBIR");
+    System.out.println("tESCRIBIR");
+  }
+| < tLEER : "leer" >
+  {
+    TablaHash.anyadirHashTokens("tLEER");
+    System.out.println("tLEER");
+  }
+| < tMOD : "mod" >
+  {
+    TablaHash.anyadirHashTokens("tMOD");
+    System.out.println("tMOD");
+  }
+| < tDIV : "div" >
+  {
+    TablaHash.anyadirHashTokens("tDIV");
+    System.out.println("tDIV");
+  }
+| < tENTERO : "entero" >
+  {
+    TablaHash.anyadirHashTokens("tENTERO");
+    System.out.println("tENTERO");
+  }
+| < tBOOLEANO : "booleano" >
+  {
+    TablaHash.anyadirHashTokens("tBOOLEANO");
+    System.out.println("tBOOLEANO");
+  }
+| < tCARACTER : "caracter" >
+  {
+    TablaHash.anyadirHashTokens("tCARACTER");
+    System.out.println("tCARACTER");
+  }
+| < tTRUE : "true" >
+  {
+    TablaHash.anyadirHashTokens("tTRUE");
+    System.out.println("tTRUE");
+  }
+| < tFALSE : "false" >
+  {
+    TablaHash.anyadirHashTokens("tFALSE");
+    System.out.println("tFALSE");
+  }
+| < tENTACAR : "entacar" >
+  {
+    TablaHash.anyadirHashTokens("tENTACAR");
+    System.out.println("tENTACAR");
+  }
+| < tCARAENT : "caraent" >
+  {
+    TablaHash.anyadirHashTokens("tCARAENT");
+    System.out.println("tCARAENT");
+  }
+| < tACCION : "accion" >
+  {
+    TablaHash.anyadirHashTokens("tACCION");
+    System.out.println("tACCION");
+  }
+| < tVAL : "val" >
+  {
+    TablaHash.anyadirHashTokens("tVAL");
+    System.out.println("tVAL");
+  }
+| < tREF : "ref" >
+  {
+    TablaHash.anyadirHashTokens("tREF");
+    System.out.println("tREF");
+  }
+}
+
+
+TOKEN :  /*EXPRESIONES */
+{
+  < #tDIGITO : ["0"-"9"] >	
+| < #tLETRA : ["a"-"z"] >
+| < tCONSTCHAR : ("\"")(~["\""])("\"") >
+  {
+    TablaHash.anyadirHashTokens("tCONSTCHAR");
+    System.out.println("tCONSTCHAR");
+  }
+| < tCONSTCAD :  ("\"")(~["\""])+("\"") >
+  {
+    TablaHash.anyadirHashTokens("tCONSTCAD");
+    System.out.println("tCONSTCAD");
+  }
+| < tCONSTANTE_NUMERICA : (< tDIGITO >)+ >
+  {
+    TablaHash.anyadirHashTokens("tCONSTANTE_NUMERICA");
+    System.out.println("tCONSTANTE_NUMERICA");
+  }
+| < tIDENTIFICADOR  : (< tLETRA > | ((< tLETRA > | "_")(< tLETRA > | "_" | < tDIGITO >)*(< tLETRA > | < tDIGITO >))) >
+	{
+	  TablaHash.anyadirHashTokens(image.toString());
+	  TablaHash.anyadirHashIdentificadores(image.toString());
+	  System.out.println("tIDENTIFICADOR");
+	}
+}
+
+
+TOKEN : /* OPERADORES SEPARADDORES */
+{
+  < tPUNTYCOM : ";" >
+  {
+    TablaHash.anyadirHashTokens("tPUNTYCOM");
+    System.out.println("tPUNTYCOM");
+  }
+| < tCOMA : "," >
+  {
+    TablaHash.anyadirHashTokens("tCOMA");
+    System.out.println("tCOMA");
+  }
+| < tPARENTESIS_IZDA : "(" >
+  {
+    TablaHash.anyadirHashTokens("tPARENTESIS_IZDA");
+    System.out.println("tPARENTESIS_IZDA");
+  }
+| < tPARENTESIS_DCHA : ")" >
+  {
+    TablaHash.anyadirHashTokens("tPARENTESIS_DCHA");
+    System.out.println("tPARENTESIS_DCHA");
+  }
+}
+
+
+/* Construccion del analizador sintactico */
+
+// Regla de programa
+int programa():
+{
+}
+{
+  try{
+       < tPROGRAMA > < tIDENTIFICADOR > < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias() < EOF >
+       {
+         return 0;
+       }
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+     return 1;
+  }
+}
+
+
+// Regla de bloque_sentencias OK
+void bloque_sentencias():
+{
+}
+{
+  try {
+       < tPRINCIPIO > lista_sentencias() < tFIN >
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+// Regla de lista_sentencias OK EN DUDA
+void lista_sentencias():
+{
+}
+{
+  try{
+      (sentencia())*
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+// Regla de sentencia OK
+void sentencia():
+{
+}
+{
+ try{
+      leer() < tPUNTYCOM >
+   	| escribir() < tPUNTYCOM >
+   	| asig_invoc()
+   	| seleccion()
+   	| mientras_que()
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+void asig_invoc():
+{
+}
+{
+try {
+       < tIDENTIFICADOR > (asignacion() | invocacion_accion())
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+// Regla de asignacion OK
+void asignacion():
+{
+}
+{
+  try {
+       < tOPAS > expresion() < tPUNTYCOM >
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+// Regla de lista_asignables OK
+void lista_asignables():
+{
+}
+{
+  try {
+      identificadores()
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+// Regla de leer OK
+void leer():
+{
+}
+{
+  try {
+       < tLEER >< tPARENTESIS_IZDA > lista_asignables() < tPARENTESIS_DCHA >
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+
+// Regla de escribir OK
+void escribir():
+{
+}
+{
+  try {
+       < tESCRIBIR >< tPARENTESIS_IZDA > lista_escribibles() < tPARENTESIS_DCHA >
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+// Regla de lista_escribibles OK
+void lista_escribibles():
+{
+}
+{
+  try {
+       escribible() ( < tCOMA > escribible() )*
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+// Regla de lista_escribibles OK
+void escribible():
+{
+}
+{
+  try {
+      < tCONSTCHAR >
+     | < tCONSTCAD >
+     | < tENTACAR > <tPARENTESIS_IZDA > <tCONSTANTE_NUMERICA > <tPARENTESIS_DCHA >
+     | < tIDENTIFICADOR >
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+
+// Regla de invocacion accion OK
+void invocacion_accion():
+{
+}
+{
+  try {
+     (argumentos())? < tPUNTYCOM >
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+
+//Regla de mientras que OK
+void mientras_que():
+{
+}
+{
+  try {
+     < tMQ > expresion() lista_sentencias() < tFMQ >
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+// Regla para los argumentos OK
+void argumentos():
+{
+}
+{
+  try {
+      < tPARENTESIS_IZDA > (lista_expresiones())? < tPARENTESIS_DCHA >
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+  
+}
+
+
+
+// Regla de lista de expresiones
+void lista_expresiones():
+{
+}
+{
+  try {
+     expresion()(< tCOMA > expresion())*
+  }
+  catch (ParseException e) {
+    errorSintactico(e);
+  }
+}
+
+
+// Regla de expresion OK
+void expresion():
+{
+}
+{
+ try {
+  	  expresion_simple() (operador_relacional() expresion_simple())*
+  }
+  catch (ParseException e) {
+     errorSintactico(e);
+  }
+}
+
+
+// Regla de operador_relacional OK
+void operador_relacional():
+{
+}
+{
+  try {
+      < tIGUAL >
+    | < tMENOR >
+    | < tMEI >
+    | < tNI >
+    | < tMAI >
+    | < tMAYOR >
+  }
+  catch (ParseException e) {
+     errorSintactico(e);
+  }
+}
+
+
+// Regla operador aditivo OK
+void operador_aditivo():
+{
+}
+{
+  try {
+      < tPLUS > 
+	| < tMINUS >
+	| < tOR >
+  }
+  catch (ParseException e) {
+	errorSintactico(e);
+  }
+}
+
+// regla de expresion simple OK
+void expresion_simple():
+{
+}
+{
+  try {
+       (< tPLUS > )? termino() (operador_aditivo() termino())*
+  }
+  catch (ParseException e) {
+     errorSintactico(e);
+  }
+}
+ 
+
+// Regla de termino OK
+void termino():
+{
+}
+{
+  try {
+     factor() (operador_multiplicativo() factor())*
+  }
+  catch (ParseException e) {
+     errorSintactico(e);
+  }
+}
+
+
+
+// Regla de operador multiplicativo OK
+void operador_multiplicativo():
+{
+}
+{
+  try { 
+ 	  < tMULTIPLY >
+ 	| < tDIVIDE >
+ 	| < tDIV >
+ 	| < tMOD >
+ 	| < tAND >
+  }
+  catch(ParseException e) {
+    errorSintactico(e);
+  }
+}
+
+
+
+// Regla de factor OK
+void factor():
+{
+}
+{
+  try {
+      < tMINUS > factor()
+	| < tNOT > factor()
+	| < tPARENTESIS_IZDA > expresion() < tPARENTESIS_DCHA >
+	| < tENTACAR >< tPARENTESIS_IZDA > expresion() < tPARENTESIS_DCHA >
+	| < tCARAENT >< tPARENTESIS_IZDA > expresion() < tPARENTESIS_DCHA >
+	| < tIDENTIFICADOR >
+	| < tCONSTANTE_NUMERICA >
+	| < tCONSTCHAR >
+	| < tCONSTCAD >
+	| < tTRUE >
+	| < tFALSE >
+  }
+  catch (ParseException e) {
+	  errorSintactico(e);
+  }
+}
+
+
+
+// Regla de seelccion OK
+void seleccion():
+{
+}
+{
+  try {
+    < tSI > expresion() < tENT > lista_sentencias() (< tSI_NO > lista_sentencias())? < tFSI >
+  }
+  catch (ParseException e) {
+  	errorSintactico(e);
+  }
+}
+
+
+
+// Regla de declaracion_acciones OK
+void declaracion_acciones():
+{
+}
+{
+  try { 
+ 	(declaracion_accion())*
+  }
+  catch(ParseException e) {
+    errorSintactico(e);
+  }
+}
+
+
+// Regla de declaracion_Accion OK
+void declaracion_accion():
+{
+}
+{
+  try { 
+ 	   cabecera_accion() < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias()
+  }
+  catch(ParseException e) {
+    errorSintactico(e);
+  }
+}
+
+
+
+// Regla de cabecera_accion OK
+void cabecera_accion():
+{
+  Token t;
+  Simbolo s;
+  boolean ok = false;
+  // Lista ListaParam;
+}
+{
+  try { 
+ 	 < tACCION >
+ 	 t = < tIDENTIFICADOR >
+ 	 {
+ 	    // Busqueda del simbolo en la tabla
+ 	    s = tabla.buscar_simbolo(t.image);
+ 	    if (s == null || s.getNivel() != nivel) {
+ 	      tabla.introducir_accion(t.image, nivel, s.getDir());
+ 	      ok = true;
+ 	  	}
+ 	  	else {
+ 	  	  errorSemantico("simbolo duplicado");	  	  
+ 	  	  ok = false;
+ 		}
+ 		nivel++;
+ 	 }
+ 	 parametros_formales()
+ 	 {
+ 	   if (ok) {
+ 	     // s.anyadirParametros(ListaParam);
+ 	   }
+ 	 }
+  }
+  catch(ParseException e) {
+    errorSintactico(e);
+  }
+}
+
+
+// Regla de parametros formales OK
+void parametros_formales():
+{
+}
+{
+  try { 
+ 	 (lista_parametros())?
+  }
+  catch(ParseException e) {
+    errorSintactico(e);
+  }
+}
+
+
+
+
+// Regla para lista_parametros OK
+void lista_parametros():
+{
+}
+{
+  try {
+     < tPARENTESIS_IZDA > parametros() ( < tPUNTYCOM  > parametros() )* < tPARENTESIS_DCHA >
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+// Regla de parametros OK
+void parametros():
+{
+}
+{
+  try {
+     clase_parametros() tipos_variables() identificadores()
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+// Regla de declaracion variables OK
+void declaracion_variables():
+{
+}
+{
+  try {
+     ((declaracion()) < tPUNTYCOM >)*
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+// Regla de declaracion OK
+void declaracion():
+{
+}
+{
+  try {
+     tipos_variables() identificadores()
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+// Regla para los identificadores OK
+void identificadores():
+{
+}
+{
+  try {
+     < tIDENTIFICADOR > (< tCOMA > < tIDENTIFICADOR >)*
+  }
+  catch (ParseException e){
+     errorSintactico(e);
+  }
+}
+
+
+// Regla para los tipos de variables OK
+void tipos_variables():
+{
+}
+{
+  try {
+    < tENTERO >
+  | < tCARACTER >
+  | < tBOOLEANO >
+  }
+  catch (ParseException e){
+   	 errorSintactico(e);
+  }
+}
+
+
+// Regla para las clases de parametros OK
+void clase_parametros():
+{
+}
+{
+  try {
+    < tVAL >
+  | < tREF >
+  }
+  catch (ParseException e){
+   	 errorSintactico(e);
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
