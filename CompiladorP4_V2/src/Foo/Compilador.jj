@@ -16,8 +16,11 @@ import Foo.Tabla_Simbolos;
 public class Compilador
 {
 
-   // Inivio del nivel de declaraciones anidadas
+   // IniCio del nivel de declaraciones anidadas
    public static int nivel = 0;
+
+   // Variable de direccion por defecto a 0
+   public static long dir = 0;
 
    public static Tabla_Simbolos tabla;
 
@@ -386,10 +389,21 @@ TOKEN : /* OPERADORES SEPARADDORES */
 // Regla de programa
 int programa():
 {
+  Token t;
 }
 {
   try{
-       < tPROGRAMA > < tIDENTIFICADOR > < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias() < EOF >
+       // Lectura del token programa
+       < tPROGRAMA >
+       // Guardado del nombre del programa
+       t = < tIDENTIFICADOR >
+       {
+         // Insertar en la tabla de simbolos el token del programa
+         // no se comprueba porque es el primero
+         Simbolo s = tabla.introducir_programa(t.image, dir);
+       }
+       // Lectura del resto de datos
+       < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias() < EOF >
        {
          return 0;
        }
@@ -780,28 +794,9 @@ void cabecera_accion():
   // Lista ListaParam;
 }
 {
-  try { 
- 	 < tACCION >
- 	 t = < tIDENTIFICADOR >
- 	 {
- 	    // Busqueda del simbolo en la tabla
- 	    s = tabla.buscar_simbolo(t.image);
- 	    if (s == null || s.getNivel() != nivel) {
- 	      tabla.introducir_accion(t.image, nivel, s.getDir());
- 	      ok = true;
- 	  	}
- 	  	else {
- 	  	  errorSemantico("simbolo duplicado");	  	  
- 	  	  ok = false;
- 		}
- 		nivel++;
- 	 }
- 	 parametros_formales()
- 	 {
- 	   if (ok) {
- 	     // s.anyadirParametros(ListaParam);
- 	   }
- 	 }
+  try {
+    // Apilar la nueva definicio  
+ 	 < tACCION > < tIDENTIFICADOR > parametros_formales()
   }
   catch(ParseException e) {
     errorSintactico(e);

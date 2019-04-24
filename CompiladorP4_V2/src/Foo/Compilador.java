@@ -4,8 +4,11 @@ import Foo.Tabla_Simbolos;
 
 public class Compilador implements CompiladorConstants {
 
-   // Inivio del nivel de declaraciones anidadas
+   // IniCio del nivel de declaraciones anidadas
    public static int nivel = 0;
+
+   // Variable de direccion por defecto a 0
+   public static long dir = 0;
 
    public static Tabla_Simbolos tabla;
 
@@ -88,10 +91,15 @@ public class Compilador implements CompiladorConstants {
 /* Construccion del analizador sintactico */
 
 // Regla de programa
-  static final public int programa() throws Exception {
+  static final public int programa() throws ParseException {
+  Token t;
     try {
       jj_consume_token(tPROGRAMA);
-      jj_consume_token(tIDENTIFICADOR);
+      // Guardado del nombre del programa
+             t = jj_consume_token(tIDENTIFICADOR);
+         // Insertar en la tabla de simbolos el token del programa
+         // no se comprueba porque es el primero
+         Simbolo s = tabla.introducir_programa(t.image, dir);
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
       declaracion_acciones();
@@ -616,7 +624,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de declaracion_acciones OK
-  static final public void declaracion_acciones() throws Exception {
+  static final public void declaracion_acciones() throws ParseException {
     try {
       label_7:
       while (true) {
@@ -636,7 +644,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de declaracion_Accion OK
-  static final public void declaracion_accion() throws Exception {
+  static final public void declaracion_accion() throws ParseException {
     try {
       cabecera_accion();
       jj_consume_token(tPUNTYCOM);
@@ -649,28 +657,14 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de cabecera_accion OK
-  static final public void cabecera_accion() throws Exception {
+  static final public void cabecera_accion() throws ParseException {
   Token t;
   Simbolo s;
   boolean ok = false;
     try {
       jj_consume_token(tACCION);
-      t = jj_consume_token(tIDENTIFICADOR);
-            // Busqueda del simbolo en la tabla
-            s = tabla.buscar_simbolo(t.image);
-            if (s == null || s.getNivel() != nivel) {
-              tabla.introducir_accion(t.image, nivel, s.getDir());
-              ok = true;
-                }
-                else {
-                  errorSemantico("simbolo duplicado");
-                  ok = false;
-                }
-                nivel++;
+      jj_consume_token(tIDENTIFICADOR);
       parametros_formales();
-           if (ok) {
-             // s.anyadirParametros(ListaParam);
-           }
     } catch (ParseException e) {
     errorSintactico(e);
     }
