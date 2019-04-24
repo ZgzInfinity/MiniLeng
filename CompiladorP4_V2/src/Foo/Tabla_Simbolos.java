@@ -87,8 +87,6 @@ public class Tabla_Simbolos {
 	 * puntero como resultado, de lo contrario lanza una excepción
 	 */
 	public Simbolo buscar_simbolo(String nombre) throws SimboloNoEncontradoException { 
-	 String mensajeExcepcion = "El simbolo de nombre " + nombre + " no existe en la tabla ";
-	 try {
 		Simbolo ret = null;
 		int h = hash_function(nombre);
 		if(tabla.get(h) != null) {
@@ -102,10 +100,6 @@ public class Tabla_Simbolos {
 			}
 		}
 		return ret;
-	  }
-	  catch (Exception e) {
-		throw new SimboloNoEncontradoException(mensajeExcepcion);
-	  }
 	}
 	
 	

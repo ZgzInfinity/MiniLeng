@@ -12,6 +12,7 @@ PARSER_BEGIN(Compilador)
 
 package Foo;
 import Foo.Tabla_Simbolos;
+import java.util.LinkedList;
 
 public class Compilador
 {
@@ -36,6 +37,18 @@ public class Compilador
   public static void errorSemantico(String msg) {
      System.out.println(" ERROR SEMANTICO : " + msg);
   }
+
+
+  // Error de simbolo no encontrado en la tabla de simbolos
+  public static void SimboloNoEncontradoException(String imagen){
+    System.out.println(" ERROR EN LA TABLA DE SIMBOLOS: el simbolo " + imagen + " no existe ");
+  }
+
+  // Error de simbolo ya existente en la tabla de simbolos
+  public static void SimboloRepetidoExcepcion(String imagen) {
+    System.out.println(" ERROR EN LA TABLA DE SIMBOLOS: el simbolo " + imagen + " ya existe ");
+  }
+    
   
   public static void main(String args []) throws ParseException
   {
@@ -390,6 +403,7 @@ TOKEN : /* OPERADORES SEPARADDORES */
 int programa():
 {
   Token t;
+  Simbolo s;
 }
 {
   try{
@@ -400,7 +414,7 @@ int programa():
        {
          // Insertar en la tabla de simbolos el token del programa
          // no se comprueba porque es el primero
-         Simbolo s = tabla.introducir_programa(t.image, dir);
+         s = tabla.introducir_programa(t.image, dir);
        }
        // Lectura del resto de datos
        < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias() < EOF >
@@ -790,13 +804,31 @@ void cabecera_accion():
 {
   Token t;
   Simbolo s;
-  boolean ok = false;
-  // Lista ListaParam;
 }
 {
   try {
-    // Apilar la nueva definicio  
- 	 < tACCION > < tIDENTIFICADOR > parametros_formales()
+     // Apilar la nueva definicion de accion si no existe   
+ 	 < tACCION >
+ 	 t = < tIDENTIFICADOR >
+ 	 parametros_formales()
+ 	 {
+ 	   try {
+ 	     // Posible mensaje de excepcion
+ 	     // Determinar si existe una accion con ese identificador en la tabla
+ 	     if (tabla.buscar_simbolo(t.image) != null) {
+ 	  		// El simbolo no existe en la tabla
+ 	  		// Incrementar el nuevo nivel
+ 	  		nivel++;
+ 	  		// Insertar en la tabla de simbolos el nuevo identificador
+ 	  		tabla.introducir_accion(t.image, nivel, dir);
+ 	     }
+ 	   }
+ 	   // Salta la excepcion de simbolo encontrado
+ 	   catch (Exception e) {
+ 	      // Muestra la excepcion por pantalla
+ 	      SimboloNoEncontradoException(t.image);
+ 	   }
+ 	 }
   }
   catch(ParseException e) {
     errorSintactico(e);
@@ -837,10 +869,34 @@ void lista_parametros():
 // Regla de parametros OK
 void parametros():
 {
+  // Variables de los tokens a coger y apilar
+  Token t;
+  Simbolo s;
+  Tipo_variable tpV;
+  Clase_parametro clPar;
 }
 {
   try {
+     // Procesamiento de los tipos de parametros a meter en la tabla de simbolos
      clase_parametros() tipos_variables() identificadores()
+     {    
+     	try {
+			// Introduccion del parametro
+			s = tabla.buscar_simbolo();
+
+			// Obtencion del tipo de variable y la clase de parametro
+			tpV = s.getTipo();
+
+			clPar = s.getParametro();
+
+			// El simbolo del parametro no existe y se mete en la tabla
+     		tabla.introducir_parametro(t.image, Clasenivel, 0);
+      	}
+      	catch (Exception e) {
+      	    // El simbolo ya existe en la tabla 
+      	    SimboloRepetidoExcepcion(t.image);
+        }
+     } 
   }
   catch (ParseException e){
      errorSintactico(e);
@@ -878,10 +934,26 @@ void declaracion():
 // Regla para los identificadores OK
 void identificadores():
 {
+  // Declaracion de una lista auxiliar de identificadores
+  LinkedList<String> listaAuxiliar = new LinkedList<String>();
+  Token t;
 }
 {
   try {
-     < tIDENTIFICADOR > (< tCOMA > < tIDENTIFICADOR >)*
+     t = < tIDENTIFICADOR >
+     {
+       // Añadir el identificador obligatorio
+       listaAuxiliar.add(t.image);
+     }
+     (< tCOMA > t = < tIDENTIFICADOR >)*
+     {
+       // Añadir el resto de identificadores de la lista
+       listaAuxiliar.add(t.image);
+     }
+     {
+       // Recorrer la lista e insertar los parametros
+       
+     }
   }
   catch (ParseException e){
      errorSintactico(e);
