@@ -13,6 +13,8 @@ PARSER_BEGIN(Compilador)
 package Foo;
 import Foo.Tabla_Simbolos;
 import java.util.LinkedList;
+import Foo.Simbolo.Tipo_simbolo;
+import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
 
 public class Compilador
@@ -403,13 +405,22 @@ TOKEN : /* OPERADORES SEPARADDORES */
 // Regla de programa
 int programa():
 {
-  Token t;
+  Token tSim, t;
   Simbolo s;
+  Simbolo.Tipo_simbolo tp_Sim;
 }
 {
   try{
        // Lectura del token programa
-       < tPROGRAMA >
+       tSim = < tPROGRAMA >
+       {
+	 	   // Comprobacion del tipo de tipo de programa
+	 	   if (tSim.kind == tPROGRAMA) {
+	 	      // Es el token correcto
+	 	      tp_Sim = Simbolo.Tipo_simbolo.ACCION;
+	 	      tabla.anyadirBloque(tp_Sim);
+	 	   }
+       }
        // Guardado del nombre del programa
        t = < tIDENTIFICADOR >
        {
@@ -799,34 +810,42 @@ void declaracion_accion():
 }
 
 
-
 // Regla de cabecera_accion OK
 void cabecera_accion():
 {
-  Token t;
+  Token tSim, tId;
   Simbolo s;
+  Simbolo.Tipo_simbolo tp_Sim;
 }
 {
   try {
      // Apilar la nueva definicion de accion si no existe   
- 	 < tACCION >
- 	 t = < tIDENTIFICADOR >
+ 	 tSim = < tACCION >
+ 	 {
+ 	   // Comprobacion del tipo de tipo de accion
+ 	   if (tSim.kind == tACCION) {
+ 	      // Es el token correcto
+ 	      tp_Sim = Simbolo.Tipo_simbolo.ACCION;
+ 	      tabla.anyadirBloque(tp_Sim);
+ 	   }
+     }
+ 	 tId = < tIDENTIFICADOR >
  	 {
  	   try {
  	     // Posible mensaje de excepcion
  	     // Determinar si existe una accion con ese identificador en la tabla
- 	     if (tabla.buscar_simbolo(t.image) != null) {
+ 	     if (tabla.buscar_simbolo(tId.image) != null) {
  	  		// El simbolo no existe en la tabla
  	  		// Incrementar el nuevo nivel
  	  		nivel++;
  	  		// Insertar en la tabla de simbolos el nuevo identificador
- 	  		tabla.introducir_accion(t.image, nivel, dir);
+ 	  		tabla.introducir_accion(tId.image, nivel, dir);
  	     }
  	   }
  	   // Salta la excepcion de simbolo encontrado
  	   catch (Exception e) {
  	      // Muestra la excepcion por pantalla
- 	      SimboloNoEncontradoException(t.image);
+ 	      SimboloNoEncontradoException(tId.image);
  	   }
  	 }
  	 // Procesamiento de los parametros
@@ -877,8 +896,8 @@ void parametros():
   Simbolo s;
 
   // Clase de parametro y tipo de variable del simbolo a introducir
-  Simbolo.Clase_parametro = cl_Param;
-  Simbolo.Tipo_variable = tipo_Var;
+  Simbolo.Clase_parametro cl_Param;
+  Simbolo.Tipo_variable tipo_Var;
 
   // Lista de identificadores leidos a almacenar en la tabla de simbolos
   LinkedList<String> lista;
@@ -910,7 +929,7 @@ void parametros():
 
 				try {
 				  	// Insercion del parametro en la tabla de simbolos
-					introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
+					tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
 				}		
 				catch (Exception e) {
 				 	// El parametro ya esta repetido 
@@ -946,10 +965,44 @@ void declaracion_variables():
 // Regla de declaracion OK
 void declaracion():
 {
+  // Declaracion de variables
+  Token t;
+  Simbolo.Tipo_variable tp_Var;
+  LinkedList<String> lista;
 }
 {
   try {
      tipos_variables() identificadores()
+     {
+       // Se ha procesado el tipo de variable y los corresponfientes identificadores
+       lista = tabla.getListaIdentificadores();
+
+       // Obtencion del tipo de variable de los simbolos
+       tp_Var = tabla.getTipo_variable();
+
+ 	   // Variable para guardar el identificador del simbolo a introducir
+ 	   String identificadorActual;
+
+	  // Tamaño de la lista de identificadores
+	  int dimension = lista.size();
+
+ 	   //Bucle de recorrido de insercion de variables
+ 	   for (int i = 0; i < dimension; i++) {
+ 	        // Obtencion del identificador actual
+			identificadorActual = lista.get(i);
+
+			try {
+			   // Buscar simbolo en la tabla de simbolos
+			   tabla.buscar_simbolo(identificadorActual);
+
+			   // Simbolo ya existente en la tabla de simbolos
+	           tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
+	        }
+	        catch (Exception e) {
+	           
+	        }
+ 	   }
+     }
   }
   catch (ParseException e){
      errorSintactico(e);
@@ -961,7 +1014,6 @@ void declaracion():
 void identificadores():
 {
   // Declaracion de una lista auxiliar de identificadores
-  LinkedList<String> lista = new LinkedList<String>();
   Token t;
 }
 {
@@ -969,15 +1021,14 @@ void identificadores():
      t = < tIDENTIFICADOR >
      {
        // Añadir el identificador obligatorio
-       lista.add(t.image);
+       tabla.anyadirIdentificador(t.image);
      }
      (< tCOMA > t = < tIDENTIFICADOR >)*
      {
        // Añadir el resto de identificadores de la lista
-       lista.add(t.image);
+       tabla.anyadirIdentificador(t.image);
      }
-     // Todos los tokens han sido procesados correctamente
-     tabla.setListaIdentificadores(lista);
+     
   }
   catch (ParseException e){
      errorSintactico(e);
@@ -990,6 +1041,7 @@ void tipos_variables():
 {
   // Declaracion de variable
   Token t;
+  Tipo_variable tipo_Var;
 }
 {
   try {
@@ -1004,7 +1056,11 @@ void tipos_variables():
          	break;
          case "tCARACTER":
          	// Es token tCARACTER
-         	tipo_Var = Simbolo.Tipo_variable.CARACTER;
+         	tipo_Var = Simbolo.Tipo_variable.CHAR;
+         	break;
+         case "tCONSTCAD":
+         	// Es token tCARACTER
+         	tipo_Var = Simbolo.Tipo_variable.CADENA;
          	break;
          case "tBOOLEANO":
          	// Es token tBOOLEANO

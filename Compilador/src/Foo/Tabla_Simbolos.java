@@ -21,15 +21,20 @@ public class Tabla_Simbolos {
 	// Vector de tablas Hash
 	static ArrayList<LinkedList<Simbolo>> tabla;
 	
-	// Variable estatica que almacena el tipo de dato
-	static Tipo_variable tipoVariable;
 	
 	// Variable estatica que almacena el tipo de dato
-	static Clase_parametro tipoParametro;
+	static Tipo_variable tipoVariable = null;
+	
+	// Variable estatica que almacena el tipo de dato
+	static Clase_parametro tipoParametro = null; 
 	
 	// Declaracion de una lista estatica de identificadores
 	static LinkedList<String> listaIdentificadores = new LinkedList<String>();
 	
+	// Declaracion de una lista estatica de identificadores
+	static LinkedList<Tipo_simbolo> listaBloques = new LinkedList<Tipo_simbolo>();
+	
+
 	/*
 	 * Pre: ---
 	 * Post: Asigna el tipo de variable que se ha leido 
@@ -57,6 +62,35 @@ public class Tabla_Simbolos {
 	 */
 	public void setListaIdentificadores(LinkedList<String> lista) {
 		Tabla_Simbolos.listaIdentificadores = lista;
+	}
+	
+	
+	/*
+	 * Pre: ---
+	 * Post: Ha incorporado el identificador <<i>> en la ultima posicion de la lista
+	 */
+	public void anyadirIdentificador(String i) {
+		Tabla_Simbolos.listaIdentificadores.add(i);
+	}
+	
+	
+	/*
+	 * Pre ---
+	 * Post: Ha asignado la lista <<lista>> a la lista de identificadores
+	 */
+	public void anyadirBloque(Tipo_simbolo tp_Sim) {
+		// Añade nuevo bloque en la ultima posicion
+		listaBloques.add(tp_Sim);
+	}
+	
+	
+	/*
+	 * Pre ---
+	 * Post: Ha asignado la lista <<lista>> a la lista de identificadores
+	 */
+	public void eliminarBloque(Tipo_simbolo tp_Sim) {
+		// Borra el ultimo bloque añadido
+		listaBloques.removeLast();
 	}
 	
 	
@@ -232,7 +266,7 @@ public class Tabla_Simbolos {
      *  De lo contrario, introduce un símbolo PARAMETRO con los datos de los argumentos. 
      */
 	public Simbolo introducir_parametro (String nombre, Tipo_variable variable, 
-											Clase_parametro parametro, int nivel, int dir) throws Exception {
+											Clase_parametro parametro, int nivel, long dir) throws Exception {
 		
 		String mensajeExcepcion = "El simbolo PARAMETRO de nombre " + nombre + " ya existe en la tabla ";
 		Simbolo esta = buscar_simbolo(nombre);

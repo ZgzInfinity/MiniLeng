@@ -2,6 +2,8 @@
 package Foo;
 import Foo.Tabla_Simbolos;
 import java.util.LinkedList;
+import Foo.Simbolo.Tipo_simbolo;
+import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
 
 /** Token Manager. */

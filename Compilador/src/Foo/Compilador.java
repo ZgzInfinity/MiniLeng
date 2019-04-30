@@ -2,6 +2,8 @@
 package Foo;
 import Foo.Tabla_Simbolos;
 import java.util.LinkedList;
+import Foo.Simbolo.Tipo_simbolo;
+import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
 
 public class Compilador implements CompiladorConstants {
@@ -106,10 +108,18 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de programa
   static final public int programa() throws ParseException {
-  Token t;
+  Token tSim, t;
   Simbolo s;
+  Simbolo.Tipo_simbolo tp_Sim;
     try {
-      jj_consume_token(tPROGRAMA);
+      // Lectura del token programa
+             tSim = jj_consume_token(tPROGRAMA);
+                   // Comprobacion del tipo de tipo de programa
+                   if (tSim.kind == tPROGRAMA) {
+                      // Es el token correcto
+                      tp_Sim = Simbolo.Tipo_simbolo.ACCION;
+                      tabla.anyadirBloque(tp_Sim);
+                   }
       // Guardado del nombre del programa
              t = jj_consume_token(tIDENTIFICADOR);
          // Insertar en la tabla de simbolos el token del programa
@@ -673,26 +683,34 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de cabecera_accion OK
   static final public void cabecera_accion() throws ParseException {
-  Token t;
+  Token tSim, tId;
   Simbolo s;
+  Simbolo.Tipo_simbolo tp_Sim;
     try {
-      jj_consume_token(tACCION);
-      t = jj_consume_token(tIDENTIFICADOR);
+      // Apilar la nueva definicion de accion si no existe   
+               tSim = jj_consume_token(tACCION);
+           // Comprobacion del tipo de tipo de accion
+           if (tSim.kind == tACCION) {
+              // Es el token correcto
+              tp_Sim = Simbolo.Tipo_simbolo.ACCION;
+              tabla.anyadirBloque(tp_Sim);
+           }
+      tId = jj_consume_token(tIDENTIFICADOR);
            try {
              // Posible mensaje de excepcion
              // Determinar si existe una accion con ese identificador en la tabla
-             if (tabla.buscar_simbolo(t.image) != null) {
+             if (tabla.buscar_simbolo(tId.image) != null) {
                         // El simbolo no existe en la tabla
                         // Incrementar el nuevo nivel
                         nivel++;
                         // Insertar en la tabla de simbolos el nuevo identificador
-                        tabla.introducir_accion(t.image, nivel, dir);
+                        tabla.introducir_accion(tId.image, nivel, dir);
              }
            }
            // Salta la excepcion de simbolo encontrado
            catch (Exception e) {
               // Muestra la excepcion por pantalla
-              SimboloNoEncontradoException(t.image);
+              SimboloNoEncontradoException(tId.image);
            }
       parametros_formales();
     } catch (ParseException e) {
@@ -742,10 +760,56 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de parametros OK
   static final public void parametros() throws ParseException {
+  // Declaracion de variables
+
+  // Simbolo a guardar en la tabla de simbolos
+  Simbolo s;
+
+  // Clase de parametro y tipo de variable del simbolo a introducir
+  Simbolo.Clase_parametro cl_Param;
+  Simbolo.Tipo_variable tipo_Var;
+
+  // Lista de identificadores leidos a almacenar en la tabla de simbolos
+  LinkedList<String> lista;
     try {
       clase_parametros();
       tipos_variables();
       identificadores();
+       // Se ha procesado la clase con el tipo de variable y los identificadores
+       cl_Param = tabla.getClase_parametro();
+       tipo_Var = tabla.getTipo_variable();
+       lista = tabla.getListaIdentificadores();
+
+       // Tamaño de la lista de identificadores
+       int dimension = lista.size();
+
+           // Identificador del simbolo a procesar
+           String identificadorActual;
+
+       // Bucle de recorrido de la lista de identificadores
+       for (int i = 0; i < dimension; i++) {
+                // Obtener identificador actual
+                identificadorActual = lista.get(i);
+
+                        // Comprobar que existe o no simbolo en la tabla
+                        try {
+                                // Busqueda del simbolo en la tabla de simbolos
+                                tabla.buscar_simbolo(identificadorActual);
+
+                                try {
+                                        // Insercion del parametro en la tabla de simbolos
+                                        tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
+                                }
+                                catch (Exception e) {
+                                        // El parametro ya esta repetido 
+                                        SimboloRepetidoExcepcion(identificadorActual);
+                                }
+                        }
+                        catch (Exception e) {
+                        // Muestra la excepcion por pantalla
+                        SimboloNoEncontradoException(identificadorActual);
+                }
+       }
     } catch (ParseException e) {
      errorSintactico(e);
     }
@@ -776,9 +840,41 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de declaracion OK
   static final public void declaracion() throws ParseException {
+  // Declaracion de variables
+  Token t;
+  Simbolo.Tipo_variable tp_Var;
+  LinkedList<String> lista;
     try {
       tipos_variables();
       identificadores();
+       // Se ha procesado el tipo de variable y los corresponfientes identificadores
+       lista = tabla.getListaIdentificadores();
+
+       // Obtencion del tipo de variable de los simbolos
+       tp_Var = tabla.getTipo_variable();
+
+           // Variable para guardar el identificador del simbolo a introducir
+           String identificadorActual;
+
+          // Tamaño de la lista de identificadores
+          int dimension = lista.size();
+
+           //Bucle de recorrido de insercion de variables
+           for (int i = 0; i < dimension; i++) {
+                // Obtencion del identificador actual
+                        identificadorActual = lista.get(i);
+
+                        try {
+                           // Buscar simbolo en la tabla de simbolos
+                           tabla.buscar_simbolo(identificadorActual);
+
+                           // Simbolo ya existente en la tabla de simbolos
+                   tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
+                }
+                catch (Exception e) {
+
+                }
+           }
     } catch (ParseException e) {
      errorSintactico(e);
     }
@@ -787,12 +883,11 @@ public class Compilador implements CompiladorConstants {
 // Regla para los identificadores OK
   static final public void identificadores() throws ParseException {
   // Declaracion de una lista auxiliar de identificadores
-  LinkedList<String> listaAuxiliar = new LinkedList<String>();
   Token t;
     try {
       t = jj_consume_token(tIDENTIFICADOR);
        // Añadir el identificador obligatorio
-       listaAuxiliar.add(t.image);
+       tabla.anyadirIdentificador(t.image);
       label_10:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -807,8 +902,7 @@ public class Compilador implements CompiladorConstants {
         t = jj_consume_token(tIDENTIFICADOR);
       }
        // Añadir el resto de identificadores de la lista
-       listaAuxiliar.add(t.image);
-
+       tabla.anyadirIdentificador(t.image);
     } catch (ParseException e) {
      errorSintactico(e);
     }
@@ -816,16 +910,44 @@ public class Compilador implements CompiladorConstants {
 
 // Regla para los tipos de variables OK
   static final public void tipos_variables() throws ParseException {
+  // Declaracion de variable
+  Token t;
+  Tipo_variable tipo_Var;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tENTERO:
-        jj_consume_token(tENTERO);
+        // Asignacion del token leido
+            t = jj_consume_token(tENTERO);
         break;
       case tCARACTER:
-        jj_consume_token(tCARACTER);
+        t = jj_consume_token(tCARACTER);
         break;
       case tBOOLEANO:
-        jj_consume_token(tBOOLEANO);
+        t = jj_consume_token(tBOOLEANO);
+       // Control del tipo token
+       switch (t.image) {
+         case "tENTERO":
+                // Es token tENTERO
+                tipo_Var = Simbolo.Tipo_variable.ENTERO;
+                break;
+         case "tCARACTER":
+                // Es token tCARACTER
+                tipo_Var = Simbolo.Tipo_variable.CHAR;
+                break;
+         case "tCONSTCAD":
+                // Es token tCARACTER
+                tipo_Var = Simbolo.Tipo_variable.CADENA;
+                break;
+         case "tBOOLEANO":
+                // Es token tBOOLEANO
+                tipo_Var = Simbolo.Tipo_variable.BOOLEANO;
+                break;
+         default:
+                // No es niguno de los anteriores es DESCONOCIDO
+                tipo_Var = Simbolo.Tipo_variable.DESCONOCIDO;
+       }
+           // Asignar el valor del tipo de variable leida
+           tabla.setTipo_variable(tipo_Var);
         break;
       default:
         jj_la1[22] = jj_gen;
