@@ -6,39 +6,17 @@ import Foo.Simbolo.Tipo_simbolo;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
 
+import Foo.SimboloNoEncontradoException;
+
 public class Compilador implements CompiladorConstants {
 
-   // IniCio del nivel de declaraciones anidadas
-   public static int nivel = 0;
+  // IniCio del nivel de declaraciones anidadas
+  public static int nivel = 0;
 
-   // Variable de direccion por defecto a 0
-   public static long dir = 0;
+  // Variable de direccion por defecto a 0
+  public static long dir = 0;
 
-   public static Tabla_Simbolos tabla;
-
-  // Error sintactico personalizado para el compilador
-  public static void errorSintactico(ParseException e) {
-      System.out.println(" ERROR SINTACTICO (< " + e.currentToken.beginLine + " , "
-                                                  + e.currentToken.beginColumn + " >): "
-                                                  + " detectado token incorrecto: " + e.currentToken.next + "\u005cn");
-  }
-
-
-  // Error semantico personalizado del compilador
-  public static void errorSemantico(String msg) {
-     System.out.println(" ERROR SEMANTICO : " + msg);
-  }
-
-
-  // Error de simbolo no encontrado en la tabla de simbolos
-  public static void SimboloNoEncontradoException(String imagen){
-    System.out.println(" ERROR EN LA TABLA DE SIMBOLOS: el simbolo " + imagen + " no existe ");
-  }
-
-  // Error de simbolo ya existente en la tabla de simbolos
-  public static void SimboloRepetidoExcepcion(String imagen) {
-    System.out.println(" ERROR EN LA TABLA DE SIMBOLOS: el simbolo " + imagen + " ya existe ");
-  }
+  public static Tabla_Simbolos tabla;
 
 
   public static void main(String args []) throws ParseException
@@ -98,9 +76,7 @@ public class Compilador implements CompiladorConstants {
        int columna = CompiladorTokenManager.input_stream.getBeginColumn();
        String tokenMalo = CompiladorTokenManager.input_stream.GetImage();
 
-       // Muestreo de los errores
-       System.out.println(" ERROR LEXICO <(" + fila + " , " + columna + " >):"
-                                                                                 + " simbolo no reconocido " + tokenMalo);
+       ErrorLexico eL = new ErrorLexico(fila, columna, tokenMalo);
     }
   }
 
@@ -132,7 +108,7 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(0);
          {if (true) return 0;}
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
      {if (true) return 1;}
     }
     throw new Error("Missing return statement in function");
@@ -145,7 +121,7 @@ public class Compilador implements CompiladorConstants {
       lista_sentencias();
       jj_consume_token(tFIN);
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -169,7 +145,7 @@ public class Compilador implements CompiladorConstants {
         sentencia();
       }
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -200,7 +176,7 @@ public class Compilador implements CompiladorConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -221,7 +197,7 @@ public class Compilador implements CompiladorConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -232,7 +208,7 @@ public class Compilador implements CompiladorConstants {
       expresion();
       jj_consume_token(tPUNTYCOM);
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -241,7 +217,7 @@ public class Compilador implements CompiladorConstants {
     try {
       identificadores();
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -253,7 +229,7 @@ public class Compilador implements CompiladorConstants {
       lista_asignables();
       jj_consume_token(tPARENTESIS_DCHA);
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -265,7 +241,7 @@ public class Compilador implements CompiladorConstants {
       lista_escribibles();
       jj_consume_token(tPARENTESIS_DCHA);
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -287,7 +263,7 @@ public class Compilador implements CompiladorConstants {
         escribible();
       }
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -316,7 +292,7 @@ public class Compilador implements CompiladorConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -333,7 +309,7 @@ public class Compilador implements CompiladorConstants {
       }
       jj_consume_token(tPUNTYCOM);
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -345,7 +321,7 @@ public class Compilador implements CompiladorConstants {
       lista_sentencias();
       jj_consume_token(tFMQ);
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -374,7 +350,7 @@ public class Compilador implements CompiladorConstants {
       }
       jj_consume_token(tPARENTESIS_DCHA);
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -396,7 +372,7 @@ public class Compilador implements CompiladorConstants {
         expresion();
       }
     } catch (ParseException e) {
-    errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -423,7 +399,7 @@ public class Compilador implements CompiladorConstants {
         expresion_simple();
       }
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -455,7 +431,7 @@ public class Compilador implements CompiladorConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-     errorSintactico(e);
+    ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -478,7 +454,7 @@ public class Compilador implements CompiladorConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-        errorSintactico(e);
+         ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -510,7 +486,7 @@ public class Compilador implements CompiladorConstants {
         termino();
       }
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -536,7 +512,7 @@ public class Compilador implements CompiladorConstants {
         factor();
       }
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -565,7 +541,7 @@ public class Compilador implements CompiladorConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-    errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -622,7 +598,7 @@ public class Compilador implements CompiladorConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-          errorSintactico(e);
+         ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -644,7 +620,7 @@ public class Compilador implements CompiladorConstants {
       }
       jj_consume_token(tFSI);
     } catch (ParseException e) {
-        errorSintactico(e);
+         ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -664,7 +640,7 @@ public class Compilador implements CompiladorConstants {
         declaracion_accion();
       }
     } catch (ParseException e) {
-    errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -677,7 +653,7 @@ public class Compilador implements CompiladorConstants {
       declaracion_acciones();
       bloque_sentencias();
     } catch (ParseException e) {
-    errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -704,17 +680,23 @@ public class Compilador implements CompiladorConstants {
                         // Incrementar el nuevo nivel
                         nivel++;
                         // Insertar en la tabla de simbolos el nuevo identificador
-                        tabla.introducir_accion(tId.image, nivel, dir);
+                        try {
+                                tabla.introducir_accion(tId.image, nivel, dir);
+                        }
+                        catch(AccionRepetidaException e) {
+                            // El simbolo ya existe en la tabla de simbolos
+                                e.accionRepetidaExcepcion(tId.image);
+                }
              }
            }
            // Salta la excepcion de simbolo encontrado
-           catch (Exception e) {
-              // Muestra la excepcion por pantalla
-              SimboloNoEncontradoException(tId.image);
+           catch (SimboloNoEncontradoException e) {
+               // Muestra la excepcion por pantalla
+               e.simboloNoEncontrado(tId.image);
            }
       parametros_formales();
     } catch (ParseException e) {
-    errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -730,7 +712,7 @@ public class Compilador implements CompiladorConstants {
         ;
       }
     } catch (ParseException e) {
-    errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -754,7 +736,7 @@ public class Compilador implements CompiladorConstants {
       }
       jj_consume_token(tPARENTESIS_DCHA);
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -800,18 +782,18 @@ public class Compilador implements CompiladorConstants {
                                         // Insercion del parametro en la tabla de simbolos
                                         tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
                                 }
-                                catch (Exception e) {
+                                catch (ParametroRepetidoException e) {
                                         // El parametro ya esta repetido 
-                                        SimboloRepetidoExcepcion(identificadorActual);
+                                        e.parametroRepetidoExcepcion(identificadorActual);
                                 }
                         }
-                        catch (Exception e) {
+                        catch (SimboloNoEncontradoException e) {
                         // Muestra la excepcion por pantalla
-                        SimboloNoEncontradoException(identificadorActual);
+                        e.simboloNoEncontrado(identificadorActual);
                 }
        }
     } catch (ParseException e) {
-     errorSintactico(e);
+    ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -834,7 +816,7 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(tPUNTYCOM);
       }
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -864,19 +846,27 @@ public class Compilador implements CompiladorConstants {
                 // Obtencion del identificador actual
                         identificadorActual = lista.get(i);
 
-                        try {
+                    try {
                            // Buscar simbolo en la tabla de simbolos
                            tabla.buscar_simbolo(identificadorActual);
 
                            // Simbolo ya existente en la tabla de simbolos
-                   tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
+                           try {
+                                // introducir el nuevo simbolo
+                                tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
+                   }
+                   catch (VariableRepetidaException e) {
+                        // El identificador ya existe en la tabla de simbolos
+                        e.variableRepetidaExcepcion(identificadorActual);
+                   }
                 }
-                catch (Exception e) {
-
+                catch (SimboloNoEncontradoException e) {
+                    // El simbolo no existe en la tabla 
+                    e.simboloNoEncontrado(identificadorActual);
                 }
            }
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -904,7 +894,7 @@ public class Compilador implements CompiladorConstants {
        // Añadir el resto de identificadores de la lista
        tabla.anyadirIdentificador(t.image);
     } catch (ParseException e) {
-     errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -955,7 +945,7 @@ public class Compilador implements CompiladorConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-         errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
@@ -990,7 +980,7 @@ public class Compilador implements CompiladorConstants {
         throw new ParseException();
       }
     } catch (ParseException e) {
-         errorSintactico(e);
+     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 

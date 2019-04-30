@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import Foo.Simbolo.Tipo_simbolo;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
+import Foo.SimboloNoEncontradoException;
 
 /** Token Manager. */
 public class CompiladorTokenManager implements CompiladorConstants

@@ -2,6 +2,7 @@ package Foo;
 
 
 import java.util.ArrayList;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
@@ -10,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import Foo.Simbolo.Clase_parametro;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Tipo_simbolo;
-
+import Foo.SimboloNoEncontradoException;
 
 public class Tabla_Simbolos {
 	
@@ -223,18 +224,17 @@ public class Tabla_Simbolos {
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, devuelve NULL 
 	 * De lo contrario, introduce un símbolo VARIABLE (simple) con los datos de los argumentos. 
 	 */
-	public Simbolo introducir_variable(String nombre, Tipo_variable variable, int nivel, long dir) throws Exception {
-		String mensajeExcepcion = "El simbolo VARIABLE de nombre " + nombre + " ya existe en la tabla ";
-		
-		Simbolo esta = buscar_simbolo(nombre);
-		if (esta == null) {
-			throw new SimboloRepetidoException(mensajeExcepcion);
-		}		
-		else {
+	public Simbolo introducir_variable(String nombre, Tipo_variable variable, int nivel, long dir) throws VariableRepetidaException {
+		try {
+			Simbolo esta = buscar_simbolo(nombre);
 			// No está en la lista y lo añado
 			Simbolo s = new Simbolo(Tipo_simbolo.VARIABLE, variable, null, nombre, nivel, dir);	
 			anyadir(nombre, s);
 			return s;
+		}
+		catch (SimboloNoEncontradoException e) {
+			// La variable ya existe en la tabla de simbolos
+			throw new VariableRepetidaException();
 		}
 	}
 	
@@ -244,40 +244,38 @@ public class Tabla_Simbolos {
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, devuelve NULL. 
 	 *  De lo contrario, introduce un símbolo ACCION con los datos de los argumentos. 
 	 */
-    public Simbolo introducir_accion (String nombre, int nivel, long dir) throws Exception {
-    	String mensajeExcepcion = "El simbolo ACCION de nombre " + nombre + " ya existe en la tabla ";
-    	
-    	Simbolo esta = buscar_simbolo(nombre);
-		if (esta == null) { 
-			throw new SimboloRepetidoException(mensajeExcepcion);
-		}
-		else {
+    public Simbolo introducir_accion(String nombre, int nivel, long dir) throws AccionRepetidaException {
+    	try {
+    		Simbolo esta = buscar_simbolo(nombre);
 			// No está en la lista y lo añado
 			Simbolo s = new Simbolo(Tipo_simbolo.ACCION, null, null, nombre, nivel, dir	);	
 			anyadir(nombre, s);
 			return s;
 		}	
+    	catch (SimboloNoEncontradoException e) {
+			// La accion ya existe en la tabla de simbolos
+			throw new AccionRepetidaException();
+		}
     }
 	 
 
-	 
     /*
      * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, devuelve NULL. 
      *  De lo contrario, introduce un símbolo PARAMETRO con los datos de los argumentos. 
      */
 	public Simbolo introducir_parametro (String nombre, Tipo_variable variable, 
-											Clase_parametro parametro, int nivel, long dir) throws Exception {
-		
-		String mensajeExcepcion = "El simbolo PARAMETRO de nombre " + nombre + " ya existe en la tabla ";
-		Simbolo esta = buscar_simbolo(nombre);
-		if (esta == null) { 
-			throw new SimboloRepetidoException(mensajeExcepcion);
-		}
-		else {
+											Clase_parametro parametro, int nivel, long dir) throws ParametroRepetidoException {
+		try {
+			Simbolo esta = buscar_simbolo(nombre);
+	
 			// No está en la lista y lo añado
 			Simbolo s = new Simbolo(Tipo_simbolo.PARAMETRO, variable, parametro, nombre, nivel,	dir	);
 			anyadir(nombre, s);
 			return s;
+		}
+		catch (SimboloNoEncontradoException e) {
+				// El simbolo ya existe en la tabla de simbolos
+				throw new ParametroRepetidoException();
 		}
 	}
 	 
