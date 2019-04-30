@@ -8,7 +8,7 @@ public class Simbolo {
 	/* ENUMS */
 	
 	// Representacion del tipo simbolo con enum
-	enum Tipo_simbolo {
+	 enum Tipo_simbolo {
 		PROGRAMA, VARIABLE, ACCION, PARAMETRO
 	}
 	

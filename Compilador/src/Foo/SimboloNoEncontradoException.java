@@ -7,5 +7,4 @@ public class SimboloNoEncontradoException extends Exception {
 	public SimboloNoEncontradoException(String msg) {
         super(msg);
     }
-	
 }

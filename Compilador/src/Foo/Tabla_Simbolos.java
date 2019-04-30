@@ -21,6 +21,73 @@ public class Tabla_Simbolos {
 	// Vector de tablas Hash
 	static ArrayList<LinkedList<Simbolo>> tabla;
 	
+	// Variable estatica que almacena el tipo de dato
+	static Tipo_variable tipoVariable;
+	
+	// Variable estatica que almacena el tipo de dato
+	static Clase_parametro tipoParametro;
+	
+	// Declaracion de una lista estatica de identificadores
+	static LinkedList<String> listaIdentificadores = new LinkedList<String>();
+	
+	/*
+	 * Pre: ---
+	 * Post: Asigna el tipo de variable que se ha leido 
+	 * 		 DESCONOCIDO, ENTERO, BOOLEANO, CHAR, CADENA
+	 */
+	public void setTipo_variable(Tipo_variable tp_V) {
+		Tabla_Simbolos.tipoVariable = tp_V;
+	}
+	
+	
+	
+	/*
+	 * Pre: ---
+	 * Post: Asigna la clase de parametro que se ha leido
+	 * 		 DESCONOCIDO, ENTERO, BOOLEANO, CHAR, CADENA
+	 */
+	public void setClase_parametro(Clase_parametro tp_Par) {
+		Tabla_Simbolos.tipoParametro = tp_Par;
+	}
+	
+	
+	/*
+	 * Pre ---
+	 * Post: Ha asignado la lista <<lista>> a la lista de identificadores
+	 */
+	public void setListaIdentificadores(LinkedList<String> lista) {
+		Tabla_Simbolos.listaIdentificadores = lista;
+	}
+	
+	
+	
+	/*
+	 * Pre: ---
+	 * Post: Ha devuelto el tipo de variable leida
+	 */
+	public Tipo_variable getTipo_variable() {
+		return tipoVariable;
+	}
+	
+	
+	/*
+	 * Pre: ---
+	 * Post: Ha devuelto el tipo de clase de parametro leido
+	 */
+	public Clase_parametro getClase_parametro() {
+		return tipoParametro;
+	}
+	
+	
+	
+	/*
+	 * Pre: ---
+	 * Post: Ha devuelto la lista de identificadores leidos
+	 */
+	public LinkedList<String> getListaIdentificadores() {
+		return listaIdentificadores;
+	}
+	
 	
 	/* 
 	 * Funcion de hash de Pearson que emplea una tabla auxiliar con los
@@ -87,8 +154,6 @@ public class Tabla_Simbolos {
 	 * puntero como resultado, de lo contrario lanza una excepción
 	 */
 	public Simbolo buscar_simbolo(String nombre) throws SimboloNoEncontradoException { 
-	 String mensajeExcepcion = "El simbolo de nombre " + nombre + " no existe en la tabla ";
-	 try {
 		Simbolo ret = null;
 		int h = hash_function(nombre);
 		if(tabla.get(h) != null) {
@@ -102,10 +167,6 @@ public class Tabla_Simbolos {
 			}
 		}
 		return ret;
-	  }
-	  catch (Exception e) {
-		throw new SimboloNoEncontradoException(mensajeExcepcion);
-	  }
 	}
 	
 	
@@ -149,7 +210,7 @@ public class Tabla_Simbolos {
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, devuelve NULL. 
 	 *  De lo contrario, introduce un símbolo ACCION con los datos de los argumentos. 
 	 */
-    public Simbolo introducir_accion (String nombre, int nivel, int dir) throws Exception {
+    public Simbolo introducir_accion (String nombre, int nivel, long dir) throws Exception {
     	String mensajeExcepcion = "El simbolo ACCION de nombre " + nombre + " ya existe en la tabla ";
     	
     	Simbolo esta = buscar_simbolo(nombre);
