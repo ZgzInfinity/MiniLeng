@@ -92,5 +92,17 @@ Se han implementado dos excepciones una para detectar que un simbolo ya existe e
 Para comprobar que la matriz funciona adecuadamente se ha insertado un conjunto de símbolos para poder afirmar que funciona
 correctamente. A continuación se ha procedido a elaborar el error semántico con los errores correspondientes.
 
+Se ha llevado a cabo una modificación en el manejo de las excepciones para poder abstraer el manejo de los errores, es decir, las
+situaciones anómalas de funcionamiento de la porción de código que funciona correctamente. De este modo se logra la abstracción
+entre ambas partes. Para ello se han elaborado diferentes clases de excepciones, todas ellas heredan de la clase por defecto
+Exception de java. El tratamiento de todas las excepciones se ha realizado mediante el manejo de bloques try-catch para poder
+detectar los errores léxicos y sintácticos, ya implementados, así como los errores en la tabla de símbolos al buscar si un 
+símbolo existe o comprobar si una variable, parámetro, programa o acción está repetida.
+
+Seguidamente se ha procedido a comenzar el análisis semántico del compilador. Para ello ha sido necesario crear la clase Simbolo 
+con las especificaciones del enunciado y poseriormente la Clase Tabla Simbolos. Finalmente se ha realizado un primer análisis 
+sintáctico estableciendo la estructura de almacenamiento bloques
+
+
 
  
