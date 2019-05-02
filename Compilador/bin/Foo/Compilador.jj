@@ -12,12 +12,14 @@ PARSER_BEGIN(Compilador)
 
 package Foo;
 import Foo.Tabla_Simbolos;
-import java.util.LinkedList;
 import Foo.Simbolo.Tipo_simbolo;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
-
 import Foo.SimboloNoEncontradoException;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.LinkedList;
 
 public class Compilador
 {
@@ -38,7 +40,6 @@ public class Compilador
 	String nombreArchivo;
 	String path = "C:\\Users\\Gord\\Desktop\\programas\\";
 
-
 	if (args[0].equals("-v")) {
 	  	System.out.println("Compilacion en modo verbose");
 	  	nombreArchivo = args[1];
@@ -55,38 +56,38 @@ public class Compilador
     System.out.println("LEYENDO FICHERO " + nombreArchivo + "\n");
     try
     {
-      /* Crear el parser con respecto al fichero */
-      Compilador parser = new Compilador (new java.io.FileInputStream(path));
-      
-      // Inicializacion de la tabla de simbolos
-	  tabla.inicializar_tabla();
-	  
-      int res = Compilador.programa();
-      if (args[0].equals("-v")) {
-
-	      /* Mostrar total de tokens */
-		  TablaHash.mostrarTokensNormales();
-		
-		  /* Mostrar total de identificadores */
-		  TablaHash.mostrarIdentificadores();
-	  }
-	  System.out.println("El fichero introducido es correcto");
-  	} 
-    catch (Exception e)
-    {
-       System.out.println("INCORRECTO");
-       System.out.println(e.getMessage());
-       Compilador.ReInit(System.in);
-    }
-    catch (Error e)
-      {
-       // Obtencion del error sintactico 
-       int fila = CompiladorTokenManager.input_stream.getBeginLine();
-       int columna = CompiladorTokenManager.input_stream.getBeginColumn();
-       String tokenMalo = CompiladorTokenManager.input_stream.GetImage();
-
-       ErrorLexico eL = new ErrorLexico(fila, columna, tokenMalo); 
-    }
+	      /* Crear el parser con respecto al fichero */
+	      Compilador parser = new Compilador (new java.io.FileInputStream(path));
+	      
+	      // Inicializacion de la tabla de simbolos
+		  tabla.inicializar_tabla();
+		  
+	      int res = Compilador.programa();
+	      if (args[0].equals("-v")) {
+	
+		      /* Mostrar total de tokens */
+			  TablaHash.mostrarTokensNormales();
+			
+			  /* Mostrar total de identificadores */
+			  TablaHash.mostrarIdentificadores();
+		  }
+		  System.out.println("El fichero introducido es correcto");
+	 } 
+	 catch (Exception e)
+	 {
+	       System.out.println("INCORRECTO");
+	       System.out.println(e.getMessage());
+	       Compilador.ReInit(System.in);
+	 }
+	 catch (Error e)
+	 {
+	       // Obtencion del error sintactico 
+	       int fila = CompiladorTokenManager.input_stream.getBeginLine();
+	       int columna = CompiladorTokenManager.input_stream.getBeginColumn();
+	       String tokenMalo = CompiladorTokenManager.input_stream.GetImage();
+	
+	       ErrorLexico eL = new ErrorLexico(fila, columna, tokenMalo); 
+	 }
   }
 }
 

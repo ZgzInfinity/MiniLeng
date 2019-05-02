@@ -131,6 +131,19 @@ public class Tabla_Simbolos {
 		Tabla_Simbolos.listaIdentificadores.clear();
 	}
 	
+	
+	
+	/*
+	 * Pre: ---
+	 * Post: Devuelve <<true>> si y solo si la lista de indice <<i>>
+	 * 		 esta vacia. En caso contrario devuelve <<false>>
+	 */
+	private boolean esEntradaVacia(int i) {
+		return tabla.get(i).isEmpty();
+	}
+	
+	
+	
 	/* 
 	 * Funcion de hash de Pearson que emplea una tabla auxiliar con los
 	 * indices ordenados de modo aleatorio 
@@ -425,20 +438,23 @@ public class Tabla_Simbolos {
 		// Recorrido de las entradas de la tabla por filas
 		 for (int i = 0; i < tabla.size(); i++) {
 			 // Coge la i-ésima lista de simbolos
+			 
 			 LinkedList<Simbolo> listaAuxiliar = tabla.get(i);
 			 
-			// Recorrido por columnas de las listas asociadas
-			 for (int j = 0; j < tabla.get(j).size(); j++) {
-				 // Coge el simbolo j-ésimo de la lista iésima
-				 Simbolo s = listaAuxiliar.get(j);
-				 
-				 // Generar cadena con el simbolo
-				 String cadena = s.toString();
-				 
-				 // Muestreo por pantalla del simbolo
-				 System.out.println("Fila: " + i + " Columna: " + j + "\n" +
-						 			"Simbolo: " + cadena + "\n");
-			 }
+			 // Si la lista no esta vacia
+				 // Recorrido por columnas de las listas asociadas
+				 for (int j = 0; j < listaAuxiliar.size(); j++) {
+					 // Coge el simbolo j-ésimo de la lista iésima
+					 Simbolo s = listaAuxiliar.get(j);
+					 
+					 // Generar cadena con el simbolo
+					 String cadena = s.toString();
+					 
+					 // Muestreo por pantalla del simbolo
+					 System.out.println("Fila: " + i + " Columna: " + j + "\n" +
+							 			"Simbolo: " + cadena + "\n");
+				 }
+			 
 		 }
 	 }
 }
