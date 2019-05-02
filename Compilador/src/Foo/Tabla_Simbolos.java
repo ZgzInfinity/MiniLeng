@@ -403,5 +403,33 @@ public class Tabla_Simbolos {
 					}
 				}
 			}
-	 } 
+	 }
+	 
+	 
+	 
+	 
+	 /*
+	  * Pre: ----
+	  * Post: Muestra por pantalla el contenido actual de la tabla de simbolos
+	  */
+	 public void mostrarTabla_Simbolos(){
+		// Recorrido de las entradas de la tabla por filas
+		 for (int i = 0; i < tabla.size(); i++) {
+			 // Coge la i-ésima lista de simbolos
+			 LinkedList<Simbolo> listaAuxiliar = tabla.get(i);
+			 
+			// Recorrido por columnas de las listas asociadas
+			 for (int j = 0; j < tabla.get(j).size(); j++) {
+				 // Coge el simbolo j-ésimo de la lista iésima
+				 Simbolo s = listaAuxiliar.get(j);
+				 
+				 // Generar cadena con el simbolo
+				 String cadena = s.toString();
+				 
+				 // Muestreo por pantalla del simbolo
+				 System.out.println("Fila: " + i + "Columna: " + j + "\n" +
+						 			"Simbolo: " + cadena + "\n");
+			 }
+		 }
+	 }
 }

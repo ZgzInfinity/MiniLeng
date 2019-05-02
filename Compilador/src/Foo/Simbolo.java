@@ -202,5 +202,15 @@ public class Simbolo {
 	boolean es_Parametro_Referencia() {
 		return parametro.equals(Clase_parametro.REF);
 	}
+
+
+	@Override
+	public String toString() {
+		// Mostrar el simbolo por pantalla
+		return "Simbolo [nombre=" + nombre + ", nivel=" + nivel + ", tipo=" + tipo + ", variable=" + variable
+				+ ", parametro=" + parametro + ", visible=" + visible + ", lista_parametros=" + lista_parametros
+				+ ", dir=" + dir + "]";
+	}
+	
 	
 }
