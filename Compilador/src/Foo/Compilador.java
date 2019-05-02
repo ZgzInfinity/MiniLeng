@@ -718,6 +718,8 @@ public class Compilador implements CompiladorConstants {
 
 // Regla para lista_parametros OK
   static final public void lista_parametros() throws ParseException {
+  // Declaracion de variables
+  Token t;
     try {
       jj_consume_token(tPARENTESIS_IZDA);
       parametros();
@@ -731,7 +733,9 @@ public class Compilador implements CompiladorConstants {
           jj_la1[19] = jj_gen;
           break label_8;
         }
-        jj_consume_token(tPUNTYCOM);
+        t = jj_consume_token(tPUNTYCOM);
+                  // Vaciar lista de identificadores de parametros para evitar su resinsercion
+                  tabla.limpiarListaIdentificadores();
         parametros();
       }
       jj_consume_token(tPARENTESIS_DCHA);
@@ -799,6 +803,8 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de declaracion variables OK
   static final public void declaracion_variables() throws ParseException {
+  // Declaracion de variables 
+  Token t;
     try {
       label_9:
       while (true) {
@@ -813,7 +819,9 @@ public class Compilador implements CompiladorConstants {
           break label_9;
         }
         declaracion();
-        jj_consume_token(tPUNTYCOM);
+        t = jj_consume_token(tPUNTYCOM);
+       // Vaciar lista de identificadores de parametros para evitar su resinsercion
+           tabla.limpiarListaIdentificadores();
       }
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);

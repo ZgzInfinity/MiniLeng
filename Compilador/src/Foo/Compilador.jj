@@ -858,10 +858,17 @@ void parametros_formales():
 // Regla para lista_parametros OK
 void lista_parametros():
 {
+  // Declaracion de variables
+  Token t;
 }
 {
   try {
-     < tPARENTESIS_IZDA > parametros() ( < tPUNTYCOM  > parametros() )* < tPARENTESIS_DCHA >
+     < tPARENTESIS_IZDA > parametros() ( t = < tPUNTYCOM  >
+		{
+		  // Vaciar lista de identificadores de parametros para evitar su resinsercion
+		  tabla.limpiarListaIdentificadores();
+		}
+     	parametros() )* < tPARENTESIS_DCHA >
   }
   catch (ParseException e){
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -934,10 +941,17 @@ void parametros():
 // Regla de declaracion variables OK
 void declaracion_variables():
 {
+  // Declaracion de variables 
+  Token t;
 }
 {
   try {
-     ((declaracion()) < tPUNTYCOM >)*
+     ((declaracion()) t = < tPUNTYCOM >
+     {
+       // Vaciar lista de identificadores de parametros para evitar su resinsercion
+	   tabla.limpiarListaIdentificadores();
+     }
+     )*
   }
   catch (ParseException e){
      ErrorSintactico eS = new ErrorSintactico(e);

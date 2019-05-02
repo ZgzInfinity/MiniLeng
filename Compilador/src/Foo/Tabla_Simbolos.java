@@ -81,7 +81,7 @@ public class Tabla_Simbolos {
 	 */
 	public void anyadirBloque(Tipo_simbolo tp_Sim) {
 		// Añade nuevo bloque en la ultima posicion
-		listaBloques.add(tp_Sim);
+		Tabla_Simbolos.listaBloques.add(tp_Sim);
 	}
 	
 	
@@ -91,7 +91,7 @@ public class Tabla_Simbolos {
 	 */
 	public void eliminarBloque(Tipo_simbolo tp_Sim) {
 		// Borra el ultimo bloque añadido
-		listaBloques.removeLast();
+		Tabla_Simbolos.listaBloques.removeLast();
 	}
 	
 	
@@ -101,7 +101,7 @@ public class Tabla_Simbolos {
 	 * Post: Ha devuelto el tipo de variable leida
 	 */
 	public Tipo_variable getTipo_variable() {
-		return tipoVariable;
+		return Tabla_Simbolos.tipoVariable;
 	}
 	
 	
@@ -110,7 +110,7 @@ public class Tabla_Simbolos {
 	 * Post: Ha devuelto el tipo de clase de parametro leido
 	 */
 	public Clase_parametro getClase_parametro() {
-		return tipoParametro;
+		return Tabla_Simbolos.tipoParametro;
 	}
 	
 	
@@ -120,9 +120,16 @@ public class Tabla_Simbolos {
 	 * Post: Ha devuelto la lista de identificadores leidos
 	 */
 	public LinkedList<String> getListaIdentificadores() {
-		return listaIdentificadores;
+		return Tabla_Simbolos.listaIdentificadores;
 	}
 	
+	/*
+	 * Pre: ---
+	 * Post: Ha eliminado el contenido de la lista de identificadores leidos
+	 */
+	public void limpiarListaIdentificadores() {
+		Tabla_Simbolos.listaIdentificadores.clear();
+	}
 	
 	/* 
 	 * Funcion de hash de Pearson que emplea una tabla auxiliar con los
