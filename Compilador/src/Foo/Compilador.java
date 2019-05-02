@@ -88,7 +88,6 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tPROGRAMA);
       // Guardado del nombre del programa
              t = jj_consume_token(tIDENTIFICADOR);
-         System.out.println(" El programa es " + t.image);
          // Insertar en la tabla de simbolos el token del programa
          // no se comprueba porque es el primero
 
@@ -114,12 +113,12 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tPRINCIPIO);
       lista_sentencias();
       t = jj_consume_token(tFIN);
+         // Ocultar los parametros del nivel actual
+         tabla.ocultar_parametros(nivel);
+
          // Detectado el fin de un bloque de sentencias
          // Mostrar el contenido de la tabla Hash
          tabla.mostrarTabla_Simbolos();
-
-         // Decrementar el nivel
-         nivel--;
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -652,6 +651,17 @@ public class Compilador implements CompiladorConstants {
       declaracion_variables();
       declaracion_acciones();
       bloque_sentencias();
+           // Eliminacion de variables
+       tabla.eliminar_variables(nivel);
+
+           // Eliminar las acciones
+       tabla.eliminar_acciones(nivel);
+
+           // Eliminar los parametros ocultos
+       tabla.eliminar_parametros_ocultos(nivel + 1);
+
+       // Decrementar el nivel porque se cierra un bloque       
+       nivel--;
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -669,11 +679,15 @@ public class Compilador implements CompiladorConstants {
              // Insertar en la tabla de simbolos el nuevo identificador
                  try {
                      tabla.introducir_accion(tId.image, nivel, dir);
+
                  }
                  catch(AccionRepetidaException aRepExcep) {
                          // El simbolo ya existe en la tabla de simbolos
                          aRepExcep.accionRepetidaExcepcion(tId.image);
              }
+
+             // Incrementar el nivel actual
+             nivel++;
       parametros_formales();
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -867,10 +881,8 @@ public class Compilador implements CompiladorConstants {
            // Variable para guardar el identificador del simbolo a introducir
            String identificadorActual;
 
-          // Tamaño de la lista de identificadores
-          int dimension = lista.size();
-
-          System.out.println(dimension);
+           // Tamaño de la lista de identificadores
+           int dimension = lista.size();
 
            //Bucle de recorrido de insercion de variables
            for (int i = 0; i < dimension; i++) {

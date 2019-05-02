@@ -166,11 +166,10 @@ public class Tabla_Simbolos {
 		LinkedList<Simbolo> lista = tabla.get(h);
 		if (lista == null) {
 			lista = new LinkedList<Simbolo>();
-			lista.add(s);
-			tabla.add(h, lista);
 		}
 		else {
 			lista.add(s);
+			tabla.add(h, lista);
 		}
 	}
 	
