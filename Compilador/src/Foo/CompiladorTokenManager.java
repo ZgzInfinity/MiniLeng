@@ -1045,247 +1045,201 @@ static void TokenLexicalActions(Token matchedToken)
         image.append(jjstrLiteralImages[9]);
         lengthOfMatch = jjstrLiteralImages[9].length();
     TablaHash.anyadirHashTokens("tPLUS");
-    System.out.println("tPLUS");
          break;
       case 10 :
         image.append(jjstrLiteralImages[10]);
         lengthOfMatch = jjstrLiteralImages[10].length();
     TablaHash.anyadirHashTokens("tMINUS");
-    System.out.println("tMINUS");
          break;
       case 11 :
         image.append(jjstrLiteralImages[11]);
         lengthOfMatch = jjstrLiteralImages[11].length();
     TablaHash.anyadirHashTokens("tMULTIPLY");
-    System.out.println("tMULTIPLY");
          break;
       case 12 :
         image.append(jjstrLiteralImages[12]);
         lengthOfMatch = jjstrLiteralImages[12].length();
     TablaHash.anyadirHashTokens("tDIVIDE");
-    System.out.println("tDIVIDE");
          break;
       case 13 :
         image.append(jjstrLiteralImages[13]);
         lengthOfMatch = jjstrLiteralImages[13].length();
     TablaHash.anyadirHashTokens("tMAYOR");
-    System.out.println("tMAYOR");
          break;
       case 14 :
         image.append(jjstrLiteralImages[14]);
         lengthOfMatch = jjstrLiteralImages[14].length();
     TablaHash.anyadirHashTokens("tMENOR");
-    System.out.println("tMENOR");
          break;
       case 15 :
         image.append(jjstrLiteralImages[15]);
         lengthOfMatch = jjstrLiteralImages[15].length();
     TablaHash.anyadirHashTokens("tIGUAL");
-    System.out.println("tIGUAL");
          break;
       case 16 :
         image.append(jjstrLiteralImages[16]);
         lengthOfMatch = jjstrLiteralImages[16].length();
     TablaHash.anyadirHashTokens("tMAI");
-    System.out.println("tMAI");
          break;
       case 17 :
         image.append(jjstrLiteralImages[17]);
         lengthOfMatch = jjstrLiteralImages[17].length();
     TablaHash.anyadirHashTokens("tMEI");
-    System.out.println("tMEI");
          break;
       case 18 :
         image.append(jjstrLiteralImages[18]);
         lengthOfMatch = jjstrLiteralImages[18].length();
     TablaHash.anyadirHashTokens("tNI");
-    System.out.println("tNI");
          break;
       case 19 :
         image.append(jjstrLiteralImages[19]);
         lengthOfMatch = jjstrLiteralImages[19].length();
     TablaHash.anyadirHashTokens("tOPAS");
-    System.out.println("tOPAS");
          break;
       case 20 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tAND");
-    System.out.println("tAND");
          break;
       case 21 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tOR");
-    System.out.println("tOR");
          break;
       case 22 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tNOT");
-    System.out.println("tNOT");
          break;
       case 23 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tPROGRAMA");
-    System.out.println("tPROGRAMA");
          break;
       case 24 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tVAR");
-    System.out.println("tVAR");
          break;
       case 25 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tPRINCIPIO");
-    System.out.println("tPRINCIPIO");
          break;
       case 26 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tFIN");
-    System.out.println("tFIN");
          break;
       case 27 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tSI");
-    System.out.println("tSI");
          break;
       case 28 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tENT");
-    System.out.println("tENT");
          break;
       case 29 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tSI_NO");
-    System.out.println("tSI_NO");
          break;
       case 30 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tFSI");
-    System.out.println("tFSI");
          break;
       case 31 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tMQ");
-    System.out.println("tMQ");
          break;
       case 32 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tFMQ");
-    System.out.println("tFMQ");
          break;
       case 33 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tESCRIBIR");
-    System.out.println("tESCRIBIR");
          break;
       case 34 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tLEER");
-    System.out.println("tLEER");
          break;
       case 35 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tMOD");
-    System.out.println("tMOD");
          break;
       case 36 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tDIV");
-    System.out.println("tDIV");
          break;
       case 37 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tENTERO");
-    System.out.println("tENTERO");
          break;
       case 38 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tBOOLEANO");
-    System.out.println("tBOOLEANO");
          break;
       case 39 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tCARACTER");
-    System.out.println("tCARACTER");
          break;
       case 40 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tTRUE");
-    System.out.println("tTRUE");
          break;
       case 41 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tFALSE");
-    System.out.println("tFALSE");
          break;
       case 42 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tENTACAR");
-    System.out.println("tENTACAR");
          break;
       case 43 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tCARAENT");
-    System.out.println("tCARAENT");
          break;
       case 44 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tACCION");
-    System.out.println("tACCION");
          break;
       case 45 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tVAL");
-    System.out.println("tVAL");
          break;
       case 46 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tREF");
-    System.out.println("tREF");
          break;
       case 49 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tCONSTCHAR");
-    System.out.println("tCONSTCHAR");
          break;
       case 50 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tCONSTCAD");
-    System.out.println("tCONSTCAD");
          break;
       case 51 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
     TablaHash.anyadirHashTokens("tCONSTANTE_NUMERICA");
-    System.out.println("tCONSTANTE_NUMERICA");
          break;
       case 52 :
         image.append(input_stream.GetSuffix(jjimageLen + (lengthOfMatch = jjmatchedPos + 1)));
           TablaHash.anyadirHashTokens(image.toString());
           TablaHash.anyadirHashIdentificadores(image.toString());
-          System.out.println("tIDENTIFICADOR");
          break;
       case 53 :
         image.append(jjstrLiteralImages[53]);
         lengthOfMatch = jjstrLiteralImages[53].length();
     TablaHash.anyadirHashTokens("tPUNTYCOM");
-    System.out.println("tPUNTYCOM");
          break;
       case 54 :
         image.append(jjstrLiteralImages[54]);
         lengthOfMatch = jjstrLiteralImages[54].length();
     TablaHash.anyadirHashTokens("tCOMA");
-    System.out.println("tCOMA");
          break;
       case 55 :
         image.append(jjstrLiteralImages[55]);
         lengthOfMatch = jjstrLiteralImages[55].length();
     TablaHash.anyadirHashTokens("tPARENTESIS_IZDA");
-    System.out.println("tPARENTESIS_IZDA");
          break;
       case 56 :
         image.append(jjstrLiteralImages[56]);
         lengthOfMatch = jjstrLiteralImages[56].length();
     TablaHash.anyadirHashTokens("tPARENTESIS_DCHA");
-    System.out.println("tPARENTESIS_DCHA");
          break;
       default :
          break;

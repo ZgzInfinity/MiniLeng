@@ -16,7 +16,7 @@ import Foo.SimboloNoEncontradoException;
 public class Tabla_Simbolos {
 	
 	// Dimension de la tabla hash
-	private final int DIMENSION_TABLA = 13;
+	private final int DIMENSION_TABLA = 10;
 	private int T[];
 	
 	// Vector de tablas Hash
@@ -208,6 +208,9 @@ public class Tabla_Simbolos {
 				}
 			}
 		}
+		if (ret == null) {
+			throw new SimboloNoEncontradoException();
+		}
 		return ret;
 	}
 	
@@ -221,6 +224,7 @@ public class Tabla_Simbolos {
 	public Simbolo introducir_programa(String nombre, long dir) {
 		Simbolo s = new Simbolo(Tipo_simbolo.PROGRAMA, null, null, nombre, 0, dir);
 		anyadir(nombre, s);
+		System.out.println(s.toString());
 		return s;
 	}
 	
@@ -242,13 +246,15 @@ public class Tabla_Simbolos {
 				// Hay un simbolo variable en la lista pero con distinto nivel
 				Simbolo s = new Simbolo(Tipo_simbolo.VARIABLE, variable, null, nombre, nivel, dir);	
 				anyadir(nombre, s);
+				System.out.println(s.toString());
 				return s;
 			}
 		}
 		catch (SimboloNoEncontradoException e) {
 			// No hay ningun simbolo variable en la tabla
-			Simbolo s = new Simbolo(Tipo_simbolo.VARIABLE, variable, null, nombre, nivel, dir);	
+			Simbolo s = new Simbolo(Tipo_simbolo.VARIABLE, variable, null, nombre, nivel, dir);
 			anyadir(nombre, s);
+			System.out.println(s.toString());
 			return s;
 		}
 	}
@@ -269,12 +275,14 @@ public class Tabla_Simbolos {
 			// Hay un simbolo accion con el mismo nombre pero distinto nivel
 			Simbolo s = new Simbolo(Tipo_simbolo.ACCION, null, null, nombre, nivel, dir	);	
 			anyadir(nombre, s);
+			System.out.println(s.toString());
 			return s;
 		}	
     	catch (SimboloNoEncontradoException e) {
     		// No hay ningun simbolo accion en la tabla
     		Simbolo s = new Simbolo(Tipo_simbolo.ACCION, null, null, nombre, nivel, dir	);	
    			anyadir(nombre, s);
+   			System.out.println(s.toString());
     		return s;
 		}
     }
@@ -296,6 +304,7 @@ public class Tabla_Simbolos {
 				// Hay un simbolo identico en nombre pero con distinto nivel
 				Simbolo s = new Simbolo(Tipo_simbolo.PARAMETRO, variable, parametro, nombre, nivel,	dir	);
 				anyadir(nombre, s);
+				System.out.println(s.toString());
 				return s;
 		    }
 		}
@@ -303,6 +312,7 @@ public class Tabla_Simbolos {
 			// No ha encontrado ningun simbolo parametro identico 
 			Simbolo s = new Simbolo(Tipo_simbolo.PARAMETRO, variable, parametro, nombre, nivel,	dir	);
 			anyadir(nombre, s);
+			System.out.println(s.toString());
 			return s;
 		}
 	}
@@ -427,7 +437,7 @@ public class Tabla_Simbolos {
 				 String cadena = s.toString();
 				 
 				 // Muestreo por pantalla del simbolo
-				 System.out.println("Fila: " + i + "Columna: " + j + "\n" +
+				 System.out.println("Fila: " + i + " Columna: " + j + "\n" +
 						 			"Simbolo: " + cadena + "\n");
 			 }
 		 }

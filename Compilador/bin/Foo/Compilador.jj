@@ -28,13 +28,13 @@ public class Compilador
   // Variable de direccion por defecto a 0
   public static long dir = 0;
 
-  public static Tabla_Simbolos tabla;
+  
+  public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
 
   public static void main(String args []) throws ParseException
   {
     /* nombre del fichero */
-	
 	String nombreArchivo;
 	String path = "C:\\Users\\Gord\\Desktop\\programas\\";
 
@@ -57,21 +57,18 @@ public class Compilador
     {
       /* Crear el parser con respecto al fichero */
       Compilador parser = new Compilador (new java.io.FileInputStream(path));
+      
+      // Inicializacion de la tabla de simbolos
+	  tabla.inicializar_tabla();
+	  
       int res = Compilador.programa();
       if (args[0].equals("-v")) {
 
-	  // Instancia de la tabla de simbolos
-	  Tabla_Simbolos tabla = new Tabla_Simbolos();
-
-	  // Inicializacion de la tabla de simbolos
-	  tabla.inicializar_tabla();
-
-        
-      /* Mostrar total de tokens */
-	  TablaHash.mostrarTokensNormales();
-	
-	  /* Mostrar total de identificadores */
-	  TablaHash.mostrarIdentificadores();
+	      /* Mostrar total de tokens */
+		  TablaHash.mostrarTokensNormales();
+		
+		  /* Mostrar total de identificadores */
+		  TablaHash.mostrarIdentificadores();
 	  }
 	  System.out.println("El fichero introducido es correcto");
   	} 
@@ -124,57 +121,46 @@ TOKEN : /* OPERADORES ARITMETICOS */
   < tPLUS : "+" >
   {
     TablaHash.anyadirHashTokens("tPLUS");
-    System.out.println("tPLUS");
   }
 | < tMINUS : "-" >
   {
     TablaHash.anyadirHashTokens("tMINUS");
-    System.out.println("tMINUS");
   }
 | < tMULTIPLY : "*" >
   {
     TablaHash.anyadirHashTokens("tMULTIPLY");
-    System.out.println("tMULTIPLY");
   }
 | < tDIVIDE : "/" >
   {
     TablaHash.anyadirHashTokens("tDIVIDE");
-    System.out.println("tDIVIDE");
   }
 | < tMAYOR : ">" >
   {
     TablaHash.anyadirHashTokens("tMAYOR");
-    System.out.println("tMAYOR");
   }
 | < tMENOR : "<" >
   {
     TablaHash.anyadirHashTokens("tMENOR");
-    System.out.println("tMENOR");
   }
 | < tIGUAL : "=" >
   {
     TablaHash.anyadirHashTokens("tIGUAL");
-    System.out.println("tIGUAL");
   }
 | < tMAI : ">=" >
   {
     TablaHash.anyadirHashTokens("tMAI");
-    System.out.println("tMAI");
   }
 | < tMEI : "<=" >
   {
     TablaHash.anyadirHashTokens("tMEI");
-    System.out.println("tMEI");
   }
 | < tNI : "<>" >
   {
     TablaHash.anyadirHashTokens("tNI");
-    System.out.println("tNI");
   }
 | < tOPAS : ":=" >
   {
     TablaHash.anyadirHashTokens("tOPAS");
-    System.out.println("tOPAS");
   }
 }
 
@@ -183,17 +169,14 @@ TOKEN : /* OPERADORES LOGICOS */
   < tAND : "and" >
    {
     TablaHash.anyadirHashTokens("tAND");
-    System.out.println("tAND");
    }
 | < tOR : "or" >
   {
     TablaHash.anyadirHashTokens("tOR");
-    System.out.println("tOR");
   }
 | < tNOT : "not" >
   {
     TablaHash.anyadirHashTokens("tNOT");
-    System.out.println("tNOT");
   }
 }
 
@@ -203,122 +186,100 @@ TOKEN : /* PALABRAS RESERVADAS */
   < tPROGRAMA : "programa" >
    {
     TablaHash.anyadirHashTokens("tPROGRAMA");
-    System.out.println("tPROGRAMA");
    }
 | < tVAR : "var" >
   {
     TablaHash.anyadirHashTokens("tVAR");
-    System.out.println("tVAR");
   }
 | < tPRINCIPIO : "principio" >
   {
     TablaHash.anyadirHashTokens("tPRINCIPIO");
-    System.out.println("tPRINCIPIO");
   }
 | < tFIN : "fin" >
   {
     TablaHash.anyadirHashTokens("tFIN");
-    System.out.println("tFIN");
   }
 | < tSI : "si" >
   {
     TablaHash.anyadirHashTokens("tSI");
-    System.out.println("tSI");
   }
 | < tENT : "ent" >
   {
     TablaHash.anyadirHashTokens("tENT");
-    System.out.println("tENT");
   }
 | < tSI_NO : "si_no" >
   {
     TablaHash.anyadirHashTokens("tSI_NO");
-    System.out.println("tSI_NO");
   }
 | < tFSI : "fsi" >
   {
     TablaHash.anyadirHashTokens("tFSI");
-    System.out.println("tFSI");
   }
 | < tMQ : "mq" >
   {
     TablaHash.anyadirHashTokens("tMQ");
-    System.out.println("tMQ");
   }
 | < tFMQ : "fmq" >
   {
     TablaHash.anyadirHashTokens("tFMQ");
-    System.out.println("tFMQ");
   }
 | < tESCRIBIR : "escribir" >
   {
     TablaHash.anyadirHashTokens("tESCRIBIR");
-    System.out.println("tESCRIBIR");
   }
 | < tLEER : "leer" >
   {
     TablaHash.anyadirHashTokens("tLEER");
-    System.out.println("tLEER");
   }
 | < tMOD : "mod" >
   {
     TablaHash.anyadirHashTokens("tMOD");
-    System.out.println("tMOD");
   }
 | < tDIV : "div" >
   {
     TablaHash.anyadirHashTokens("tDIV");
-    System.out.println("tDIV");
   }
 | < tENTERO : "entero" >
   {
     TablaHash.anyadirHashTokens("tENTERO");
-    System.out.println("tENTERO");
   }
 | < tBOOLEANO : "booleano" >
   {
     TablaHash.anyadirHashTokens("tBOOLEANO");
-    System.out.println("tBOOLEANO");
   }
 | < tCARACTER : "caracter" >
   {
     TablaHash.anyadirHashTokens("tCARACTER");
-    System.out.println("tCARACTER");
   }
 | < tTRUE : "true" >
   {
     TablaHash.anyadirHashTokens("tTRUE");
-    System.out.println("tTRUE");
   }
 | < tFALSE : "false" >
   {
     TablaHash.anyadirHashTokens("tFALSE");
-    System.out.println("tFALSE");
+
   }
 | < tENTACAR : "entacar" >
   {
-    TablaHash.anyadirHashTokens("tENTACAR");
-    System.out.println("tENTACAR");
+    TablaHash.anyadirHashTokens("tENTACAR");  
   }
 | < tCARAENT : "caraent" >
   {
     TablaHash.anyadirHashTokens("tCARAENT");
-    System.out.println("tCARAENT");
   }
 | < tACCION : "accion" >
   {
     TablaHash.anyadirHashTokens("tACCION");
-    System.out.println("tACCION");
   }
 | < tVAL : "val" >
   {
     TablaHash.anyadirHashTokens("tVAL");
-    System.out.println("tVAL");
+
   }
 | < tREF : "ref" >
   {
     TablaHash.anyadirHashTokens("tREF");
-    System.out.println("tREF");
   }
 }
 
@@ -330,23 +291,19 @@ TOKEN :  /*EXPRESIONES */
 | < tCONSTCHAR : ("\"")(~["\""])("\"") >
   {
     TablaHash.anyadirHashTokens("tCONSTCHAR");
-    System.out.println("tCONSTCHAR");
   }
 | < tCONSTCAD :  ("\"")(~["\""])+("\"") >
   {
     TablaHash.anyadirHashTokens("tCONSTCAD");
-    System.out.println("tCONSTCAD");
   }
 | < tCONSTANTE_NUMERICA : (< tDIGITO >)+ >
   {
     TablaHash.anyadirHashTokens("tCONSTANTE_NUMERICA");
-    System.out.println("tCONSTANTE_NUMERICA");
   }
 | < tIDENTIFICADOR  : (< tLETRA > | ((< tLETRA > | "_")(< tLETRA > | "_" | < tDIGITO >)*(< tLETRA > | < tDIGITO >))) >
 	{
 	  TablaHash.anyadirHashTokens(image.toString());
 	  TablaHash.anyadirHashIdentificadores(image.toString());
-	  System.out.println("tIDENTIFICADOR");
 	}
 }
 
@@ -356,22 +313,18 @@ TOKEN : /* OPERADORES SEPARADDORES */
   < tPUNTYCOM : ";" >
   {
     TablaHash.anyadirHashTokens("tPUNTYCOM");
-    System.out.println("tPUNTYCOM");
   }
 | < tCOMA : "," >
   {
     TablaHash.anyadirHashTokens("tCOMA");
-    System.out.println("tCOMA");
   }
 | < tPARENTESIS_IZDA : "(" >
   {
     TablaHash.anyadirHashTokens("tPARENTESIS_IZDA");
-    System.out.println("tPARENTESIS_IZDA");
   }
 | < tPARENTESIS_DCHA : ")" >
   {
     TablaHash.anyadirHashTokens("tPARENTESIS_DCHA");
-    System.out.println("tPARENTESIS_DCHA");
   }
 }
 
@@ -388,20 +341,14 @@ int programa():
 {
   try{
        // Lectura del token programa
-       tSim = < tPROGRAMA >
-       {
-	 	   // Comprobacion del tipo de tipo de programa
-	 	   if (tSim.kind == tPROGRAMA) {
-	 	      // Es el token correcto
-	 	      tp_Sim = Simbolo.Tipo_simbolo.ACCION;
-	 	      tabla.anyadirBloque(tp_Sim);
-	 	   }
-       }
+      < tPROGRAMA >
        // Guardado del nombre del programa
        t = < tIDENTIFICADOR >
        {
+         System.out.println(" El programa es " + t.image);
          // Insertar en la tabla de simbolos el token del programa
          // no se comprueba porque es el primero
+
          s = tabla.introducir_programa(t.image, dir);
        }
        // Lectura del resto de datos
@@ -420,10 +367,20 @@ int programa():
 // Regla de bloque_sentencias OK
 void bloque_sentencias():
 {
+  // Declaracion de variables
+  Token t;
 }
 {
   try {
-       < tPRINCIPIO > lista_sentencias() < tFIN >
+       < tPRINCIPIO > lista_sentencias() t = < tFIN >
+       {
+         // Detectado el fin de un bloque de sentencias
+         // Mostrar el contenido de la tabla Hash
+         tabla.mostrarTabla_Simbolos();
+
+         // Decrementar el nivel
+         nivel--;
+       }
   }
   catch (ParseException e){
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -797,39 +754,17 @@ void cabecera_accion():
   try {
      // Apilar la nueva definicion de accion si no existe   
  	 tSim = < tACCION >
- 	 {
- 	   // Comprobacion del tipo de tipo de accion
- 	   if (tSim.kind == tACCION) {
- 	      // Es el token correcto
- 	      tp_Sim = Simbolo.Tipo_simbolo.ACCION;
- 	      tabla.anyadirBloque(tp_Sim);
- 	   }
-     }
  	 tId = < tIDENTIFICADOR >
  	 {
- 	   try {
- 	     // Posible mensaje de excepcion
- 	     // Determinar si existe una accion con ese identificador en la tabla
- 	     if (tabla.buscar_simbolo(tId.image) != null) {
- 	  		// El simbolo no existe en la tabla
- 	  		// Incrementar el nuevo nivel
- 	  		nivel++;
- 	  		// Insertar en la tabla de simbolos el nuevo identificador
-			try { 
- 	  			tabla.introducir_accion(tId.image, nivel, dir);
- 	 		}
- 	 		catch(AccionRepetidaException e) {
- 	 		    // El simbolo ya existe en la tabla de simbolos
- 	 		  	e.accionRepetidaExcepcion(tId.image);
- 	        }
+ 	     // Insertar en la tabla de simbolos el nuevo identificador
+		 try { 
+ 	  	     tabla.introducir_accion(tId.image, nivel, dir);
+ 	 	 }
+ 	 	 catch(AccionRepetidaException aRepExcep) {
+ 	 		 // El simbolo ya existe en la tabla de simbolos
+ 	 		 aRepExcep.accionRepetidaExcepcion(tId.image);
  	     }
- 	   }
- 	   // Salta la excepcion de simbolo encontrado
- 	   catch (SimboloNoEncontradoException e) {
- 	       // Muestra la excepcion por pantalla
- 	       e.simboloNoEncontrado(tId.image);
- 	   }
- 	 }
+ 	  }
  	 // Procesamiento de los parametros
  	 parametros_formales()
   }
@@ -863,7 +798,7 @@ void lista_parametros():
 }
 {
   try {
-     < tPARENTESIS_IZDA > parametros() ( t = < tPUNTYCOM  >
+        < tPARENTESIS_IZDA > parametros() ( t = < tPUNTYCOM  >
 		{
 		  // Vaciar lista de identificadores de parametros para evitar su resinsercion
 		  tabla.limpiarListaIdentificadores();
@@ -912,24 +847,15 @@ void parametros():
          	identificadorActual = lista.get(i);
 
 			// Comprobar que existe o no simbolo en la tabla
-			try {
-			  	// Busqueda del simbolo en la tabla de simbolos
-				tabla.buscar_simbolo(identificadorActual);
-
-				try {
-				  	// Insercion del parametro en la tabla de simbolos
-					tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
-				}		
-				catch (ParametroRepetidoException e) {
-				 	// El parametro ya esta repetido 
-				  	e.parametroRepetidoExcepcion(identificadorActual);
-				}
+ 	      	try {
+			  	// Insercion del parametro en la tabla de simbolos
+				tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
+			}		
+			catch (ParametroRepetidoException pRepExcep) {
+			 	// El parametro ya esta repetido 
+				pRepExcep.parametroRepetidoExcepcion(identificadorActual);
 			}
-			catch (SimboloNoEncontradoException e) {
- 	      		// Muestra la excepcion por pantalla
- 	      		e.simboloNoEncontrado(identificadorActual);
- 	        }
-       }
+ 	   }
      }
   }
   catch (ParseException e){
@@ -958,6 +884,54 @@ void declaracion_variables():
   }
 }
 
+
+// Regla para los tipos de variables OK
+void tipos_variables():
+{
+  // Declaracion de variable
+  Token t;
+  Tipo_variable tipo_Var;
+}
+{
+  try {
+      // Asignacion del token leido
+       (         t = < tENTERO > | t = < tCARACTER > | t = < tBOOLEANO >
+       )
+      { 
+       // Control del tipo token
+       switch (t.kind) {
+         case tENTERO:
+         	// Es token tENTERO
+         	tipo_Var = Simbolo.Tipo_variable.ENTERO;
+         	break;
+         case tCARACTER:
+         	// Es token tCARACTER
+         	tipo_Var = Simbolo.Tipo_variable.CHAR;
+         	break;
+         case tCONSTCAD:
+         	// Es token tCARACTER
+         	tipo_Var = Simbolo.Tipo_variable.CADENA;
+         	break;
+         case tBOOLEANO:
+         	// Es token tBOOLEANO
+         	tipo_Var = Simbolo.Tipo_variable.BOOLEANO;
+         	break;
+         default:
+         	// No es niguno de los anteriores es DESCONOCIDO
+         	tipo_Var = Simbolo.Tipo_variable.DESCONOCIDO;
+       }
+ 	   // Asignar el valor del tipo de variable leida 	   
+ 	   tabla.setTipo_variable(tipo_Var);
+    }
+  }
+  catch (ParseException e){
+     ErrorSintactico eS = new ErrorSintactico(e);
+  }
+}
+
+
+
+
 // Regla de declaracion OK
 void declaracion():
 {
@@ -975,37 +949,30 @@ void declaracion():
 
        // Obtencion del tipo de variable de los simbolos
        tp_Var = tabla.getTipo_variable();
-
+   
  	   // Variable para guardar el identificador del simbolo a introducir
  	   String identificadorActual;
 
 	  // Tamaño de la lista de identificadores
 	  int dimension = lista.size();
 
+	  System.out.println(dimension);
+
  	   //Bucle de recorrido de insercion de variables
  	   for (int i = 0; i < dimension; i++) {
  	        // Obtencion del identificador actual
 			identificadorActual = lista.get(i);
-
+	            
+	        // Simbolo ya existente en la tabla de simbolos
 		    try {
-			   // Buscar simbolo en la tabla de simbolos
-			   tabla.buscar_simbolo(identificadorActual);
-
-			   // Simbolo ya existente en la tabla de simbolos
-			   try {
-			     	// introducir el nuevo simbolo
-	           		tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
-	           }
-	           catch (VariableRepetidaException e) {
-	             	// El identificador ya existe en la tabla de simbolos
-	                e.variableRepetidaExcepcion(identificadorActual);
-	           }
-	        }
-	        catch (SimboloNoEncontradoException e) {
-	            // El simbolo no existe en la tabla 
-	            e.simboloNoEncontrado(identificadorActual);
-	        }
- 	   }
+			     // introducir el nuevo simbolo
+		       	tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
+		    }
+		    catch (VariableRepetidaException vRepExcep) {
+		         // El identificador ya existe en la tabla de simbolos
+		         vRepExcep.variableRepetidaExcepcion(identificadorActual);
+		    }
+ 	    }
      }
   }
   catch (ParseException e){
@@ -1022,17 +989,21 @@ void identificadores():
 }
 {
   try {
+     // Coger primer identificador
      t = < tIDENTIFICADOR >
      {
        // Añadir el identificador obligatorio
        tabla.anyadirIdentificador(t.image);
      }
-     (< tCOMA > t = < tIDENTIFICADOR >)*
-     {
-       // Añadir el resto de identificadores de la lista
-       tabla.anyadirIdentificador(t.image);
-     }
-     
+     (< tCOMA >
+      // Coger los siguientes identificadores
+      t = < tIDENTIFICADOR >
+	  {
+       	 // Añadir el resto de identificadores de la lista
+       	 tabla.anyadirIdentificador(t.image);
+      }
+     )*
+     // Todos los identificadores 
   }
   catch (ParseException e){
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -1040,48 +1011,6 @@ void identificadores():
 }
 
 
-// Regla para los tipos de variables OK
-void tipos_variables():
-{
-  // Declaracion de variable
-  Token t;
-  Tipo_variable tipo_Var;
-}
-{
-  try {
-    // Asignacion del token leido
-    t = < tENTERO > | t = < tCARACTER > | t = < tBOOLEANO >
-    {
-       // Control del tipo token
-       switch (t.image) {
-         case "tENTERO":
-         	// Es token tENTERO
-         	tipo_Var = Simbolo.Tipo_variable.ENTERO;
-         	break;
-         case "tCARACTER":
-         	// Es token tCARACTER
-         	tipo_Var = Simbolo.Tipo_variable.CHAR;
-         	break;
-         case "tCONSTCAD":
-         	// Es token tCARACTER
-         	tipo_Var = Simbolo.Tipo_variable.CADENA;
-         	break;
-         case "tBOOLEANO":
-         	// Es token tBOOLEANO
-         	tipo_Var = Simbolo.Tipo_variable.BOOLEANO;
-         	break;
-         default:
-         	// No es niguno de los anteriores es DESCONOCIDO
-         	tipo_Var = Simbolo.Tipo_variable.DESCONOCIDO;
-       }
- 	   // Asignar el valor del tipo de variable leida
- 	   tabla.setTipo_variable(tipo_Var);
-    }
-  }
-  catch (ParseException e){
-     ErrorSintactico eS = new ErrorSintactico(e);
-  }
-}
 
 
 // Regla para las clases de parametros OK
@@ -1094,7 +1023,8 @@ void clase_parametros():
 {
   try {
     // Asignacion del token hallado
-    t = < tVAL > | t = < tREF >
+    (      t = < tVAL > | t = < tREF >
+    )
     {
       if (t.kind == tVAL) {
         // Es token tVAL

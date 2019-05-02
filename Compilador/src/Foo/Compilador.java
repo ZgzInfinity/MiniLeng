@@ -16,13 +16,13 @@ public class Compilador implements CompiladorConstants {
   // Variable de direccion por defecto a 0
   public static long dir = 0;
 
-  public static Tabla_Simbolos tabla;
+
+  public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
 
   public static void main(String args []) throws ParseException
   {
     /* nombre del fichero */
-
         String nombreArchivo;
         String path = "C:\u005c\u005cUsers\u005c\u005cGord\u005c\u005cDesktop\u005c\u005cprogramas\u005c\u005c";
 
@@ -45,21 +45,18 @@ public class Compilador implements CompiladorConstants {
     {
       /* Crear el parser con respecto al fichero */
       Compilador parser = new Compilador (new java.io.FileInputStream(path));
+
+      // Inicializacion de la tabla de simbolos
+          tabla.inicializar_tabla();
+
       int res = Compilador.programa();
       if (args[0].equals("-v")) {
 
-          // Instancia de la tabla de simbolos
-          Tabla_Simbolos tabla = new Tabla_Simbolos();
+              /* Mostrar total de tokens */
+                  TablaHash.mostrarTokensNormales();
 
-          // Inicializacion de la tabla de simbolos
-          tabla.inicializar_tabla();
-
-
-      /* Mostrar total de tokens */
-          TablaHash.mostrarTokensNormales();
-
-          /* Mostrar total de identificadores */
-          TablaHash.mostrarIdentificadores();
+                  /* Mostrar total de identificadores */
+                  TablaHash.mostrarIdentificadores();
           }
           System.out.println("El fichero introducido es correcto");
         }
@@ -88,18 +85,13 @@ public class Compilador implements CompiladorConstants {
   Simbolo s;
   Simbolo.Tipo_simbolo tp_Sim;
     try {
-      // Lectura del token programa
-             tSim = jj_consume_token(tPROGRAMA);
-                   // Comprobacion del tipo de tipo de programa
-                   if (tSim.kind == tPROGRAMA) {
-                      // Es el token correcto
-                      tp_Sim = Simbolo.Tipo_simbolo.ACCION;
-                      tabla.anyadirBloque(tp_Sim);
-                   }
+      jj_consume_token(tPROGRAMA);
       // Guardado del nombre del programa
              t = jj_consume_token(tIDENTIFICADOR);
+         System.out.println(" El programa es " + t.image);
          // Insertar en la tabla de simbolos el token del programa
          // no se comprueba porque es el primero
+
          s = tabla.introducir_programa(t.image, dir);
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
@@ -116,10 +108,18 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de bloque_sentencias OK
   static final public void bloque_sentencias() throws ParseException {
+  // Declaracion de variables
+  Token t;
     try {
       jj_consume_token(tPRINCIPIO);
       lista_sentencias();
-      jj_consume_token(tFIN);
+      t = jj_consume_token(tFIN);
+         // Detectado el fin de un bloque de sentencias
+         // Mostrar el contenido de la tabla Hash
+         tabla.mostrarTabla_Simbolos();
+
+         // Decrementar el nivel
+         nivel--;
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -665,35 +665,15 @@ public class Compilador implements CompiladorConstants {
     try {
       // Apilar la nueva definicion de accion si no existe   
                tSim = jj_consume_token(tACCION);
-           // Comprobacion del tipo de tipo de accion
-           if (tSim.kind == tACCION) {
-              // Es el token correcto
-              tp_Sim = Simbolo.Tipo_simbolo.ACCION;
-              tabla.anyadirBloque(tp_Sim);
-           }
       tId = jj_consume_token(tIDENTIFICADOR);
-           try {
-             // Posible mensaje de excepcion
-             // Determinar si existe una accion con ese identificador en la tabla
-             if (tabla.buscar_simbolo(tId.image) != null) {
-                        // El simbolo no existe en la tabla
-                        // Incrementar el nuevo nivel
-                        nivel++;
-                        // Insertar en la tabla de simbolos el nuevo identificador
-                        try {
-                                tabla.introducir_accion(tId.image, nivel, dir);
-                        }
-                        catch(AccionRepetidaException e) {
-                            // El simbolo ya existe en la tabla de simbolos
-                                e.accionRepetidaExcepcion(tId.image);
-                }
+             // Insertar en la tabla de simbolos el nuevo identificador
+                 try {
+                     tabla.introducir_accion(tId.image, nivel, dir);
+                 }
+                 catch(AccionRepetidaException aRepExcep) {
+                         // El simbolo ya existe en la tabla de simbolos
+                         aRepExcep.accionRepetidaExcepcion(tId.image);
              }
-           }
-           // Salta la excepcion de simbolo encontrado
-           catch (SimboloNoEncontradoException e) {
-               // Muestra la excepcion por pantalla
-               e.simboloNoEncontrado(tId.image);
-           }
       parametros_formales();
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -778,24 +758,15 @@ public class Compilador implements CompiladorConstants {
                 identificadorActual = lista.get(i);
 
                         // Comprobar que existe o no simbolo en la tabla
-                        try {
-                                // Busqueda del simbolo en la tabla de simbolos
-                                tabla.buscar_simbolo(identificadorActual);
-
-                                try {
-                                        // Insercion del parametro en la tabla de simbolos
-                                        tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
-                                }
-                                catch (ParametroRepetidoException e) {
-                                        // El parametro ya esta repetido 
-                                        e.parametroRepetidoExcepcion(identificadorActual);
-                                }
+                try {
+                                // Insercion del parametro en la tabla de simbolos
+                                tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
                         }
-                        catch (SimboloNoEncontradoException e) {
-                        // Muestra la excepcion por pantalla
-                        e.simboloNoEncontrado(identificadorActual);
-                }
-       }
+                        catch (ParametroRepetidoException pRepExcep) {
+                                // El parametro ya esta repetido 
+                                pRepExcep.parametroRepetidoExcepcion(identificadorActual);
+                        }
+           }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -828,6 +799,56 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
+// Regla para los tipos de variables OK
+  static final public void tipos_variables() throws ParseException {
+  // Declaracion de variable
+  Token t;
+  Tipo_variable tipo_Var;
+    try {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case tENTERO:
+        t = jj_consume_token(tENTERO);
+        break;
+      case tCARACTER:
+        t = jj_consume_token(tCARACTER);
+        break;
+      case tBOOLEANO:
+        t = jj_consume_token(tBOOLEANO);
+        break;
+      default:
+        jj_la1[21] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+       // Control del tipo token
+       switch (t.kind) {
+         case tENTERO:
+                // Es token tENTERO
+                tipo_Var = Simbolo.Tipo_variable.ENTERO;
+                break;
+         case tCARACTER:
+                // Es token tCARACTER
+                tipo_Var = Simbolo.Tipo_variable.CHAR;
+                break;
+         case tCONSTCAD:
+                // Es token tCARACTER
+                tipo_Var = Simbolo.Tipo_variable.CADENA;
+                break;
+         case tBOOLEANO:
+                // Es token tBOOLEANO
+                tipo_Var = Simbolo.Tipo_variable.BOOLEANO;
+                break;
+         default:
+                // No es niguno de los anteriores es DESCONOCIDO
+                tipo_Var = Simbolo.Tipo_variable.DESCONOCIDO;
+       }
+           // Asignar el valor del tipo de variable leida 	   
+           tabla.setTipo_variable(tipo_Var);
+    } catch (ParseException e) {
+     ErrorSintactico eS = new ErrorSintactico(e);
+    }
+  }
+
 // Regla de declaracion OK
   static final public void declaracion() throws ParseException {
   // Declaracion de variables
@@ -849,30 +870,23 @@ public class Compilador implements CompiladorConstants {
           // Tamaño de la lista de identificadores
           int dimension = lista.size();
 
+          System.out.println(dimension);
+
            //Bucle de recorrido de insercion de variables
            for (int i = 0; i < dimension; i++) {
                 // Obtencion del identificador actual
                         identificadorActual = lista.get(i);
 
+                // Simbolo ya existente en la tabla de simbolos
                     try {
-                           // Buscar simbolo en la tabla de simbolos
-                           tabla.buscar_simbolo(identificadorActual);
-
-                           // Simbolo ya existente en la tabla de simbolos
-                           try {
-                                // introducir el nuevo simbolo
-                                tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
-                   }
-                   catch (VariableRepetidaException e) {
-                        // El identificador ya existe en la tabla de simbolos
-                        e.variableRepetidaExcepcion(identificadorActual);
-                   }
-                }
-                catch (SimboloNoEncontradoException e) {
-                    // El simbolo no existe en la tabla 
-                    e.simboloNoEncontrado(identificadorActual);
-                }
-           }
+                             // introducir el nuevo simbolo
+                        tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
+                    }
+                    catch (VariableRepetidaException vRepExcep) {
+                         // El identificador ya existe en la tabla de simbolos
+                         vRepExcep.variableRepetidaExcepcion(identificadorActual);
+                    }
+            }
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -883,7 +897,8 @@ public class Compilador implements CompiladorConstants {
   // Declaracion de una lista auxiliar de identificadores
   Token t;
     try {
-      t = jj_consume_token(tIDENTIFICADOR);
+      // Coger primer identificador
+           t = jj_consume_token(tIDENTIFICADOR);
        // Añadir el identificador obligatorio
        tabla.anyadirIdentificador(t.image);
       label_10:
@@ -893,64 +908,14 @@ public class Compilador implements CompiladorConstants {
           ;
           break;
         default:
-          jj_la1[21] = jj_gen;
+          jj_la1[22] = jj_gen;
           break label_10;
         }
         jj_consume_token(tCOMA);
-        t = jj_consume_token(tIDENTIFICADOR);
-      }
-       // Añadir el resto de identificadores de la lista
-       tabla.anyadirIdentificador(t.image);
-    } catch (ParseException e) {
-     ErrorSintactico eS = new ErrorSintactico(e);
-    }
-  }
-
-// Regla para los tipos de variables OK
-  static final public void tipos_variables() throws ParseException {
-  // Declaracion de variable
-  Token t;
-  Tipo_variable tipo_Var;
-    try {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case tENTERO:
-        // Asignacion del token leido
-            t = jj_consume_token(tENTERO);
-        break;
-      case tCARACTER:
-        t = jj_consume_token(tCARACTER);
-        break;
-      case tBOOLEANO:
-        t = jj_consume_token(tBOOLEANO);
-       // Control del tipo token
-       switch (t.image) {
-         case "tENTERO":
-                // Es token tENTERO
-                tipo_Var = Simbolo.Tipo_variable.ENTERO;
-                break;
-         case "tCARACTER":
-                // Es token tCARACTER
-                tipo_Var = Simbolo.Tipo_variable.CHAR;
-                break;
-         case "tCONSTCAD":
-                // Es token tCARACTER
-                tipo_Var = Simbolo.Tipo_variable.CADENA;
-                break;
-         case "tBOOLEANO":
-                // Es token tBOOLEANO
-                tipo_Var = Simbolo.Tipo_variable.BOOLEANO;
-                break;
-         default:
-                // No es niguno de los anteriores es DESCONOCIDO
-                tipo_Var = Simbolo.Tipo_variable.DESCONOCIDO;
-       }
-           // Asignar el valor del tipo de variable leida
-           tabla.setTipo_variable(tipo_Var);
-        break;
-      default:
-        jj_la1[22] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+        // Coger los siguientes identificadores
+              t = jj_consume_token(tIDENTIFICADOR);
+         // Añadir el resto de identificadores de la lista
+         tabla.anyadirIdentificador(t.image);
       }
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -965,11 +930,16 @@ public class Compilador implements CompiladorConstants {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tVAL:
-        // Asignacion del token hallado
-            t = jj_consume_token(tVAL);
+        t = jj_consume_token(tVAL);
         break;
       case tREF:
         t = jj_consume_token(tREF);
+        break;
+      default:
+        jj_la1[23] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
       if (t.kind == tVAL) {
         // Es token tVAL
         cl_Param = Simbolo.Clase_parametro.VAL;
@@ -981,12 +951,6 @@ public class Compilador implements CompiladorConstants {
           // El tipo de clase ha sido procesada
           // Guardado de la clase de parametro leido 
           tabla.setClase_parametro(cl_Param);
-        break;
-      default:
-        jj_la1[23] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -1013,7 +977,7 @@ public class Compilador implements CompiladorConstants {
       jj_la1_0 = new int[] {0x88000000,0x88000000,0x80000,0x0,0x0,0x0,0x400600,0x0,0x7e000,0x7e000,0x200600,0x200,0x200600,0x101800,0x101800,0x400400,0x20000000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0x100006,0x100006,0xa00000,0x400000,0x160400,0x800000,0x9e0f00,0x400000,0x0,0x0,0x0,0x0,0x0,0x18,0x18,0x9e0f00,0x0,0x1000,0x800000,0x200000,0xe0,0x400000,0xe0,0x6000,};
+      jj_la1_1 = new int[] {0x100006,0x100006,0xa00000,0x400000,0x160400,0x800000,0x9e0f00,0x400000,0x0,0x0,0x0,0x0,0x0,0x18,0x18,0x9e0f00,0x0,0x1000,0x800000,0x200000,0xe0,0xe0,0x400000,0x6000,};
    }
 
   /** Constructor with InputStream. */
