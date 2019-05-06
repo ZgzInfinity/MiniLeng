@@ -15,8 +15,12 @@ import Foo.SimboloNoEncontradoException;
 
 public class Tabla_Simbolos {
 	
-	// Dimension de la tabla hash
-	private final int DIMENSION_TABLA = 10;
+	// Esto se hace con el objetivo de evitar la tendencia de que los hash de enteros grandes 
+	// tengan divisores comunes con el tamaño de la tabla hash provocando colisiones tras el 
+	// cálculo del módulo
+	
+	// Dimension de la tabla hash es un numero primo
+	private final int DIMENSION_TABLA = 13;
 	private int T[];
 	
 	// Vector de tablas Hash
@@ -181,7 +185,7 @@ public class Tabla_Simbolos {
 			lista = new LinkedList<Simbolo>();
 		}
 		else {
-			lista.add(s);
+			lista.push(s);
 			tabla.add(h, lista);
 		}
 	}
