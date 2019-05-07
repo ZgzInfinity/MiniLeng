@@ -761,8 +761,12 @@ void declaracion_accion():
 void cabecera_accion():
 {
   Token tSim, tId;
-  Simbolo s;
+  Simbolo s = null;
   Simbolo.Tipo_simbolo tp_Sim;
+  boolean ok = false;
+
+  // Lista de parametros de la accion
+  LinkedList<Simbolo> listaDeParametros;
 }
 {
   try {
@@ -772,8 +776,8 @@ void cabecera_accion():
  	 {
  	     // Insertar en la tabla de simbolos el nuevo identificador
 		 try { 
- 	  	     tabla.introducir_accion(tId.image, nivel, dir);
- 	  	     
+ 	  	     s = tabla.introducir_accion(tId.image, nivel, dir);
+ 	  	     ok = true;	     
  	 	 }
  	 	 catch(AccionRepetidaException aRepExcep) {
  	 		 // El simbolo ya existe en la tabla de simbolos
@@ -784,7 +788,17 @@ void cabecera_accion():
  	     nivel++;
  	  }
  	 // Procesamiento de los parametros
- 	 parametros_formales()
+ 	 listaDeParametros = parametros_formales()
+ 	 {
+ 	   // Se ha efectuado con exito
+ 	   if (ok) { 
+	 	   // Añadir la lista de parametros al simbolo
+	 	   s.anyadirParametrosAccion(listaDeParametros);
+	
+	 	   // Muestra la accion para ver si se guardan bien
+	 	   System.out.println(s.toString());
+	   }
+     }
   }
   catch(ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -793,12 +807,18 @@ void cabecera_accion():
 
 
 // Regla de parametros formales OK
-void parametros_formales():
+LinkedList<Simbolo> parametros_formales():
 {
+  	// Declaracion de la lista de parametros
+  	LinkedList<Simbolo> parametros;
 }
 {
   try { 
- 	 (lista_parametros())?
+ 	 (parametros = lista_parametros()
+ 	 {
+ 	   // Devolucion de los parametros
+ 	   return parametros;
+     })?
   }
   catch(ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -809,19 +829,26 @@ void parametros_formales():
 
 
 // Regla para lista_parametros OK
-void lista_parametros():
+LinkedList<Simbolo> lista_parametros():
 {
   // Declaracion de variables
   Token t;
+
+  // Lista de identificadores 
+  LinkedList<Simbolo> lista;
 }
 {
   try {
-        < tPARENTESIS_IZDA > parametros() ( t = < tPUNTYCOM  >
+        < tPARENTESIS_IZDA > lista = parametros() ( t = < tPUNTYCOM  >
 		{
 		  // Vaciar lista de identificadores de parametros para evitar su resinsercion
-		  tabla.limpiarListaIdentificadores();
+		  return lista;
 		}
-     	parametros() )* < tPARENTESIS_DCHA >
+     	lista = parametros()
+     	{
+     	  return lista;
+		}
+     	)* < tPARENTESIS_DCHA >
   }
   catch (ParseException e){
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -830,7 +857,7 @@ void lista_parametros():
 
 
 // Regla de parametros OK
-void parametros():
+LinkedList<Simbolo> parametros():
 {
   // Declaracion de variables
 
@@ -841,18 +868,20 @@ void parametros():
   Simbolo.Clase_parametro cl_Param;
   Simbolo.Tipo_variable tipo_Var;
 
-  // Lista de identificadores leidos a almacenar en la tabla de simbolos
-  LinkedList<String> lista;
+  // Lista de simbolos leidos a almacenar en la tabla de simbolos
+  LinkedList<Simbolo> lista = new LinkedList<Simbolo>();
+
+ // Lista de identificadores procesados
+ LinkedList<String> listaIdentificadores;
 }
 {
   try {
-     clase_parametros() tipos_variables() identificadores()
+         
+      // Lectura del tipo de clase y del tipo de parametro
+      cl_Param = clase_parametros()
+      tipo_Var = tipos_variables()
+      listaIdentificadores = identificadores()
      {
-       // Se ha procesado la clase con el tipo de variable y los identificadores
-       cl_Param = tabla.getClase_parametro();
-       tipo_Var = tabla.getTipo_variable();
-       lista = tabla.getListaIdentificadores();
-
        // Tamaño de la lista de identificadores
        int dimension = lista.size();
 
@@ -862,18 +891,23 @@ void parametros():
        // Bucle de recorrido de la lista de identificadores
        for (int i = 0; i < dimension; i++) {
          	// Obtener identificador actual
-         	identificadorActual = lista.get(i);
+         	identificadorActual = listaIdentificadores.get(i);
 
 			// Comprobar que existe o no simbolo en la tabla
  	      	try {
 			  	// Insercion del parametro en la tabla de simbolos
-				tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
+				 s = tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
+
+				 // Añadir parametro a la lista de parametros
+				 lista.add(s);
 			}		
 			catch (ParametroRepetidoException pRepExcep) {
 			 	// El parametro ya esta repetido 
 				pRepExcep.parametroRepetidoExcepcion(identificadorActual);
 			}
  	   }
+ 	   // Devolucion de la lista de parametros
+ 	   return lista;
      }
   }
   catch (ParseException e){
@@ -890,12 +924,7 @@ void declaracion_variables():
 }
 {
   try {
-     ((declaracion()) t = < tPUNTYCOM >
-     {
-       // Vaciar lista de identificadores de parametros para evitar su resinsercion
-	   tabla.limpiarListaIdentificadores();
-     }
-     )*
+     ((declaracion()) t = < tPUNTYCOM >)*
   }
   catch (ParseException e){
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -904,11 +933,10 @@ void declaracion_variables():
 
 
 // Regla para los tipos de variables OK
-void tipos_variables():
+Simbolo.Tipo_variable tipos_variables():
 {
   // Declaracion de variable
   Token t;
-  Tipo_variable tipo_Var;
 }
 {
   try {
@@ -920,26 +948,24 @@ void tipos_variables():
        switch (t.kind) {
          case tENTERO:
          	// Es token tENTERO
-         	tipo_Var = Simbolo.Tipo_variable.ENTERO;
+         	return Simbolo.Tipo_variable.ENTERO;
          	break;
          case tCARACTER:
          	// Es token tCARACTER
-         	tipo_Var = Simbolo.Tipo_variable.CHAR;
+         	return Simbolo.Tipo_variable.CHAR;
          	break;
          case tCONSTCAD:
          	// Es token tCARACTER
-         	tipo_Var = Simbolo.Tipo_variable.CADENA;
+         	return Simbolo.Tipo_variable.CADENA;
          	break;
          case tBOOLEANO:
          	// Es token tBOOLEANO
-         	tipo_Var = Simbolo.Tipo_variable.BOOLEANO;
+         	return Simbolo.Tipo_variable.BOOLEANO;
          	break;
          default:
          	// No es niguno de los anteriores es DESCONOCIDO
-         	tipo_Var = Simbolo.Tipo_variable.DESCONOCIDO;
+         	return Simbolo.Tipo_variable.DESCONOCIDO;
        }
- 	   // Asignar el valor del tipo de variable leida 	   
- 	   tabla.setTipo_variable(tipo_Var);
     }
   }
   catch (ParseException e){
@@ -957,20 +983,18 @@ void declaracion():
   Token t;
   Simbolo.Tipo_variable tp_Var;
   LinkedList<String> lista;
+
+  // Variable para guardar el identificador del simbolo a introducir
+  String identificadorActual;
+
+  Simbolo s;
 }
 {
   try {
-     tipos_variables() identificadores()
+      tp_Var = tipos_variables()
+      lista = identificadores()
      {
-       // Se ha procesado el tipo de variable y los corresponfientes identificadores
-       lista = tabla.getListaIdentificadores();
-
-       // Obtencion del tipo de variable de los simbolos
-       tp_Var = tabla.getTipo_variable();
-   
- 	   // Variable para guardar el identificador del simbolo a introducir
- 	   String identificadorActual;
-
+  
 	   // Tamaño de la lista de identificadores
 	   int dimension = lista.size();
 
@@ -982,7 +1006,7 @@ void declaracion():
 	        // Simbolo ya existente en la tabla de simbolos
 		    try {
 			     // introducir el nuevo simbolo
-		       	tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
+			     tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
 		    }
 		    catch (VariableRepetidaException vRepExcep) {
 		         // El identificador ya existe en la tabla de simbolos
@@ -998,28 +1022,34 @@ void declaracion():
 
 
 // Regla para los identificadores OK
-void identificadores():
+LinkedList<String> identificadores():
 {
   // Declaracion de una lista auxiliar de identificadores
   Token t;
+
+  // Lista de identificadores (parametros o variables)
+  LinkedList<String> listaIdentificadores = new LinkedList<String>();
 }
 {
   try {
      // Coger primer identificador
      t = < tIDENTIFICADOR >
      {
-       // Añadir el identificador obligatorio
-       tabla.anyadirIdentificador(t.image);
+       // Añadir el identificador a lista
+       	 listaIdentificadores.add(t.image);
      }
      (< tCOMA >
       // Coger los siguientes identificadores
       t = < tIDENTIFICADOR >
 	  {
-       	 // Añadir el resto de identificadores de la lista
-       	 tabla.anyadirIdentificador(t.image);
+       	 // Añadir el identificador a lista
+       	 listaIdentificadores.add(t.image);
       }
      )*
-     // Todos los identificadores 
+     // Todos los identificadores
+     { 
+     	return listaIdentificadores;
+     }
   }
   catch (ParseException e){
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -1030,11 +1060,10 @@ void identificadores():
 
 
 // Regla para las clases de parametros OK
-void clase_parametros():
+Simbolo.Clase_parametro clase_parametros():
 {
   // Declaracion de variables
   Token t;
-  Simbolo.Clase_parametro cl_Param;
 }
 {
   try {
@@ -1044,15 +1073,17 @@ void clase_parametros():
     {
       if (t.kind == tVAL) {
         // Es token tVAL
-        cl_Param = Simbolo.Clase_parametro.VAL;
+        return Simbolo.Clase_parametro.VAL;
+      }
+      else if (t.kind == tREF) {
+        // Es tokeb tREF
+        return Simbolo.Clase_parametro.REF;
       }
       else {
-        // Es tokeb tREF
-        cl_Param = Simbolo.Clase_parametro.REF;
+        // Clase de parametro erroneo
+        System.out.println("La clase de parametro no es correcta");
       }
 	  // El tipo de clase ha sido procesada
-	  // Guardado de la clase de parametro leido 
-	  tabla.setClase_parametro(cl_Param);
     }
   }
   catch (ParseException e){

@@ -213,4 +213,19 @@ public class Simbolo {
 	}
 	
 	
+	/*
+	 * Pre: <<listaDeParametros>> es una lista de parametros asociados a una accion
+	 * Post: Ha asignado a la lista de parametros de la accion la lista <<listaDeParametros>>
+	 */
+	void anyadirParametrosAccion(LinkedList<Simbolo> listaDeParametros){
+		// Calculo del numero de parametros de la accion
+		int dimension = listaDeParametros.size();
+		
+		// Insercion de los parametros en la accion
+		for (int i = 0; i < dimension; i++) {
+			this.lista_parametros.add(listaDeParametros.get(i));
+		}
+	}
+	
+	
 }

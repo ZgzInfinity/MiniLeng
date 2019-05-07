@@ -26,41 +26,11 @@ public class Tabla_Simbolos {
 	// Vector de tablas Hash
 	static ArrayList<LinkedList<Simbolo>> tabla;
 	
-	
-	// Variable estatica que almacena el tipo de dato
-	static Tipo_variable tipoVariable = null;
-	
-	// Variable estatica que almacena el tipo de dato
-	static Clase_parametro tipoParametro = null; 
-	
 	// Declaracion de una lista estatica de identificadores
 	static LinkedList<String> listaIdentificadores = new LinkedList<String>();
 	
-	// Declaracion de una lista estatica de identificadores
-	static LinkedList<Tipo_simbolo> listaBloques = new LinkedList<Tipo_simbolo>();
-	
 
-	/*
-	 * Pre: ---
-	 * Post: Asigna el tipo de variable que se ha leido 
-	 * 		 DESCONOCIDO, ENTERO, BOOLEANO, CHAR, CADENA
-	 */
-	public void setTipo_variable(Tipo_variable tp_V) {
-		Tabla_Simbolos.tipoVariable = tp_V;
-	}
-	
-	
-	
-	/*
-	 * Pre: ---
-	 * Post: Asigna la clase de parametro que se ha leido
-	 * 		 DESCONOCIDO, ENTERO, BOOLEANO, CHAR, CADENA
-	 */
-	public void setClase_parametro(Clase_parametro tp_Par) {
-		Tabla_Simbolos.tipoParametro = tp_Par;
-	}
-	
-	
+
 	/*
 	 * Pre ---
 	 * Post: Ha asignado la lista <<lista>> a la lista de identificadores
@@ -80,46 +50,6 @@ public class Tabla_Simbolos {
 	
 	
 	/*
-	 * Pre ---
-	 * Post: Ha asignado la lista <<lista>> a la lista de identificadores
-	 */
-	public void anyadirBloque(Tipo_simbolo tp_Sim) {
-		// Añade nuevo bloque en la ultima posicion
-		Tabla_Simbolos.listaBloques.add(tp_Sim);
-	}
-	
-	
-	/*
-	 * Pre ---
-	 * Post: Ha asignado la lista <<lista>> a la lista de identificadores
-	 */
-	public void eliminarBloque(Tipo_simbolo tp_Sim) {
-		// Borra el ultimo bloque añadido
-		Tabla_Simbolos.listaBloques.removeLast();
-	}
-	
-	
-	
-	/*
-	 * Pre: ---
-	 * Post: Ha devuelto el tipo de variable leida
-	 */
-	public Tipo_variable getTipo_variable() {
-		return Tabla_Simbolos.tipoVariable;
-	}
-	
-	
-	/*
-	 * Pre: ---
-	 * Post: Ha devuelto el tipo de clase de parametro leido
-	 */
-	public Clase_parametro getClase_parametro() {
-		return Tabla_Simbolos.tipoParametro;
-	}
-	
-	
-	
-	/*
 	 * Pre: ---
 	 * Post: Ha devuelto la lista de identificadores leidos
 	 */
@@ -127,16 +57,7 @@ public class Tabla_Simbolos {
 		return Tabla_Simbolos.listaIdentificadores;
 	}
 	
-	/*
-	 * Pre: ---
-	 * Post: Ha eliminado el contenido de la lista de identificadores leidos
-	 */
-	public void limpiarListaIdentificadores() {
-		Tabla_Simbolos.listaIdentificadores.clear();
-	}
-	
-	
-	
+
 	/*
 	 * Pre: ---
 	 * Post: Devuelve <<true>> si y solo si la lista de indice <<i>>
@@ -291,14 +212,12 @@ public class Tabla_Simbolos {
 			// Hay un simbolo accion con el mismo nombre pero distinto nivel
 			Simbolo s = new Simbolo(Tipo_simbolo.ACCION, null, null, nombre, nivel, dir	);	
 			anyadir(nombre, s);
-			System.out.println(s.toString());
 			return s;
 		}	
     	catch (SimboloNoEncontradoException e) {
     		// No hay ningun simbolo accion en la tabla
     		Simbolo s = new Simbolo(Tipo_simbolo.ACCION, null, null, nombre, nivel, dir	);	
    			anyadir(nombre, s);
-   			System.out.println(s.toString());
     		return s;
 		}
     }

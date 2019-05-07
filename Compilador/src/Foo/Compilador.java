@@ -671,16 +671,20 @@ public class Compilador implements CompiladorConstants {
 // Regla de cabecera_accion OK
   static final public void cabecera_accion() throws ParseException {
   Token tSim, tId;
-  Simbolo s;
+  Simbolo s = null;
   Simbolo.Tipo_simbolo tp_Sim;
+  boolean ok = false;
+
+  // Lista de parametros de la accion
+  LinkedList<Simbolo> listaDeParametros;
     try {
       // Apilar la nueva definicion de accion si no existe   
                tSim = jj_consume_token(tACCION);
       tId = jj_consume_token(tIDENTIFICADOR);
              // Insertar en la tabla de simbolos el nuevo identificador
                  try {
-                     tabla.introducir_accion(tId.image, nivel, dir);
-
+                     s = tabla.introducir_accion(tId.image, nivel, dir);
+                     ok = true;
                  }
                  catch(AccionRepetidaException aRepExcep) {
                          // El simbolo ya existe en la tabla de simbolos
@@ -689,18 +693,31 @@ public class Compilador implements CompiladorConstants {
 
              // Incrementar el nivel actual
              nivel++;
-      parametros_formales();
+      // Procesamiento de los parametros
+               listaDeParametros = parametros_formales();
+           // Se ha efectuado con exito
+           if (ok) {
+                   // Añadir la lista de parametros al simbolo
+                   s.anyadirParametrosAccion(listaDeParametros);
+
+                   // Muestra la accion para ver si se guardan bien
+                   System.out.println(s.toString());
+           }
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
 // Regla de parametros formales OK
-  static final public void parametros_formales() throws ParseException {
+  static final public LinkedList<Simbolo> parametros_formales() throws ParseException {
+        // Declaracion de la lista de parametros
+        LinkedList<Simbolo> parametros;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZDA:
-        lista_parametros();
+        parametros = lista_parametros();
+           // Devolucion de los parametros
+           {if (true) return parametros;}
         break;
       default:
         jj_la1[18] = jj_gen;
@@ -709,15 +726,19 @@ public class Compilador implements CompiladorConstants {
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla para lista_parametros OK
-  static final public void lista_parametros() throws ParseException {
+  static final public LinkedList<Simbolo> lista_parametros() throws ParseException {
   // Declaracion de variables
   Token t;
+
+  // Lista de identificadores 
+  LinkedList<Simbolo> lista;
     try {
       jj_consume_token(tPARENTESIS_IZDA);
-      parametros();
+      lista = parametros();
       label_8:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -730,17 +751,19 @@ public class Compilador implements CompiladorConstants {
         }
         t = jj_consume_token(tPUNTYCOM);
                   // Vaciar lista de identificadores de parametros para evitar su resinsercion
-                  tabla.limpiarListaIdentificadores();
-        parametros();
+                  {if (true) return lista;}
+        lista = parametros();
+          {if (true) return lista;}
       }
       jj_consume_token(tPARENTESIS_DCHA);
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de parametros OK
-  static final public void parametros() throws ParseException {
+  static final public LinkedList<Simbolo> parametros() throws ParseException {
   // Declaracion de variables
 
   // Simbolo a guardar en la tabla de simbolos
@@ -750,17 +773,16 @@ public class Compilador implements CompiladorConstants {
   Simbolo.Clase_parametro cl_Param;
   Simbolo.Tipo_variable tipo_Var;
 
-  // Lista de identificadores leidos a almacenar en la tabla de simbolos
-  LinkedList<String> lista;
-    try {
-      clase_parametros();
-      tipos_variables();
-      identificadores();
-       // Se ha procesado la clase con el tipo de variable y los identificadores
-       cl_Param = tabla.getClase_parametro();
-       tipo_Var = tabla.getTipo_variable();
-       lista = tabla.getListaIdentificadores();
+  // Lista de simbolos leidos a almacenar en la tabla de simbolos
+  LinkedList<Simbolo> lista = new LinkedList<Simbolo>();
 
+ // Lista de identificadores procesados
+ LinkedList<String> listaIdentificadores;
+    try {
+      // Lectura del tipo de clase y del tipo de parametro
+            cl_Param = clase_parametros();
+      tipo_Var = tipos_variables();
+      listaIdentificadores = identificadores();
        // Tamaño de la lista de identificadores
        int dimension = lista.size();
 
@@ -770,21 +792,27 @@ public class Compilador implements CompiladorConstants {
        // Bucle de recorrido de la lista de identificadores
        for (int i = 0; i < dimension; i++) {
                 // Obtener identificador actual
-                identificadorActual = lista.get(i);
+                identificadorActual = listaIdentificadores.get(i);
 
                         // Comprobar que existe o no simbolo en la tabla
                 try {
                                 // Insercion del parametro en la tabla de simbolos
-                                tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
+                                 s = tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
+
+                                 // Añadir parametro a la lista de parametros
+                                 lista.add(s);
                         }
                         catch (ParametroRepetidoException pRepExcep) {
                                 // El parametro ya esta repetido 
                                 pRepExcep.parametroRepetidoExcepcion(identificadorActual);
                         }
            }
+           // Devolucion de la lista de parametros
+           {if (true) return lista;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de declaracion variables OK
@@ -806,8 +834,6 @@ public class Compilador implements CompiladorConstants {
         }
         declaracion();
         t = jj_consume_token(tPUNTYCOM);
-       // Vaciar lista de identificadores de parametros para evitar su resinsercion
-           tabla.limpiarListaIdentificadores();
       }
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -815,10 +841,9 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla para los tipos de variables OK
-  static final public void tipos_variables() throws ParseException {
+  static final public Simbolo.Tipo_variable tipos_variables() throws ParseException {
   // Declaracion de variable
   Token t;
-  Tipo_variable tipo_Var;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tENTERO:
@@ -839,29 +864,28 @@ public class Compilador implements CompiladorConstants {
        switch (t.kind) {
          case tENTERO:
                 // Es token tENTERO
-                tipo_Var = Simbolo.Tipo_variable.ENTERO;
+                {if (true) return Simbolo.Tipo_variable.ENTERO;}
                 break;
          case tCARACTER:
                 // Es token tCARACTER
-                tipo_Var = Simbolo.Tipo_variable.CHAR;
+                {if (true) return Simbolo.Tipo_variable.CHAR;}
                 break;
          case tCONSTCAD:
                 // Es token tCARACTER
-                tipo_Var = Simbolo.Tipo_variable.CADENA;
+                {if (true) return Simbolo.Tipo_variable.CADENA;}
                 break;
          case tBOOLEANO:
                 // Es token tBOOLEANO
-                tipo_Var = Simbolo.Tipo_variable.BOOLEANO;
+                {if (true) return Simbolo.Tipo_variable.BOOLEANO;}
                 break;
          default:
                 // No es niguno de los anteriores es DESCONOCIDO
-                tipo_Var = Simbolo.Tipo_variable.DESCONOCIDO;
+                {if (true) return Simbolo.Tipo_variable.DESCONOCIDO;}
        }
-           // Asignar el valor del tipo de variable leida 	   
-           tabla.setTipo_variable(tipo_Var);
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de declaracion OK
@@ -870,18 +894,14 @@ public class Compilador implements CompiladorConstants {
   Token t;
   Simbolo.Tipo_variable tp_Var;
   LinkedList<String> lista;
+
+  // Variable para guardar el identificador del simbolo a introducir
+  String identificadorActual;
+
+  Simbolo s;
     try {
-      tipos_variables();
-      identificadores();
-       // Se ha procesado el tipo de variable y los corresponfientes identificadores
-       lista = tabla.getListaIdentificadores();
-
-       // Obtencion del tipo de variable de los simbolos
-       tp_Var = tabla.getTipo_variable();
-
-           // Variable para guardar el identificador del simbolo a introducir
-           String identificadorActual;
-
+      tp_Var = tipos_variables();
+      lista = identificadores();
            // Tamaño de la lista de identificadores
            int dimension = lista.size();
 
@@ -893,7 +913,7 @@ public class Compilador implements CompiladorConstants {
                 // Simbolo ya existente en la tabla de simbolos
                     try {
                              // introducir el nuevo simbolo
-                        tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
+                             tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
                     }
                     catch (VariableRepetidaException vRepExcep) {
                          // El identificador ya existe en la tabla de simbolos
@@ -906,14 +926,17 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla para los identificadores OK
-  static final public void identificadores() throws ParseException {
+  static final public LinkedList<String> identificadores() throws ParseException {
   // Declaracion de una lista auxiliar de identificadores
   Token t;
+
+  // Lista de identificadores (parametros o variables)
+  LinkedList<String> listaIdentificadores = new LinkedList<String>();
     try {
       // Coger primer identificador
            t = jj_consume_token(tIDENTIFICADOR);
-       // Añadir el identificador obligatorio
-       tabla.anyadirIdentificador(t.image);
+       // Añadir el identificador a lista
+         listaIdentificadores.add(t.image);
       label_10:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -927,19 +950,20 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(tCOMA);
         // Coger los siguientes identificadores
               t = jj_consume_token(tIDENTIFICADOR);
-         // Añadir el resto de identificadores de la lista
-         tabla.anyadirIdentificador(t.image);
+         // Añadir el identificador a lista
+         listaIdentificadores.add(t.image);
       }
+        {if (true) return listaIdentificadores;}
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla para las clases de parametros OK
-  static final public void clase_parametros() throws ParseException {
+  static final public Simbolo.Clase_parametro clase_parametros() throws ParseException {
   // Declaracion de variables
   Token t;
-  Simbolo.Clase_parametro cl_Param;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tVAL:
@@ -955,18 +979,22 @@ public class Compilador implements CompiladorConstants {
       }
       if (t.kind == tVAL) {
         // Es token tVAL
-        cl_Param = Simbolo.Clase_parametro.VAL;
+        {if (true) return Simbolo.Clase_parametro.VAL;}
+      }
+      else if (t.kind == tREF) {
+        // Es tokeb tREF
+        {if (true) return Simbolo.Clase_parametro.REF;}
       }
       else {
-        // Es tokeb tREF
-        cl_Param = Simbolo.Clase_parametro.REF;
+        // Clase de parametro erroneo
+        System.out.println("La clase de parametro no es correcta");
       }
           // El tipo de clase ha sido procesada
-          // Guardado de la clase de parametro leido 
-          tabla.setClase_parametro(cl_Param);
+
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
   static private boolean jj_initialized_once = false;
