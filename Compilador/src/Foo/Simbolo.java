@@ -208,7 +208,7 @@ public class Simbolo {
 	public String toString() {
 		// Mostrar el simbolo por pantalla
 		return "Simbolo [nombre=" + nombre + ", nivel=" + nivel + ", tipo=" + tipo + ", variable=" + variable
-				+ ", parametro=" + parametro + ", visible=" + visible + ", lista_parametros=" + lista_parametros
+				+ ", parametro=" + parametro + ", visible=" + visible + ", lista_parametros=" + mostrarParametros()
 				+ ", dir=" + dir + "]";
 	}
 	
@@ -225,6 +225,28 @@ public class Simbolo {
 		for (int i = 0; i < dimension; i++) {
 			this.lista_parametros.add(listaDeParametros.get(i));
 		}
+	}
+	
+	
+	/*
+	 * Pre: ---
+	 * Post Ha mostrado por pantalla los parametros de la accion
+	 */
+	String mostrarParametros() {
+		String resultado = "[";
+		int dim = this.lista_parametros.size();
+		Simbolo s;
+		for (int i = 0; i < dim; i++) {
+			s = this.lista_parametros.get(i);
+			if ( i != dim - 1) {
+				resultado += s.getNombre() + " , ";
+			}
+			else {
+				resultado += s.getNombre();
+			}
+		}
+		resultado += "]";
+		return resultado;
 	}
 	
 	

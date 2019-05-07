@@ -20,7 +20,7 @@ public class Tabla_Simbolos {
 	// cálculo del módulo
 	
 	// Dimension de la tabla hash es un numero primo
-	private final int DIMENSION_TABLA = 13;
+	private final int DIMENSION_TABLA = 61;
 	private int T[];
 	
 	// Vector de tablas Hash
@@ -29,6 +29,8 @@ public class Tabla_Simbolos {
 	// Declaracion de una lista estatica de identificadores
 	static LinkedList<String> listaIdentificadores = new LinkedList<String>();
 	
+	// Lista con todos los parametros de una accion concreta
+	static LinkedList<LinkedList<Simbolo>> listaParametrosAccion = new LinkedList<LinkedList<Simbolo>>();
 
 
 	/*
@@ -58,17 +60,6 @@ public class Tabla_Simbolos {
 	}
 	
 
-	/*
-	 * Pre: ---
-	 * Post: Devuelve <<true>> si y solo si la lista de indice <<i>>
-	 * 		 esta vacia. En caso contrario devuelve <<false>>
-	 */
-	private boolean esEntradaVacia(int i) {
-		return tabla.get(i).isEmpty();
-	}
-	
-	
-	
 	/* 
 	 * Funcion de hash de Pearson que emplea una tabla auxiliar con los
 	 * indices ordenados de modo aleatorio 
@@ -81,6 +72,24 @@ public class Tabla_Simbolos {
 		return h;
 	}
 	
+	
+	/*
+	 * Pre: ---
+	 * Post: Ha incorporado a la lista de parametros la lista <<lista>>
+	 */
+	public void asignarListaParametros(LinkedList<LinkedList<Simbolo>> lista) {
+		Tabla_Simbolos.listaParametrosAccion = lista;
+	}
+	
+	
+	
+	/*
+	 * Pre: ---
+	 * Post: Devuelve la lista de parametros asociados a una accion
+	 */
+	public LinkedList<LinkedList<Simbolo>> getListasParametros(){
+		return Tabla_Simbolos.listaParametrosAccion;
+	}
 	
 	
 	/* 

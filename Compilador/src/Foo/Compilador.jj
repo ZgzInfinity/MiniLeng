@@ -766,7 +766,7 @@ void cabecera_accion():
   boolean ok = false;
 
   // Lista de parametros de la accion
-  LinkedList<Simbolo> listaDeParametros;
+  LinkedList<LinkedList<Simbolo>> listaDeParametros = new LinkedList<LinkedList<Simbolo>>();
 }
 {
   try {
@@ -792,10 +792,11 @@ void cabecera_accion():
  	 {
  	   // Se ha efectuado con exito
  	   if (ok) { 
-	 	   // Añadir la lista de parametros al simbolo
-	 	   s.anyadirParametrosAccion(listaDeParametros);
-	
-	 	   // Muestra la accion para ver si se guardan bien
+	 	   for (int i = 0; i < listaDeParametros.size(); i++) { 
+		   	 	// Añadir la lista de parametros al simbolo
+	 	   		s.anyadirParametrosAccion(listaDeParametros.get(i));
+	 	   }
+	 	   // Simbolo accion con todos los parametros
 	 	   System.out.println(s.toString());
 	   }
      }
@@ -807,18 +808,23 @@ void cabecera_accion():
 
 
 // Regla de parametros formales OK
-LinkedList<Simbolo> parametros_formales():
+LinkedList<LinkedList<Simbolo>> parametros_formales():
 {
-  	// Declaracion de la lista de parametros
-  	LinkedList<Simbolo> parametros;
+  // Lista global de listas de identificadores
+  LinkedList<LinkedList<Simbolo>> parametros = new LinkedList<LinkedList<Simbolo>>();
 }
 {
   try { 
  	 (parametros = lista_parametros()
  	 {
- 	   // Devolucion de los parametros
- 	   return parametros;
-     })?
+ 	   // Guardado de la lista de parametros procesada
+ 	   tabla.asignarListaParametros(parametros);
+     }
+     )?
+     // Devolucion de todas las listas procesadas
+     {
+       return tabla.getListasParametros();
+     }
   }
   catch(ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -829,26 +835,29 @@ LinkedList<Simbolo> parametros_formales():
 
 
 // Regla para lista_parametros OK
-LinkedList<Simbolo> lista_parametros():
+LinkedList<LinkedList<Simbolo>> lista_parametros():
 {
-  // Declaracion de variables
-  Token t;
+  // Lista global de listas de identificadores
+  LinkedList<LinkedList<Simbolo>> listaGlobal = new LinkedList<LinkedList<Simbolo>>();
 
-  // Lista de identificadores 
-  LinkedList<Simbolo> lista;
+  // Lista de identificadores
+  LinkedList<Simbolo> lista = new LinkedList<Simbolo>();
 }
 {
   try {
-        < tPARENTESIS_IZDA > lista = parametros() ( t = < tPUNTYCOM  >
+        < tPARENTESIS_IZDA > lista = parametros() 
 		{
 		  // Vaciar lista de identificadores de parametros para evitar su resinsercion
-		  return lista;
+		  listaGlobal.add(lista);		  
 		}
-     	lista = parametros()
+     	(< tPUNTYCOM  > lista = parametros()
      	{
-     	  return lista;
+     	  listaGlobal.add(lista);
 		}
      	)* < tPARENTESIS_DCHA >
+     	{
+     	  return listaGlobal;
+        }
   }
   catch (ParseException e){
      ErrorSintactico eS = new ErrorSintactico(e);
@@ -871,8 +880,8 @@ LinkedList<Simbolo> parametros():
   // Lista de simbolos leidos a almacenar en la tabla de simbolos
   LinkedList<Simbolo> lista = new LinkedList<Simbolo>();
 
- // Lista de identificadores procesados
- LinkedList<String> listaIdentificadores;
+  // Lista de identificadores procesados
+  LinkedList<String> listaIdentificadores = new LinkedList<String>();
 }
 {
   try {
@@ -883,20 +892,21 @@ LinkedList<Simbolo> parametros():
       listaIdentificadores = identificadores()
      {
        // Tamaño de la lista de identificadores
-       int dimension = lista.size();
+       int dimension = listaIdentificadores.size();
 
 	   // Identificador del simbolo a procesar
 	   String identificadorActual;
-
+	   
        // Bucle de recorrido de la lista de identificadores
        for (int i = 0; i < dimension; i++) {
          	// Obtener identificador actual
+         	
          	identificadorActual = listaIdentificadores.get(i);
-
+         	
 			// Comprobar que existe o no simbolo en la tabla
  	      	try {
 			  	// Insercion del parametro en la tabla de simbolos
-				 s = tabla.introducir_parametro (identificadorActual, tipo_Var, cl_Param, nivel, dir);
+				 s = tabla.introducir_parametro(identificadorActual, tipo_Var, cl_Param, nivel, dir);
 
 				 // Añadir parametro a la lista de parametros
 				 lista.add(s);
@@ -982,7 +992,7 @@ void declaracion():
   // Declaracion de variables
   Token t;
   Simbolo.Tipo_variable tp_Var;
-  LinkedList<String> lista;
+  LinkedList<String> lista = new LinkedList<String>();
 
   // Variable para guardar el identificador del simbolo a introducir
   String identificadorActual;
