@@ -170,7 +170,6 @@ public class Tabla_Simbolos {
 	public Simbolo introducir_programa(String nombre, long dir) {
 		Simbolo s = new Simbolo(Tipo_simbolo.PROGRAMA, null, null, nombre, 0, dir);
 		anyadir(nombre, s);
-		System.out.println(s.toString());
 		return s;
 	}
 	
@@ -192,7 +191,6 @@ public class Tabla_Simbolos {
 				// Hay un simbolo variable en la lista pero con distinto nivel
 				Simbolo s = new Simbolo(Tipo_simbolo.VARIABLE, variable, null, nombre, nivel, dir);	
 				anyadir(nombre, s);
-				System.out.println(s.toString());
 				return s;
 			}
 		}
@@ -200,7 +198,6 @@ public class Tabla_Simbolos {
 			// No hay ningun simbolo variable en la tabla
 			Simbolo s = new Simbolo(Tipo_simbolo.VARIABLE, variable, null, nombre, nivel, dir);
 			anyadir(nombre, s);
-			System.out.println(s.toString());
 			return s;
 		}
 	}
@@ -248,7 +245,6 @@ public class Tabla_Simbolos {
 				// Hay un simbolo identico en nombre pero con distinto nivel
 				Simbolo s = new Simbolo(Tipo_simbolo.PARAMETRO, variable, parametro, nombre, nivel,	dir	);
 				anyadir(nombre, s);
-				System.out.println(s.toString());
 				return s;
 		    }
 		}
@@ -256,7 +252,6 @@ public class Tabla_Simbolos {
 			// No ha encontrado ningun simbolo parametro identico 
 			Simbolo s = new Simbolo(Tipo_simbolo.PARAMETRO, variable, parametro, nombre, nivel,	dir	);
 			anyadir(nombre, s);
-			System.out.println(s.toString());
 			return s;
 		}
 	}

@@ -701,8 +701,6 @@ public class Compilador implements CompiladorConstants {
                                 // Añadir la lista de parametros al simbolo
                                 s.anyadirParametrosAccion(listaDeParametros.get(i));
                    }
-                   // Simbolo accion con todos los parametros
-                   System.out.println(s.toString());
            }
     } catch (ParseException e) {
      ErrorSintactico eS = new ErrorSintactico(e);
