@@ -15,6 +15,7 @@ import Foo.Simbolo.Tipo_simbolo;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
 import Foo.SimboloNoEncontradoException;
+import Foo.TipoOperador.Tipo_Operador;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -652,15 +653,32 @@ void operador_relacional() :
 }
 
 // Regla operador aditivo OK
-void operador_aditivo() :
+TipoOperador operador_aditivo() :
 {
+  // Declaracion de variables
+  TipoOperador op = new TipoOperador();
 }
 {
   try
   {
     < tPLUS >
+    {
+     	// El operador es una suma
+     	op.setOperador(TipoOperador.Tipo_Operador.SUMA);
+     	return op;
+    }
   | < tMINUS >
+  	{
+  	  	// El operaodr es una resta
+  	    op.setOperador(TipoOperador.Tipo_Operador.RESTA);
+  	    return op;
+  	}
   | < tOR >
+  	{
+  	  	// El operador es un OR
+  	    op.setOperador(TipoOperador.Tipo_Operador.OR);
+  	    return op;
+  	}
   }
   catch (ParseException e)
   {
@@ -669,7 +687,7 @@ void operador_aditivo() :
 }
 
 // regla de expresion simple OK
-RegistroExp expresion_simple() :
+Simbolo.Tipo_variable expresion_simple() :
 {
   // Declaracion de variables
   RegistroExp regTerm1, regTerm2, regResult;
@@ -693,8 +711,8 @@ RegistroExp expresion_simple() :
         ok = true;
 
         // Evaluar el simbolo introducido
-        switch(op) {
-          case TipoOperador.Suma:
+        switch(op.Tipo_Operador) {
+          case Tipo_Operador.SUMA:
           	// El operador es una suma
 
           	// Evaluar primer termino de la expresion
@@ -737,7 +755,7 @@ RegistroExp expresion_simple() :
           	  }         	    
           	}
           	break;
-          	case TipoOperador.Resta:
+          	case Tipo_Operador.RESTA:
           	// El operador es una resta
 
           	// Evaluar primer termino de la expresion
@@ -780,7 +798,7 @@ RegistroExp expresion_simple() :
           	  }         	    
           	}
           	break;
-          	case TipoOperador.OR:
+          	case Tipo_Operador.OR:
           	// El operador es un OR logico
 
           	// Evaluar primer termino de la expresion
@@ -837,13 +855,171 @@ RegistroExp expresion_simple() :
 }
 
 // Regla de termino OK
-void termino() :
+RegistroExp termino() :
 {
+ 
+  // Declaracion de factores y expresiones
+  RegistroExp tpFactor1, tpFactor2;
+
+  // Declaracion del operador
+  TipoOperador op;
+  boolean ok;
 }
 {
   try
   {
-    factor() (operador_multiplicativo() factor()) *
+     // Evaluacion del primer factor
+     tpFactor1 = factor()
+     (
+       // Evaluacion del operador multiplicativo
+       op = operador_multiplicativo()
+
+       // Evaluacion del segundo factor
+       tpFactor2 = factor()
+       {
+          // Expresion a devolver
+          RegistroExp regResult = new RegistroExp();
+
+          ok = true;
+
+        // Evaluar el simbolo introducido
+        switch(op.Tipo_Operador) {
+          case Tipo_Operador.SUMA:
+          	// El operador es una suma
+
+          	// Evaluar primer termino de la expresion
+          	if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+          		&& (tpFactor1.getTipo() != Simbolo.Tipo_variable.ENTERO))
+          	{
+          		  ErrorSemantico eSM = new ErrorSemantico("El factor 1 debe ser entero");
+          		  ok = false;
+          	}
+          	// Evaluar segundo termino de la expresion
+          	if ((tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+          		&& (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
+          	{
+          		  ErrorSemantico eSM = new ErrorSemantico("El factor 2 debe ser entero");
+          		  ok = false;
+          	}
+          	// Comprobar que todo ha ido bien y evaluar la expresion
+          	if (ok) {
+          	  // Calculo de la expresion
+          	  if (tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
+          	  		&& tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+          	  {
+          	    	// Tipo de la nueva expresion
+          	    	regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+					// Extracion de los valores numericos de cada operador
+       				int operando1 = tpFactor1.getValorEnt();
+       				int operando2 = tpFactor2.getValorEnt();
+
+					// Suma de los operandos numericos
+       				int resul = operando1 + operando2;
+
+       				// Asignacion del resultado a la expresion resultado 
+          	    	regResult.setValorEnt(resul);
+          	  }
+          	  else
+          	  {
+          	    // El tipo de la expresion es desconocido
+          	    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+          	  }         	    
+          	}
+          	break;
+          	case Tipo_Operador.RESTA:
+          	// El operador es una resta
+
+          	// Evaluar primer termino de la expresion
+          	if ((tpFactor1 != Simbolo.Tipo_variable.DESCONOCIDO)
+          		&& (tpFactor2 != Simbolo.Tipo_variable.ENTERO))
+          	{
+          		  ErrorSemantico eSM = new ErrorSemantico("El factor 1 debe ser entero");
+          		  ok = false;
+          	}
+          	// Evaluar segundo termino de la expresion
+          	if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+          		&& (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
+          	{
+          		  ErrorSemantico eSM = new ErrorSemantico("El factor 2 debe ser entero");
+          		  ok = false;
+          	}
+          	// Comprobar que todo ha ido bien y evaluar la expresion
+          	if (ok) {
+          	  // Calculo de la expresion
+          	  if (tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
+          	  		&& tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+          	  {
+          	    	// Tipo de la nueva expresion
+          	    	regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+					// Extracion de los valores numericos de cada operador
+       				int operando1 = tpFactor1.getValorEnt();
+       				int operando2 = tpFactor2.getValorEnt();
+
+					// Suma de los operandos numericos
+       				int resul = operando1 - operando2;
+
+       				// Asignacion del resultado a la expresion resultado 
+          	    	regResult.setValorEnt(resul);
+          	  }
+          	  else
+          	  {
+          	    // El tipo de la expresion es desconocido
+          	    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+          	  }         	    
+          	}
+          	break;
+          	case Tipo_Operador.OR:
+          	// El operador es un OR logico
+
+          	// Evaluar primer termino de la expresion
+          	if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+          		&& (tpFactor1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+          	{
+          		  ErrorSemantico eSM = new ErrorSemantico("El factor 1 debe ser booleano");
+          		  ok = false;
+          	}
+          	// Evaluar segundo termino de la expresion
+          	if ((tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+          		&& (tpFactor2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+          	{
+          		  ErrorSemantico eSM = new ErrorSemantico("El factor 2 debe ser booleano");
+          		  ok = false;
+          	}
+          	// Comprobar que todo ha ido bien y evaluar la expresion
+          	if (ok) {
+          	  // Calculo de la expresion
+          	  if (tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
+          	  		&& tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+          	  {
+          	    	// Tipo de la nueva expresion
+          	    	regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+
+					// Extracion de los valores numericos de cada operador
+       				boolean operando1 = tpFactor1.isValorBool();
+       				boolean operando2 = tpFactor2.isValorBool();
+
+					// Suma de los operandos numericos
+       				boolean resul = operando1 | operando2;
+
+       				// Asignacion del resultado a la expresion resultado 
+          	    	regResult.setValorBool(resul);
+          	  }
+          	  else
+          	  {
+          	    // El tipo de la expresion es desconocido
+          	    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+          	  }         	    
+          	}
+          	break;
+          	default:
+          		// No es un operador aditivo valido
+          		ErrorSemantico eSM = new ErrorSemantico("El operador multiplicativo" +
+          												" es desconocido");
+        }
+       }
+      ) *
   }
   catch (ParseException e)
   {
@@ -852,17 +1028,44 @@ void termino() :
 }
 
 // Regla de operador multiplicativo OK
-void operador_multiplicativo() :
+TipoOperador operador_multiplicativo() :
 {
+  // Declaracion de variables
+  TipoOperador op = new TipoOperador();
 }
 {
   try
   {
     < tMULTIPLY >
+    {
+      // El operador es una multiplicacion
+      op.setOperador(TipoOperador.Tipo_Operador.MULTIPLICACION);
+      return op;
+    }
   | < tDIVIDE >
+  	{
+  	  // El operador es un cociente (opcion 1)
+      op.setOperador(TipoOperador.Tipo_Operador.DIVISION);
+      return op;
+  	}
   | < tDIV >
+  	{
+  	  // El operador es un cociente (opcion 2)
+      op.setOperador(TipoOperador.Tipo_Operador.DIVISION);
+      return op;
+  	}
   | < tMOD >
+  	{
+  	  // El operador es un modulo o residuo
+      op.setOperador(TipoOperador.Tipo_Operador.MOD);
+      return op;
+  	}
   | < tAND >
+  	{
+  	  // El operador es una AND logica
+      op.setOperador(TipoOperador.Tipo_Operador.AND);
+      return op;
+  	}
   }
   catch (ParseException e)
   {
@@ -871,10 +1074,16 @@ void operador_multiplicativo() :
 }
 
 // Regla de factor OK
-Simbolo.Tipo_variable factor() :
+RegistroExp factor() :
 {
    // Declaracion de factores y expresiones
-   Simbolo.Tipo_variable tpFactor, tpExp;
+   RegistroExp tpFactor;
+
+   Simbolo.Tipo_variable tpExp;
+   RegistroExp result = new RegistroExp();
+
+	// Token a procesar
+   Token t;
 }
 {
   try
@@ -882,8 +1091,8 @@ Simbolo.Tipo_variable factor() :
     < tNOT > tpFactor = factor()
     {
       // Comprobacion de si es o no booleano
-      if ((tpFactor != Simbolo.Tipo_variable.BOOLEANO)
-          && (tpFactor != Simbolo.Tipo_variable.DESCONOCIDO)) 
+      if ((tpFactor.getTipo() != Simbolo.Tipo_variable.BOOLEANO)
+          && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)) 
       {
         // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba BOOLEANO");
@@ -894,8 +1103,8 @@ Simbolo.Tipo_variable factor() :
   | < tMINUS > tpFactor = factor()
     {
       // Comprobacion de si es o no booleano
-      if ((tpFactor != Simbolo.Tipo_variable.ENTERO)
-          && (tpFactor != Simbolo.Tipo_variable.DESCONOCIDO)) 
+      if ((tpFactor.getTipo() != Simbolo.Tipo_variable.ENTERO)
+          && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)) 
       {
         // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba ENTERO");
@@ -905,7 +1114,7 @@ Simbolo.Tipo_variable factor() :
     }
   | < tPARENTESIS_IZDA > tpExp = expresion() < tPARENTESIS_DCHA >
   	{
-  	  
+  	  // Devuelve la expresiom normal
   	  return tpExp;
   	}
   | < tENTACAR > < tPARENTESIS_IZDA > tpExp = expresion() < tPARENTESIS_DCHA >
@@ -940,11 +1149,57 @@ Simbolo.Tipo_variable factor() :
   	  return tpExp;
   	}
   | < tIDENTIFICADOR >
+  	{
+  	  
+  	}
   | < tCONSTANTE_NUMERICA >
+  	{
+  	  // Obtener el valor del token y pasarlo a entero para guardarlo
+  	  int valor = Integer.parseInt(t.image);
+  	  result.setValorEnt(valor);
+
+	  // Tipo de la variable entero
+  	  result.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+	  // Devolucion del resultado
+  	  return result;
+  	}
   | < tCONSTCHAR >
+  	{
+  	   // Guardar el contenido de la cadena
+  	  result.setValorString(t.image);
+  	  // Char
+  	  result.setTipo(Simbolo.Tipo_variable.CHAR);
+  	  // Devolucion del resultado
+  	  return result;
+  	}
   | < tCONSTCAD >
+  	{
+  	  // Guardar el contenido de la cadena
+  	  result.setValorString(t.image);
+  	  // Tipo cadena de caracteres
+  	  result.setTipo(Simbolo.Tipo_variable.CADENA);
+  	  // Devolucion del resultado
+  	  return result;
+  	}
   | < tTRUE >
+  	{
+  	  // Guardar el contenido de la cadena
+  	  result.setValorBool(true);
+  	  // Tipo cadena de caracteres
+  	  result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+  	  // Devolucion del resultado
+  	  return result;
+  	}
   | < tFALSE >
+  	{
+  	  // Guardar el contenido de la cadena
+  	  result.setValorBool(false);
+  	  // Tipo cadena de caracteres
+  	  result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+  	  // Devolucion del resultado
+  	  return result;
+  	}
   }
   catch (ParseException e)
   {

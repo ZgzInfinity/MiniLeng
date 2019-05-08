@@ -5,6 +5,7 @@ import Foo.Simbolo.Tipo_simbolo;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
 import Foo.SimboloNoEncontradoException;
+import Foo.TipoOperador.Tipo_Operador;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;

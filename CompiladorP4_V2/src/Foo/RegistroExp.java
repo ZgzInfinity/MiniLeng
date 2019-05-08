@@ -8,8 +8,9 @@ public class RegistroExp {
 	// Valor booleano de la expresion
 	boolean valorBool;
 	
-	// Valor caracter de la expresion
-	char valorChar;
+	
+	// Valor de la cadena de caracteres
+	String valorString;
 	
 	// Tipo de variable de la expresion
 	Simbolo.Tipo_variable tipo;
@@ -56,26 +57,6 @@ public class RegistroExp {
 	
 	/*
 	 * Pre: ---
-	 * Post: Ha devuelto el valor char
-	 */
-	public char getValorChar() {
-		return valorChar;
-	}
-
-	
-	
-	/*
-	 * Pre: ---
-	 * Post: Asigna a valorChar el contenido de <<valorChar>>
-	 */
-	public void setValorChar(char valorChar) {
-		this.valorChar = valorChar;
-	}
-	
-
-	
-	/*
-	 * Pre: ---
 	 * Post: Ha devuelto el valor tipo
 	 */
 	public Simbolo.Tipo_variable getTipo() {
@@ -92,4 +73,24 @@ public class RegistroExp {
 		this.tipo = tipo;
 	}
 	
+	
+	
+	/*
+	 * Pre: ---
+	 * Post: Ha devuelto el valor valorString
+	 */
+	public String getValorString() {
+		return valorString;
+	}
+
+
+
+	/*
+	 * Pre: ---
+	 * Post: Asigna a valorString el contenido de <<valorString>>
+	 */
+	public void setValorString(String valorString) {
+		this.valorString = valorString;
+	}
+
 }
