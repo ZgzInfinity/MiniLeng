@@ -5,7 +5,9 @@ import Foo.Simbolo.Tipo_simbolo;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
 import Foo.SimboloNoEncontradoException;
-import Foo.TipoOperador.Tipo_Operador;
+import Foo.TipoOperador.Tipo_Operador_Aditivo;
+import Foo.TipoOperador.Tipo_Operador_Multiplicativo;
+import Foo.TipoOperador.Tipo_Operador_Relacional;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -365,9 +367,9 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de expresion OK
-  static final public Simbolo.Tipo_variable expresion() throws ParseException {
+  static final public RegistroExp expresion() throws ParseException {
   // Declaracion de expresiones a analizar
-  Simbolo.Tipo_variable tpExp1, tpExp2;
+  RegistroExp tpExp1, tpExp2;
     try {
       // Obtencion de la primera expresion
           tpExp1 = expresion_simple();
@@ -390,8 +392,8 @@ public class Compilador implements CompiladorConstants {
         // Obtencion de la segunda expresion
               tpExp2 = expresion_simple();
         // Evaluacion de los datos
-        if ((tpExp1 != Simbolo.Tipo_variable.DESCONOCIDO)
-        && (tpExp2 != Simbolo.Tipo_variable.DESCONOCIDO) && (tpExp1 != tpExp2)) {
+        if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+        && (tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO) && (tpExp1 != tpExp2)) {
            // Comprobacion de si es booleano o no 
            ErrorSemantico eSM = new ErrorSemantico("Los operandos deben ser del mismo tipo");
         }
@@ -442,19 +444,19 @@ public class Compilador implements CompiladorConstants {
       case tPLUS:
         jj_consume_token(tPLUS);
         // El operador es una suma
-        op.setOperador(TipoOperador.Tipo_Operador.SUMA);
+        op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.SUMA);
         {if (true) return op;}
         break;
       case tMINUS:
         jj_consume_token(tMINUS);
                 // El operaodr es una resta
-            op.setOperador(TipoOperador.Tipo_Operador.RESTA);
+            op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.RESTA);
             {if (true) return op;}
         break;
       case tOR:
         jj_consume_token(tOR);
                 // El operador es un OR
-            op.setOperador(TipoOperador.Tipo_Operador.OR);
+            op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.OR);
             {if (true) return op;}
         break;
       default:
@@ -469,7 +471,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // regla de expresion simple OK
-  static final public Simbolo.Tipo_variable expresion_simple() throws ParseException {
+  static final public RegistroExp expresion_simple() throws ParseException {
   // Declaracion de variables
   RegistroExp regTerm1, regTerm2, regResult;
   TipoOperador op;
@@ -498,8 +500,8 @@ public class Compilador implements CompiladorConstants {
         ok = true;
 
         // Evaluar el simbolo introducido
-        switch(op.Tipo_Operador) {
-          case Tipo_Operador.SUMA:
+        switch(op.getOperadorAditivo()) {
+          case SUMA:
                 // El operador es una suma
 
                 // Evaluar primer termino de la expresion
@@ -542,7 +544,7 @@ public class Compilador implements CompiladorConstants {
                   }
                 }
                 break;
-                case Tipo_Operador.RESTA:
+                case RESTA:
                 // El operador es una resta
 
                 // Evaluar primer termino de la expresion
@@ -585,7 +587,7 @@ public class Compilador implements CompiladorConstants {
                   }
                 }
                 break;
-                case Tipo_Operador.OR:
+                case OR:
                 // El operador es un OR logico
 
                 // Evaluar primer termino de la expresion
@@ -632,12 +634,15 @@ public class Compilador implements CompiladorConstants {
                         // No es un operador aditivo valido
                         ErrorSemantico eSM = new ErrorSemantico("El operador aditivo es desconocido");
         }
+        {if (true) return regResult;}
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
+// LOS OPERADORES SON AND Y ESAS MIERDAS EH
 // Regla de termino OK
   static final public RegistroExp termino() throws ParseException {
   // Declaracion de factores y expresiones
@@ -673,8 +678,8 @@ public class Compilador implements CompiladorConstants {
           ok = true;
 
         // Evaluar el simbolo introducido
-        switch(op.Tipo_Operador) {
-          case Tipo_Operador.SUMA:
+        switch(op.getOperadorAditivo()) {
+          case SUMA:
                 // El operador es una suma
 
                 // Evaluar primer termino de la expresion
@@ -717,12 +722,12 @@ public class Compilador implements CompiladorConstants {
                   }
                 }
                 break;
-                case Tipo_Operador.RESTA:
+                case RESTA:
                 // El operador es una resta
 
                 // Evaluar primer termino de la expresion
-                if ((tpFactor1 != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpFactor2 != Simbolo.Tipo_variable.ENTERO))
+                if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
                 {
                           ErrorSemantico eSM = new ErrorSemantico("El factor 1 debe ser entero");
                           ok = false;
@@ -760,7 +765,7 @@ public class Compilador implements CompiladorConstants {
                   }
                 }
                 break;
-                case Tipo_Operador.OR:
+                case OR:
                 // El operador es un OR logico
 
                 // Evaluar primer termino de la expresion
@@ -808,10 +813,13 @@ public class Compilador implements CompiladorConstants {
                         ErrorSemantico eSM = new ErrorSemantico("El operador multiplicativo" +
                                                                                                         " es desconocido");
         }
+        // Devolucion de la expresion
+        {if (true) return regResult;}
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de operador multiplicativo OK
@@ -823,31 +831,31 @@ public class Compilador implements CompiladorConstants {
       case tMULTIPLY:
         jj_consume_token(tMULTIPLY);
       // El operador es una multiplicacion
-      op.setOperador(TipoOperador.Tipo_Operador.MULTIPLICACION);
+      op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MULTIPLICACION);
       {if (true) return op;}
         break;
       case tDIVIDE:
         jj_consume_token(tDIVIDE);
           // El operador es un cociente (opcion 1)
-      op.setOperador(TipoOperador.Tipo_Operador.DIVISION);
+      op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       {if (true) return op;}
         break;
       case tDIV:
         jj_consume_token(tDIV);
           // El operador es un cociente (opcion 2)
-      op.setOperador(TipoOperador.Tipo_Operador.DIVISION);
+      op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       {if (true) return op;}
         break;
       case tMOD:
         jj_consume_token(tMOD);
           // El operador es un modulo o residuo
-      op.setOperador(TipoOperador.Tipo_Operador.MOD);
+      op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MOD);
       {if (true) return op;}
         break;
       case tAND:
         jj_consume_token(tAND);
           // El operador es una AND logica
-      op.setOperador(TipoOperador.Tipo_Operador.AND);
+      op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.AND);
       {if (true) return op;}
         break;
       default:
@@ -864,9 +872,7 @@ public class Compilador implements CompiladorConstants {
 // Regla de factor OK
   static final public RegistroExp factor() throws ParseException {
    // Declaracion de factores y expresiones
-   RegistroExp tpFactor;
-
-   Simbolo.Tipo_variable tpExp;
+   RegistroExp tpFactor, tpExp;
    RegistroExp result = new RegistroExp();
 
         // Token a procesar
@@ -912,8 +918,8 @@ public class Compilador implements CompiladorConstants {
         tpExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
           // Comprobacion de si es entera la expresion
-          if ((tpExp != Simbolo.Tipo_variable.ENTERO)
-                  && (tpExp != Simbolo.Tipo_variable.DESCONOCIDO))
+          if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
+                  && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
           {
             // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("La expresion no se puede convertir " +
@@ -922,10 +928,15 @@ public class Compilador implements CompiladorConstants {
           else
           {
             // Es un entero y se comprueba que no hay desbordamiento
-            if (!hayDesbordamiebto(valor))
+            int valor = tpExp.getValorEnt();
+
+            // Error de desbordamiento
+            ErrorSemantico eSM = new ErrorSemantico();
+
+            if (!eSM.hayDesbordamiento(valor))
             {
               // Comprobacion de si es booleano o no 
-          ErrorSemantico eSM = new ErrorSemantico("Desbordamiento detectado");
+          eSM = new ErrorSemantico("Desbordamiento detectado");
                 }
           }
           {if (true) return tpExp;}
@@ -935,8 +946,8 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(tPARENTESIS_IZDA);
         tpExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
-          if ((tpExp != Simbolo.Tipo_variable.CHAR)
-                        && (tpExp != Simbolo.Tipo_variable.DESCONOCIDO))
+          if ((tpExp.getTipo() != Simbolo.Tipo_variable.CHAR)
+                        && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
           {
                 // Comprobacion de si es o no caracter
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba CARACTER");
@@ -948,7 +959,7 @@ public class Compilador implements CompiladorConstants {
 
         break;
       case tCONSTANTE_NUMERICA:
-        jj_consume_token(tCONSTANTE_NUMERICA);
+        t = jj_consume_token(tCONSTANTE_NUMERICA);
           // Obtener el valor del token y pasarlo a entero para guardarlo
           int valor = Integer.parseInt(t.image);
           result.setValorEnt(valor);
@@ -960,7 +971,7 @@ public class Compilador implements CompiladorConstants {
           {if (true) return result;}
         break;
       case tCONSTCHAR:
-        jj_consume_token(tCONSTCHAR);
+        t = jj_consume_token(tCONSTCHAR);
            // Guardar el contenido de la cadena
           result.setValorString(t.image);
           // Char
@@ -969,7 +980,7 @@ public class Compilador implements CompiladorConstants {
           {if (true) return result;}
         break;
       case tCONSTCAD:
-        jj_consume_token(tCONSTCAD);
+        t = jj_consume_token(tCONSTCAD);
           // Guardar el contenido de la cadena
           result.setValorString(t.image);
           // Tipo cadena de caracteres

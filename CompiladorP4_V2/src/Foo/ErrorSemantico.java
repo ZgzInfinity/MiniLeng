@@ -7,6 +7,11 @@ public class ErrorSemantico extends Exception {
 	static final int COTA_MAXIMA = 255;
 	
 	// Error semantico personalizado del compilador
+	public ErrorSemantico() {
+		     
+	}
+	
+	// Error semantico personalizado del compilador
 	public ErrorSemantico(String msg) {
 	     System.out.println(" ERROR SEMANTICO : " + msg);
 	}

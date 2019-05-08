@@ -15,7 +15,9 @@ import Foo.Simbolo.Tipo_simbolo;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
 import Foo.SimboloNoEncontradoException;
-import Foo.TipoOperador.Tipo_Operador;
+import Foo.TipoOperador.Tipo_Operador_Aditivo;
+import Foo.TipoOperador.Tipo_Operador_Multiplicativo;
+import Foo.TipoOperador.Tipo_Operador_Relacional;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -603,10 +605,10 @@ void lista_expresiones() :
 }
 
 // Regla de expresion OK
-Simbolo.Tipo_variable expresion() :
+RegistroExp expresion() :
 {
   // Declaracion de expresiones a analizar
-  Simbolo.Tipo_variable tpExp1, tpExp2;
+  RegistroExp tpExp1, tpExp2;
 }
 {
   try
@@ -618,12 +620,13 @@ Simbolo.Tipo_variable expresion() :
       tpExp2 = expresion_simple()
       {
         // Evaluacion de los datos
-        if ((tpExp1 != Simbolo.Tipo_variable.DESCONOCIDO)
-        && (tpExp2 != Simbolo.Tipo_variable.DESCONOCIDO) && (tpExp1 != tpExp2)) {
+        if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+        && (tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO) && (tpExp1 != tpExp2)) {
            // Comprobacion de si es booleano o no 
            ErrorSemantico eSM = new ErrorSemantico("Los operandos deben ser del mismo tipo");
         }
       }
+      // Devolucion de la expresion
     ) *
   }
   catch (ParseException e)
@@ -664,19 +667,19 @@ TipoOperador operador_aditivo() :
     < tPLUS >
     {
      	// El operador es una suma
-     	op.setOperador(TipoOperador.Tipo_Operador.SUMA);
+     	op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.SUMA);
      	return op;
     }
   | < tMINUS >
   	{
   	  	// El operaodr es una resta
-  	    op.setOperador(TipoOperador.Tipo_Operador.RESTA);
+  	    op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.RESTA);
   	    return op;
   	}
   | < tOR >
   	{
   	  	// El operador es un OR
-  	    op.setOperador(TipoOperador.Tipo_Operador.OR);
+  	    op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.OR);
   	    return op;
   	}
   }
@@ -687,7 +690,7 @@ TipoOperador operador_aditivo() :
 }
 
 // regla de expresion simple OK
-Simbolo.Tipo_variable expresion_simple() :
+RegistroExp expresion_simple() :
 {
   // Declaracion de variables
   RegistroExp regTerm1, regTerm2, regResult;
@@ -711,8 +714,8 @@ Simbolo.Tipo_variable expresion_simple() :
         ok = true;
 
         // Evaluar el simbolo introducido
-        switch(op.Tipo_Operador) {
-          case Tipo_Operador.SUMA:
+        switch(op.getOperadorAditivo()) {
+          case SUMA:
           	// El operador es una suma
 
           	// Evaluar primer termino de la expresion
@@ -755,7 +758,7 @@ Simbolo.Tipo_variable expresion_simple() :
           	  }         	    
           	}
           	break;
-          	case Tipo_Operador.RESTA:
+          	case RESTA:
           	// El operador es una resta
 
           	// Evaluar primer termino de la expresion
@@ -798,7 +801,7 @@ Simbolo.Tipo_variable expresion_simple() :
           	  }         	    
           	}
           	break;
-          	case Tipo_Operador.OR:
+          	case OR:
           	// El operador es un OR logico
 
           	// Evaluar primer termino de la expresion
@@ -845,6 +848,7 @@ Simbolo.Tipo_variable expresion_simple() :
           		// No es un operador aditivo valido
           		ErrorSemantico eSM = new ErrorSemantico("El operador aditivo es desconocido");
         }
+        return regResult;
       }
       ) *
   }
@@ -854,6 +858,7 @@ Simbolo.Tipo_variable expresion_simple() :
   }
 }
 
+// LOS OPERADORES SON AND Y ESAS MIERDAS EH
 // Regla de termino OK
 RegistroExp termino() :
 {
@@ -883,8 +888,8 @@ RegistroExp termino() :
           ok = true;
 
         // Evaluar el simbolo introducido
-        switch(op.Tipo_Operador) {
-          case Tipo_Operador.SUMA:
+        switch(op.getOperadorAditivo()) {
+          case SUMA:
           	// El operador es una suma
 
           	// Evaluar primer termino de la expresion
@@ -927,12 +932,12 @@ RegistroExp termino() :
           	  }         	    
           	}
           	break;
-          	case Tipo_Operador.RESTA:
+          	case RESTA:
           	// El operador es una resta
 
           	// Evaluar primer termino de la expresion
-          	if ((tpFactor1 != Simbolo.Tipo_variable.DESCONOCIDO)
-          		&& (tpFactor2 != Simbolo.Tipo_variable.ENTERO))
+          	if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+          		&& (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
           	{
           		  ErrorSemantico eSM = new ErrorSemantico("El factor 1 debe ser entero");
           		  ok = false;
@@ -970,7 +975,7 @@ RegistroExp termino() :
           	  }         	    
           	}
           	break;
-          	case Tipo_Operador.OR:
+          	case OR:
           	// El operador es un OR logico
 
           	// Evaluar primer termino de la expresion
@@ -1018,6 +1023,8 @@ RegistroExp termino() :
           		ErrorSemantico eSM = new ErrorSemantico("El operador multiplicativo" +
           												" es desconocido");
         }
+        // Devolucion de la expresion
+        return regResult;
        }
       ) *
   }
@@ -1039,31 +1046,31 @@ TipoOperador operador_multiplicativo() :
     < tMULTIPLY >
     {
       // El operador es una multiplicacion
-      op.setOperador(TipoOperador.Tipo_Operador.MULTIPLICACION);
+      op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MULTIPLICACION);
       return op;
     }
   | < tDIVIDE >
   	{
   	  // El operador es un cociente (opcion 1)
-      op.setOperador(TipoOperador.Tipo_Operador.DIVISION);
+      op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       return op;
   	}
   | < tDIV >
   	{
   	  // El operador es un cociente (opcion 2)
-      op.setOperador(TipoOperador.Tipo_Operador.DIVISION);
+      op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       return op;
   	}
   | < tMOD >
   	{
   	  // El operador es un modulo o residuo
-      op.setOperador(TipoOperador.Tipo_Operador.MOD);
+      op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MOD);
       return op;
   	}
   | < tAND >
   	{
   	  // El operador es una AND logica
-      op.setOperador(TipoOperador.Tipo_Operador.AND);
+      op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.AND);
       return op;
   	}
   }
@@ -1077,9 +1084,7 @@ TipoOperador operador_multiplicativo() :
 RegistroExp factor() :
 {
    // Declaracion de factores y expresiones
-   RegistroExp tpFactor;
-
-   Simbolo.Tipo_variable tpExp;
+   RegistroExp tpFactor, tpExp;
    RegistroExp result = new RegistroExp();
 
 	// Token a procesar
@@ -1120,8 +1125,8 @@ RegistroExp factor() :
   | < tENTACAR > < tPARENTESIS_IZDA > tpExp = expresion() < tPARENTESIS_DCHA >
   	{
   	  // Comprobacion de si es entera la expresion
-  	  if ((tpExp != Simbolo.Tipo_variable.ENTERO)
-  	  	  && (tpExp != Simbolo.Tipo_variable.DESCONOCIDO))
+  	  if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
+  	  	  && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
   	  {
   	    // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("La expresion no se puede convertir " +
@@ -1130,18 +1135,23 @@ RegistroExp factor() :
   	  else
   	  {
   	    // Es un entero y se comprueba que no hay desbordamiento
-  	    if (!hayDesbordamiebto(valor))
+  	    int valor = tpExp.getValorEnt();
+  	    
+  	    // Error de desbordamiento
+  	    ErrorSemantico eSM = new ErrorSemantico();
+  	    
+  	    if (!eSM.hayDesbordamiento(valor))
   	    {
   	      // Comprobacion de si es booleano o no 
-          ErrorSemantico eSM = new ErrorSemantico("Desbordamiento detectado");
+          eSM = new ErrorSemantico("Desbordamiento detectado");
   	  	}
   	  }
   	  return tpExp;
   	}
   | < tCARAENT > < tPARENTESIS_IZDA > tpExp = expresion() < tPARENTESIS_DCHA >
   	{
-  	  if ((tpExp != Simbolo.Tipo_variable.CHAR)
-  	  		&& (tpExp != Simbolo.Tipo_variable.DESCONOCIDO))
+  	  if ((tpExp.getTipo() != Simbolo.Tipo_variable.CHAR)
+  	  		&& (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
   	  {
   	  	// Comprobacion de si es o no caracter
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba CARACTER");
@@ -1150,9 +1160,9 @@ RegistroExp factor() :
   	}
   | < tIDENTIFICADOR >
   	{
-  	  
+  	  // AQUI QUE HAY QUE HACER
   	}
-  | < tCONSTANTE_NUMERICA >
+  | t = < tCONSTANTE_NUMERICA >
   	{
   	  // Obtener el valor del token y pasarlo a entero para guardarlo
   	  int valor = Integer.parseInt(t.image);
@@ -1164,7 +1174,7 @@ RegistroExp factor() :
 	  // Devolucion del resultado
   	  return result;
   	}
-  | < tCONSTCHAR >
+  | t = < tCONSTCHAR >
   	{
   	   // Guardar el contenido de la cadena
   	  result.setValorString(t.image);
@@ -1173,7 +1183,7 @@ RegistroExp factor() :
   	  // Devolucion del resultado
   	  return result;
   	}
-  | < tCONSTCAD >
+  | t = < tCONSTCAD >
   	{
   	  // Guardar el contenido de la cadena
   	  result.setValorString(t.image);
