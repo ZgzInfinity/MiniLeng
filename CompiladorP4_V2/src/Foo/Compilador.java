@@ -370,6 +370,10 @@ public class Compilador implements CompiladorConstants {
   static final public RegistroExp expresion() throws ParseException {
   // Declaracion de expresiones a analizar
   RegistroExp tpExp1, tpExp2;
+  TipoOperador op;
+
+  boolean ok;
+  RegistroExp regResult = new RegistroExp();
     try {
       // Obtencion de la primera expresion
           tpExp1 = expresion_simple();
@@ -388,42 +392,341 @@ public class Compilador implements CompiladorConstants {
           jj_la1[8] = jj_gen;
           break label_4;
         }
-        operador_relacional();
+        op = operador_relacional();
         // Obtencion de la segunda expresion
               tpExp2 = expresion_simple();
-        // Evaluacion de los datos
-        if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-        && (tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO) && (tpExp1 != tpExp2)) {
-           // Comprobacion de si es booleano o no 
-           ErrorSemantico eSM = new ErrorSemantico("Los operandos deben ser del mismo tipo");
+        // Evaluacion de la expresion
+        // Resultado de evaluar la expresion
+        regResult = new RegistroExp();
+        ok = true;
+
+        // Evaluar el simbolo introducido
+        switch(op.getOperadorRelacional()) {
+          case IGUAL:
+                // El operador es una suma
+
+                // Evaluar primer termino de la expresion
+                if (tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter, cadena o booleano");
+                          ok = false;
+                }
+                // Evaluar segundo termino de la expresion
+                if (tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter, cadena o booleano");
+                          ok = false;
+                }
+                // Comprobar que todo ha ido bien y evaluar la expresion
+                if (ok) {
+                  // Verficar que los dos operandos son del mismo tipo
+                  if (tpExp1.getTipo() == tpExp2.getTipo())
+                  {
+                        // Tipo de la nueva expresion
+                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+                                        // Extracion de los valores numericos de cada operador
+
+                                        // OJO
+                                int operando1 = tpExp1.getValorEnt();
+                                int operando2 = tpExp2.getValorEnt();
+
+                                        // Suma de los operandos numericos
+                                boolean resul = operando1 == operando2;
+
+                                // Asignacion del resultado a la expresion resultado 
+                        regResult.setValorBool(resul);
+                  }
+                  else
+                  {
+                    // Error semantico de tipos distintos
+                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
+                  }
+                }
+                break;
+                case MENOR:
+                // El operador es una suma
+
+                // Evaluar primer termino de la expresion
+                if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpExp1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter o cadena");
+                          ok = false;
+                }
+                // Evaluar segundo termino de la expresion
+                if ((tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpExp2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter o cadena");
+                          ok = false;
+                }
+                // Comprobar que todo ha ido bien y evaluar la expresion
+                if (ok) {
+                  // Verficar que los dos operandos son del mismo tipo
+                  if (tpExp1.getTipo() == tpExp2.getTipo())
+                  {
+                        // Tipo de la nueva expresion
+                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+                                        // Extracion de los valores numericos de cada operador
+
+                                        // OJO
+                                int operando1 = tpExp1.getValorEnt();
+                                int operando2 = tpExp2.getValorEnt();
+
+                                        // Suma de los operandos numericos
+                                boolean resul = operando1 < operando2;
+
+                                // Asignacion del resultado a la expresion resultado 
+                        regResult.setValorBool(resul);
+                  }
+                  else
+                  {
+                    // Error semantico de tipos distintos
+                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
+                  }
+                }
+                break;
+                case MENOR_IGUAL:
+                // El operador es una suma
+
+                // Evaluar primer termino de la expresion
+                if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpExp1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter o cadena");
+                          ok = false;
+                }
+                // Evaluar segundo termino de la expresion
+                if ((tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpExp2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter o cadena");
+                          ok = false;
+                }
+                // Comprobar que todo ha ido bien y evaluar la expresion
+                if (ok) {
+                  // Verficar que los dos operandos son del mismo tipo
+                  if (tpExp1.getTipo() == tpExp2.getTipo())
+                  {
+                        // Tipo de la nueva expresion
+                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+                                        // Extracion de los valores numericos de cada operador
+
+                                        // OJO
+                                int operando1 = tpExp1.getValorEnt();
+                                int operando2 = tpExp2.getValorEnt();
+
+                                        // Suma de los operandos numericos
+                                boolean resul = operando1 == operando2;
+
+                                // Asignacion del resultado a la expresion resultado 
+                        regResult.setValorBool(resul);
+                  }
+                  else
+                  {
+                    // Error semantico de tipos distintos
+                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
+                  }
+                }
+                break;
+                case NO_IGUAL:
+                // El operador es una suma
+
+                // Evaluar primer termino de la expresion
+                if (tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter, cadena, booleano");
+                          ok = false;
+                }
+                // Evaluar segundo termino de la expresion
+                if (tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter, cadena o booleano");
+                          ok = false;
+                }
+                // Comprobar que todo ha ido bien y evaluar la expresion
+                if (ok) {
+                  // Verficar que los dos operandos son del mismo tipo
+                  if (tpExp1.getTipo() == tpExp2.getTipo())
+                  {
+                        // Tipo de la nueva expresion
+                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+                                        // Extracion de los valores numericos de cada operador
+
+                                        // OJO
+                                int operando1 = tpExp1.getValorEnt();
+                                int operando2 = tpExp2.getValorEnt();
+
+                                        // Suma de los operandos numericos
+                                boolean resul = operando1 != operando2;
+
+                                // Asignacion del resultado a la expresion resultado 
+                        regResult.setValorBool(resul);
+                  }
+                  else
+                  {
+                    // Error semantico de tipos distintos
+                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
+                  }
+                }
+                break;
+                case MAYOR_IGUAL:
+                // El operador es una suma
+
+                // Evaluar primer termino de la expresion
+                if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpExp1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter o cadena");
+                          ok = false;
+                }
+                // Evaluar segundo termino de la expresion
+                if ((tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpExp2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter o cadena");
+                          ok = false;
+                }
+                // Comprobar que todo ha ido bien y evaluar la expresion
+                if (ok) {
+                  // Verficar que los dos operandos son del mismo tipo
+                  if (tpExp1.getTipo() == tpExp2.getTipo())
+                  {
+                        // Tipo de la nueva expresion
+                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+                                        // Extracion de los valores numericos de cada operador
+
+                                        // OJO
+                                int operando1 = tpExp1.getValorEnt();
+                                int operando2 = tpExp2.getValorEnt();
+
+                                        // Suma de los operandos numericos
+                                boolean resul = operando1 >= operando2;
+
+                                // Asignacion del resultado a la expresion resultado 
+                        regResult.setValorBool(resul);
+                  }
+                  else
+                  {
+                    // Error semantico de tipos distintos
+                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
+                  }
+                }
+                break;
+                case MAYOR:
+                // El operador es una suma
+
+                // Evaluar primer termino de la expresion
+                if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpExp1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter o cadena");
+                          ok = false;
+                }
+                // Evaluar segundo termino de la expresion
+                if ((tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpExp2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+                                                                                                                "caracter o cadena");
+                          ok = false;
+                }
+                // Comprobar que todo ha ido bien y evaluar la expresion
+                if (ok) {
+                  // Verficar que los dos operandos son del mismo tipo
+                  if (tpExp1.getTipo() == tpExp2.getTipo())
+                  {
+                        // Tipo de la nueva expresion
+                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+                                        // Extracion de los valores numericos de cada operador
+
+                                        // OJO
+                                int operando1 = tpExp1.getValorEnt();
+                                int operando2 = tpExp2.getValorEnt();
+
+                                        // Suma de los operandos numericos
+                                boolean resul = operando1 > operando2;
+
+                                // Asignacion del resultado a la expresion resultado 
+                        regResult.setValorBool(resul);
+                  }
+                  else
+                  {
+                    // Error semantico de tipos distintos
+                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
+                  }
+                }
+                default:
+                        // No es un operador aditivo valido
+                        ErrorSemantico eSM = new ErrorSemantico("El operador relacional es desconocido");
         }
+        // Devolucion de la expresion
+        {if (true) return regResult;}
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de operador_relacional OK
-  static final public void operador_relacional() throws ParseException {
+  static final public TipoOperador operador_relacional() throws ParseException {
+  // Declaracion de variables
+  TipoOperador op = new TipoOperador();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tIGUAL:
         jj_consume_token(tIGUAL);
+      // Es el operador ==
+      op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.IGUAL);
+      {if (true) return op;}
         break;
       case tMENOR:
         jj_consume_token(tMENOR);
+           // Es el operador <
+           op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR);
+       {if (true) return op;}
         break;
       case tMEI:
         jj_consume_token(tMEI);
+           // Es el operador <=
+           op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR_IGUAL);
+       {if (true) return op;}
         break;
       case tNI:
         jj_consume_token(tNI);
+           // Es el operador <>
+           op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.NO_IGUAL);
+       {if (true) return op;}
         break;
       case tMAI:
         jj_consume_token(tMAI);
+           // Es el operador >=
+           op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR_IGUAL);
+       {if (true) return op;}
         break;
       case tMAYOR:
         jj_consume_token(tMAYOR);
+           // Es el operador >
+           op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR);
+       {if (true) return op;}
         break;
       default:
         jj_la1[9] = jj_gen;
@@ -433,6 +736,7 @@ public class Compilador implements CompiladorConstants {
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla operador aditivo OK
@@ -678,22 +982,24 @@ public class Compilador implements CompiladorConstants {
           ok = true;
 
         // Evaluar el simbolo introducido
-        switch(op.getOperadorAditivo()) {
-          case SUMA:
+        switch(op.getOperadorMultiplicativo()) {
+          case MULTIPLICACION:
                 // El operador es una suma
 
                 // Evaluar primer termino de la expresion
                 if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
                         && (tpFactor1.getTipo() != Simbolo.Tipo_variable.ENTERO))
                 {
-                          ErrorSemantico eSM = new ErrorSemantico("El factor 1 debe ser entero");
+                          ErrorSemantico eSM = new ErrorSemantico("El factor 1 del producto " +
+                                                                                                                "debe ser entero");
                           ok = false;
                 }
                 // Evaluar segundo termino de la expresion
                 if ((tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
                         && (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
                 {
-                          ErrorSemantico eSM = new ErrorSemantico("El factor 2 debe ser entero");
+                          ErrorSemantico eSM = new ErrorSemantico("El factor 2 del producto " +
+                                                                                                                "debe ser entero");
                           ok = false;
                 }
                 // Comprobar que todo ha ido bien y evaluar la expresion
@@ -709,8 +1015,8 @@ public class Compilador implements CompiladorConstants {
                                 int operando1 = tpFactor1.getValorEnt();
                                 int operando2 = tpFactor2.getValorEnt();
 
-                                        // Suma de los operandos numericos
-                                int resul = operando1 + operando2;
+                                        // Multiplicacion de los operandos numericos
+                                int resul = operando1 * operando2;
 
                                 // Asignacion del resultado a la expresion resultado 
                         regResult.setValorEnt(resul);
@@ -722,21 +1028,21 @@ public class Compilador implements CompiladorConstants {
                   }
                 }
                 break;
-                case RESTA:
+                case DIVISION:
                 // El operador es una resta
 
                 // Evaluar primer termino de la expresion
                 if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
                         && (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
                 {
-                          ErrorSemantico eSM = new ErrorSemantico("El factor 1 debe ser entero");
+                          ErrorSemantico eSM = new ErrorSemantico("El dividendo debe ser entero");
                           ok = false;
                 }
                 // Evaluar segundo termino de la expresion
                 if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
                         && (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
                 {
-                          ErrorSemantico eSM = new ErrorSemantico("El factor 2 debe ser entero");
+                          ErrorSemantico eSM = new ErrorSemantico("El divisor debe ser entero");
                           ok = false;
                 }
                 // Comprobar que todo ha ido bien y evaluar la expresion
@@ -745,18 +1051,31 @@ public class Compilador implements CompiladorConstants {
                   if (tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
                                 && tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
                   {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+                        // Comprobacion de que el segundo termino no es cero
+                        int operando2 = tpFactor2.getValorEnt();
 
-                                        // Extracion de los valores numericos de cada operador
-                                int operando1 = tpFactor1.getValorEnt();
-                                int operando2 = tpFactor2.getValorEnt();
+                        if (operando2 != 0)
+                        {
+                          // La operacion se puede efectuar
+                          // Tipo de la nueva expresion
+                              regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
 
-                                        // Suma de los operandos numericos
-                                int resul = operando1 - operando2;
+                                          // Extracion de los valores numericos de cada operador
+                                  int operando1 = tpFactor1.getValorEnt();
 
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorEnt(resul);
+
+                                      // Cocientes de los operandos
+                                  int resul = operando1 / operando2;
+
+                              // Asignacion del resultado a la expresion resultado 
+                              regResult.setValorEnt(resul);
+                        }
+                        else
+                        {
+                          // Error al dividir por cero
+                          ErrorSemantico eSM = new ErrorSemantico("Division por cero");
+                                  ok = false;
+                        }
                   }
                   else
                   {
@@ -765,8 +1084,64 @@ public class Compilador implements CompiladorConstants {
                   }
                 }
                 break;
-                case OR:
+                case MOD:
                 // El operador es un OR logico
+
+                // Evaluar primer termino de la expresion
+                if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpFactor1.getTipo() != Simbolo.Tipo_variable.ENTERO))
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El dividendo debe ser entero");
+                          ok = false;
+                }
+                // Evaluar segundo termino de la expresion
+                if ((tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                        && (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
+                {
+                          ErrorSemantico eSM = new ErrorSemantico("El divisor debe ser entero");
+                          ok = false;
+                }
+                // Comprobar que todo ha ido bien y evaluar la expresion
+                if (ok) {
+                  // Calculo de la expresion
+                  if (tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
+                                && tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+                  {
+                        // Comprobacion de que el segundo termino no es cero
+                        int operando2 = tpFactor2.getValorEnt();
+
+                        if (operando2 != 0)
+                        {
+                          // La operacion se puede efectuar
+                          // Tipo de la nueva expresion
+                              regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+                                          // Extracion de los valores numericos de cada operador
+                                  int operando1 = tpFactor1.getValorEnt();
+
+
+                                      // Modulo de los operandos
+                                  int resul = operando1 % operando2;
+
+                              // Asignacion del resultado a la expresion resultado 
+                              regResult.setValorEnt(resul);
+                        }
+                        else
+                        {
+                          // Error al dividir por cero
+                          ErrorSemantico eSM = new ErrorSemantico("Modulo por cero");
+                                  ok = false;
+                        }
+                  }
+                  else
+                  {
+                    // El tipo de la expresion es desconocido
+                    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                  }
+                }
+                break;
+                case AND:
+                // El operador es una AND logica
 
                 // Evaluar primer termino de la expresion
                 if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
@@ -789,14 +1164,14 @@ public class Compilador implements CompiladorConstants {
                                 && tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
                   {
                         // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
 
                                         // Extracion de los valores numericos de cada operador
                                 boolean operando1 = tpFactor1.isValorBool();
                                 boolean operando2 = tpFactor2.isValorBool();
 
-                                        // Suma de los operandos numericos
-                                boolean resul = operando1 | operando2;
+                                        // Operacion logica AND de los operandos
+                                boolean resul = operando1 & operando2;
 
                                 // Asignacion del resultado a la expresion resultado 
                         regResult.setValorBool(resul);

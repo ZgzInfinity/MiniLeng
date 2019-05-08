@@ -17,7 +17,7 @@ public class TipoOperador {
 	
 	// Representacion de operador multiplicativos
 	public enum Tipo_Operador_Relacional {
-		 IGUAL, MENOR, MENOR_IGUAL, NO_IGUAL, MAYOR_IGUAL, MYOR
+		 IGUAL, MENOR, MENOR_IGUAL, NO_IGUAL, MAYOR_IGUAL, MAYOR;
 	}
 	
 	
@@ -74,7 +74,7 @@ public class TipoOperador {
 	 * Pre: ---
 	 * Post: Ha devuelto el tipo de operador relacional
 	 */
-	public Tipo_Operador_Relacional getOperadorRel() {
+	public Tipo_Operador_Relacional getOperadorRelacional() {
 		return operadorRel;
 	}
 
@@ -83,7 +83,7 @@ public class TipoOperador {
 	 * Pre: ---
 	 * Post: Ha asignado a <<operadorRel>> el tipo de operador relacional <<operdorRel>>
 	 */
-	public void setOperadorRel(Tipo_Operador_Relacional operadorRel) {
+	public void setOperadorRelacional(Tipo_Operador_Relacional operadorRel) {
 		this.operadorRel = operadorRel;
 	}
 
