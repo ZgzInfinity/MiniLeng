@@ -374,6 +374,9 @@ public class Compilador implements CompiladorConstants {
 
   boolean ok;
   RegistroExp regResult = new RegistroExp();
+
+  // Comparador de cadenas 	
+  int compare;
     try {
       // Obtencion de la primera expresion
           tpExp1 = expresion_simple();
@@ -425,19 +428,52 @@ public class Compilador implements CompiladorConstants {
                   if (tpExp1.getTipo() == tpExp2.getTipo())
                   {
                         // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
                                         // Extracion de los valores numericos de cada operador
 
-                                        // OJO
-                                int operando1 = tpExp1.getValorEnt();
-                                int operando2 = tpExp2.getValorEnt();
+                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
+                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
 
-                                        // Suma de los operandos numericos
-                                boolean resul = operando1 == operando2;
+                                        // Resultado de evaluar la expresion
+                                        boolean resul;
 
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorBool(resul);
+                                        // Evaluar la expresion logica
+                                        switch(tpVar) {
+                                          case ENTERO:
+                                                // Datos de tipo entero
+                                                int op1 = tpExp1.getValorEnt();
+                                        int op2 = tpExp2.getValorEnt();
+
+                                        // Evaluacion de la expresion
+                                                resul = op1 == op2;
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                                  break;
+                                          case BOOLEANO:
+                                                // Datos de tipo booleano
+                                                boolean op3 = tpExp1.isValorBool();
+                                        boolean op4 = tpExp2.isValorBool();
+
+                                        // Evaluacion de la expresion
+                                                resul = op3 == op4;
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                                          break;
+                                          case CHAR:
+                                          case CADENA:
+                                                // Datos de tipo caracter o cadena
+                                                String op5 = tpExp1.getValorString();
+                                        String op6 = tpExp2.getValorString();
+
+                                        // Evaluacion de la expresion
+                                                resul = op5 == op6;
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                                        }
                   }
                   else
                   {
@@ -471,26 +507,59 @@ public class Compilador implements CompiladorConstants {
                   if (tpExp1.getTipo() == tpExp2.getTipo())
                   {
                         // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
                                         // Extracion de los valores numericos de cada operador
 
-                                        // OJO
-                                int operando1 = tpExp1.getValorEnt();
-                                int operando2 = tpExp2.getValorEnt();
+                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
+                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
 
-                                        // Suma de los operandos numericos
-                                boolean resul = operando1 < operando2;
+                                        // Resultado de evaluar la expresion
+                                        boolean resul;
 
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorBool(resul);
+                                        // Evaluar la expresion logica
+                                        switch(tpVar) {
+                                          case ENTERO:
+                                                // Datos de tipo entero
+                                                int op1 = tpExp1.getValorEnt();
+                                        int op2 = tpExp2.getValorEnt();
+
+                                        // Evaluacion de la expresion
+                                                resul = op1 < op2;
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                                  break;
+                                          case CHAR:
+                                          case CADENA:
+                                                // Datos de tipo caracter o cadena
+                                                String op5 = tpExp1.getValorString();
+                                        String op6 = tpExp2.getValorString();
+
+                                                // Comparacion de Strings
+                                        compare = op5.compareToIgnoreCase(op6);
+
+                                                if(compare < 0)
+                                                {
+                                                   // Es mas pequeño
+                                                   resul = true;
+                                                }
+                                                else
+                                                {
+                                                  // Es mayor
+                                                  resul = false;
+                                                }
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                                }
+                     }
                   }
                   else
                   {
                     // Error semantico de tipos distintos
                     ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
                   }
-                }
                 break;
                 case MENOR_IGUAL:
                 // El operador es una suma
@@ -517,26 +586,59 @@ public class Compilador implements CompiladorConstants {
                   if (tpExp1.getTipo() == tpExp2.getTipo())
                   {
                         // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
                                         // Extracion de los valores numericos de cada operador
 
-                                        // OJO
-                                int operando1 = tpExp1.getValorEnt();
-                                int operando2 = tpExp2.getValorEnt();
+                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
+                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
 
-                                        // Suma de los operandos numericos
-                                boolean resul = operando1 == operando2;
+                                        // Resultado de evaluar la expresion
+                                        boolean resul;
 
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorBool(resul);
+                                        // Evaluar la expresion logica
+                                        switch(tpVar) {
+                                          case ENTERO:
+                                                // Datos de tipo entero
+                                                int op1 = tpExp1.getValorEnt();
+                                        int op2 = tpExp2.getValorEnt();
+
+                                        // Evaluacion de la expresion
+                                                resul = op1 <= op2;
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                                  break;
+                                          case CHAR:
+                                          case CADENA:
+                                                // Datos de tipo caracter o cadena
+                                                String op5 = tpExp1.getValorString();
+                                        String op6 = tpExp2.getValorString();
+
+                                        // Comparacion de Strings
+                                        compare = op5.compareToIgnoreCase(op6);
+
+                                                if(compare <= 0)
+                                                {
+                                                   // Es mas pequeño o igual
+                                                   resul = true;
+                                                }
+                                                else
+                                                {
+                                                  // Es mayor
+                                                  resul = false;
+                                                }
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                         }
+                      }
                   }
                   else
                   {
                     // Error semantico de tipos distintos
                     ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
                   }
-                }
                 break;
                 case NO_IGUAL:
                 // El operador es una suma
@@ -561,26 +663,59 @@ public class Compilador implements CompiladorConstants {
                   if (tpExp1.getTipo() == tpExp2.getTipo())
                   {
                         // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
                                         // Extracion de los valores numericos de cada operador
 
-                                        // OJO
-                                int operando1 = tpExp1.getValorEnt();
-                                int operando2 = tpExp2.getValorEnt();
+                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
+                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
 
-                                        // Suma de los operandos numericos
-                                boolean resul = operando1 != operando2;
+                                        // Resultado de evaluar la expresion
+                                        boolean resul;
 
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorBool(resul);
+                                        // Evaluar la expresion logica
+                                        switch(tpVar) {
+                                          case ENTERO:
+                                                // Datos de tipo entero
+                                                int op1 = tpExp1.getValorEnt();
+                                        int op2 = tpExp2.getValorEnt();
+
+                                        // Evaluacion de la expresion
+                                                resul = op1 != op2;
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                                  break;
+                                          case BOOLEANO:
+                                                // Datos de tipo booleano
+                                                boolean op3 = tpExp1.isValorBool();
+                                        boolean op4 = tpExp2.isValorBool();
+
+                                        // Evaluacion de la expresion
+                                                resul = op3 != op4;
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                                          break;
+                                          case CHAR:
+                                          case CADENA:
+                                                // Datos de tipo caracter o cadena
+                                                String op5 = tpExp1.getValorString();
+                                        String op6 = tpExp2.getValorString();
+
+                                        // Evaluacion de la expresion
+                                                resul = op5 != op6;
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                        }
+                     }
                   }
                   else
                   {
                     // Error semantico de tipos distintos
                     ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
                   }
-                }
                 break;
                 case MAYOR_IGUAL:
                 // El operador es una suma
@@ -607,26 +742,59 @@ public class Compilador implements CompiladorConstants {
                   if (tpExp1.getTipo() == tpExp2.getTipo())
                   {
                         // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
                                         // Extracion de los valores numericos de cada operador
 
-                                        // OJO
-                                int operando1 = tpExp1.getValorEnt();
-                                int operando2 = tpExp2.getValorEnt();
+                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
+                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
 
-                                        // Suma de los operandos numericos
-                                boolean resul = operando1 >= operando2;
+                                        // Resultado de evaluar la expresion
+                                        boolean resul;
 
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorBool(resul);
+                                        // Evaluar la expresion logica
+                                        switch(tpVar) {
+                                          case ENTERO:
+                                                // Datos de tipo entero
+                                                int op1 = tpExp1.getValorEnt();
+                                        int op2 = tpExp2.getValorEnt();
+
+                                        // Evaluacion de la expresion
+                                                resul = op1 >= op2;
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                                  break;
+                                          case CHAR:
+                                          case CADENA:
+                                                // Datos de tipo caracter o cadena
+                                                String op5 = tpExp1.getValorString();
+                                        String op6 = tpExp2.getValorString();
+
+                                        // Comparacion de Strings
+                                        compare = op5.compareToIgnoreCase(op6);
+
+                                                if(compare >= 0)
+                                                {
+                                                   // Es mayor o igual
+                                                   resul = true;
+                                                }
+                                                else
+                                                {
+                                                  // Es mas pequeño
+                                                  resul = false;
+                                                }
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                       }
+                     }
                   }
                   else
                   {
                     // Error semantico de tipos distintos
                     ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
                   }
-                }
                 break;
                 case MAYOR:
                 // El operador es una suma
@@ -653,26 +821,59 @@ public class Compilador implements CompiladorConstants {
                   if (tpExp1.getTipo() == tpExp2.getTipo())
                   {
                         // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
                                         // Extracion de los valores numericos de cada operador
 
-                                        // OJO
-                                int operando1 = tpExp1.getValorEnt();
-                                int operando2 = tpExp2.getValorEnt();
+                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
+                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
 
-                                        // Suma de los operandos numericos
-                                boolean resul = operando1 > operando2;
+                                        // Resultado de evaluar la expresion
+                                        boolean resul;
 
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorBool(resul);
+                                        // Evaluar la expresion logica
+                                        switch(tpVar) {
+                                          case ENTERO:
+                                                // Datos de tipo entero
+                                                int op1 = tpExp1.getValorEnt();
+                                        int op2 = tpExp2.getValorEnt();
+
+                                        // Evaluacion de la expresion
+                                                resul = op1 > op2;
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                                  break;
+                                          case CHAR:
+                                          case CADENA:
+                                                // Datos de tipo caracter o cadena
+                                                String op5 = tpExp1.getValorString();
+                                        String op6 = tpExp2.getValorString();
+
+                                        // Comparacion de Strings
+                                        compare = op5.compareToIgnoreCase(op6);
+
+                                                if(compare > 0)
+                                                {
+                                                   // Es mayor
+                                                   resul = true;
+                                                }
+                                                else
+                                                {
+                                                  // Es menor o igual
+                                                  resul = false;
+                                                }
+
+                                                // Asignacion del resultado a la expresion resultado 
+                                regResult.setValorBool(resul);
+                        }
+                     }
                   }
                   else
                   {
                     // Error semantico de tipos distintos
                     ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
                   }
-                }
                 default:
                         // No es un operador aditivo valido
                         ErrorSemantico eSM = new ErrorSemantico("El operador relacional es desconocido");
