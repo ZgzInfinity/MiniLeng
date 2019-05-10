@@ -172,15 +172,18 @@ public class Compilador implements CompiladorConstants {
   }
 
   static final public void asig_invoc() throws ParseException {
+  // Declaracion de variables
+  Token t;
     try {
-      jj_consume_token(tIDENTIFICADOR);
+      // Pasar el token capturado como identificador a la invocacion de la accion
+          t = jj_consume_token(tIDENTIFICADOR);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tOPAS:
         asignacion();
         break;
       case tPUNTYCOM:
       case tPARENTESIS_IZDA:
-        invocacion_accion();
+        invocacion_accion(t);
         break;
       default:
         jj_la1[2] = jj_gen;
@@ -205,8 +208,49 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de lista_asignables OK
   static final public void lista_asignables() throws ParseException {
+  //Declaracion de variables
+  LinkedList<String> listaIdentificadores;
+
+  // identificador a evaluar
+  String idActual;
     try {
-      identificadores();
+      // Retorno de la lista de identificadores
+          listaIdentificadores = identificadores();
+      // Tamaño de la lista de identificadores
+      int dimension = listaIdentificadores.size();
+
+          // Simbolo a evaluar
+          Simbolo s;
+
+          // Recorrido de la lista 
+      for (int i = 0; i < dimension; i++) {
+
+        // obtencion del i-esimo identificador
+        idActual = listaIdentificadores.get(i);
+
+                try {
+                  // Busqueda del simbolo en la tabla de simbolos
+                  s = tabla.buscar_simbolo(idActual);
+
+                  // Simbolo se encuentra en la tabla
+                  if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
+                        && s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO
+                        && (!s.es_Variable_Entero() && !s.es_Variable_Char() && !s.es_Variable_Cadena()))
+                  {
+                         // Error semantico en la lista de asignables
+                         ErrorSemantico eSM = new ErrorSemantico("Tipo invalido de variable de lectura");
+                  }
+                  else if (s.es_Simbolo_Variable() && s.es_Parametro_Valor()) {
+                     // Error semantico en la lista de asignables
+                         ErrorSemantico eSM = new ErrorSemantico("Variable por valor en lectura");
+                  }
+                  // HACER ALGO ?
+        }
+        catch (SimboloNoEncontradoException e){
+           // Simbolo no encontrado en la tabla
+           e.simboloNoEncontrado(idActual);
+        }
+      }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -288,17 +332,44 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de invocacion accion OK
-  static final public void invocacion_accion() throws ParseException {
+  static final public void invocacion_accion(Token t) throws ParseException {
+  // Declaracion de variables
+  Simbolo s = null;
+  boolean args = false;
     try {
+      try {
+        // Busqueda del simbolo en la tabla
+        s = tabla.buscar_simbolo(t.image);
+
+        // Busqueda con exito en la tabla de simbolos
+        if (!s.es_Simbolo_Accion())
+        {
+          // error al invocar la accion
+          ErrorSemantico eSM = new ErrorSemantico("No se puede realizar una llamada " +
+                                                         " a una accion sobre un parametro");
+        }
+      } catch (SimboloNoEncontradoException e) {
+        // Simbolo no encontrado
+        e.simboloNoEncontrado(t.image);
+      }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZDA:
-        argumentos();
+        argumentos(s);
+          args = true;
         break;
       default:
         jj_la1[5] = jj_gen;
         ;
       }
       jj_consume_token(tPUNTYCOM);
+      // Comprobar el numero de parametros en caso de que se llame sin ninguno
+      int argc = s.getLista_parametros().size();
+      if(!args && s!= null && argc != 0) {
+                // Error por falta de parametros
+                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                "  -  Se esperaban " + argc + " par\u00e1metros al invocar a la accion " +
+                s.getNombre());
+       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -306,9 +377,16 @@ public class Compilador implements CompiladorConstants {
 
 //Regla de mientras que OK
   static final public void mientras_que() throws ParseException {
+  // Declaracion de variables
+  RegistroExp tpExp;
     try {
       jj_consume_token(tMQ);
-      expresion();
+      tpExp = expresion();
+      if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+        && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+      {
+        ErrorSemantico eSM = new ErrorSemantico("La condicion de mientras_que debe ser booleana");
+      }
       lista_sentencias();
       jj_consume_token(tFMQ);
     } catch (ParseException e) {
@@ -317,7 +395,9 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla para los argumentos OK
-  static final public void argumentos() throws ParseException {
+  static final public void argumentos(Simbolo s) throws ParseException {
+  //Declaracion de variables
+  boolean ok = false;
     try {
       jj_consume_token(tPARENTESIS_IZDA);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -332,22 +412,71 @@ public class Compilador implements CompiladorConstants {
       case tCONSTANTE_NUMERICA:
       case tIDENTIFICADOR:
       case tPARENTESIS_IZDA:
-        lista_expresiones();
+        lista_expresiones(s);
+      // Captura bien la expresion
+      ok = true;
         break;
       default:
         jj_la1[6] = jj_gen;
         ;
       }
       jj_consume_token(tPARENTESIS_DCHA);
+      // Comprobar los parametros de la invocacion en caso de que
+      // se invoque con parametros distintos
+      int argc = s.getLista_parametros().size();
+
+      if (!ok && s != null && argc != 0)
+      {
+        // Error de invocacion de parametros
+        ErrorSemantico ESM = new ErrorSemantico("linea " + token.beginLine +
+                " - Se esperaban " + argc + " par\u00e1metros al invocar a la accion " +
+                 s.getNombre());
+      }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
   }
 
 // Regla de lista de expresiones
-  static final public void lista_expresiones() throws ParseException {
+  static final public void lista_expresiones(Simbolo s) throws ParseException {
+  // Declaracion de variables
+  RegistroExp r;
+  int argc = 0;
+  boolean ok = true;
+  LinkedList<Simbolo> parametros;
     try {
-      expresion();
+      // Captura de la primera expresion
+          r = expresion();
+      if (s != null && !s.es_Variable_Desconocido()) {
+                // Obtencion de la lista de parametros de la accion
+            parametros = s.getLista_parametros();
+
+                argc++;
+
+                // Numero de parametros incorrecto
+                if(argc > parametros.size()) {
+                                ErrorSemantico eMS = new ErrorSemantico("El n\u00famero de par\u00e1metros de" +
+                                                             " llamada a la funci\u00f3n " + s.getNombre() +
+                                                             " no coindice, se esperaban " + parametros.size());
+                                ok = false;
+                }
+                // Comprobacion de los tipos en la funcion AQUI ESTAMOS
+                else if (r.getTipo() == parametros.get(argc - 1).getVariable())
+                {
+                                ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
+                                                                                                                 s.getNombre() + " no coindicen");
+                                ok = false;
+                        }
+                        else if (r.getClase() == Simbolo.Clase_parametro.VAL && !parametros.get(argc - 1).es_Parametro_Valor() ) {
+                                ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
+                                ok = false;
+                        }
+                }
+                else
+                {
+                  // Todo ha ido bien
+                  ok = false;
+                }
       label_3:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -359,7 +488,38 @@ public class Compilador implements CompiladorConstants {
           break label_3;
         }
         jj_consume_token(tCOMA);
-        expresion();
+        // Procesamiento de la nueva expresion
+               r = expresion();
+          if (s != null && !s.es_Variable_Desconocido()) {
+                // Obtencion de la lista de parametros de la accion
+            parametros = s.getLista_parametros();
+
+                argc++;
+
+                // Numero de parametros incorrecto
+                if(argc > parametros.size()) {
+                                ErrorSemantico eMS = new ErrorSemantico("El n\u00famero de par\u00e1metros de" +
+                                                             " llamada a la funci\u00f3n " + s.getNombre() +
+                                                             " no coindice, se esperaban " + parametros.size());
+                                ok = false;
+                }
+                // Comprobacion de los tipos en la funcion AQUI ESTAMOS
+                else if (r.getTipo() == parametros.get(argc - 1).getVariable())
+                {
+                                ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
+                                                                                                                 s.getNombre() + " no coindicen");
+                                ok = false;
+                        }
+                        else if (r.getClase() == Simbolo.Clase_parametro.VAL && !parametros.get(argc - 1).es_Parametro_Valor() ) {
+                                ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
+                                ok = false;
+                        }
+                }
+                else
+                {
+                  // Todo ha ido bien
+                  ok = false;
+                }
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -1595,9 +1755,18 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de seelccion OK
   static final public void seleccion() throws ParseException {
+  // Declaracion de variables
+  RegistroExp tpExp;
     try {
       jj_consume_token(tSI);
-      expresion();
+      tpExp = expresion();
+      // Evaluacion de la condicion
+      if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+        && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+      {
+        // Se esperaba una condicion booleana
+        ErrorSemantico eSM = new ErrorSemantico("La condicion en la seleccion debe ser un booleano");
+      }
       jj_consume_token(tENT);
       lista_sentencias();
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {

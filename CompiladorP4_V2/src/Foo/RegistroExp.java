@@ -1,5 +1,6 @@
 package Foo;
 
+import Foo.Simbolo.Clase_parametro;
 
 public class RegistroExp {
 	// Valor entero de la exresion
@@ -14,6 +15,11 @@ public class RegistroExp {
 	
 	// Tipo de variable de la expresion
 	Simbolo.Tipo_variable tipo;
+	
+	// Tipo de clase de parametro
+	Simbolo.Clase_parametro clase;
+
+
 
 	/*
 	 * Pre: ---
@@ -91,6 +97,26 @@ public class RegistroExp {
 	 */
 	public void setValorString(String valorString) {
 		this.valorString = valorString;
+	}
+	
+	
+	
+	/*
+	 * Pre: ---
+	 * Post: Ha devuelto la clase del parametro
+	 */
+	public Simbolo.Clase_parametro getClase() {
+		return clase;
+	}
+
+
+
+	/*
+	 * Pre: ---
+	 * Post: Ha asignado a <<clase>> es tipo de clase <<clase>>
+	 */
+	public void setClase(Simbolo.Clase_parametro clase) {
+		this.clase = clase;
 	}
 
 }

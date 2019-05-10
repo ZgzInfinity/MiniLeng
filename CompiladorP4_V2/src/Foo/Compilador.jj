@@ -438,12 +438,14 @@ void sentencia() :
 
 void asig_invoc() :
 {
+  // Declaracion de variables
+  Token t;
 }
 {
   try
   {
-    < tIDENTIFICADOR > (asignacion()
-  | invocacion_accion())
+    // Pasar el token capturado como identificador a la invocacion de la accion
+    t = < tIDENTIFICADOR > ( asignacion(t) | invocacion_accion(t))
   }
   catch (ParseException e)
   {
@@ -452,13 +454,20 @@ void asig_invoc() :
 }
 
 // Regla de asignacion OK
-void asignacion() :
+void asignacion(Token t) :
 {
+  // Declaracion de variables
+  RegistroExp tpExp;
+  Simbolo s;
 }
 {
   try
   {
-    < tOPAS > expresion() < tPUNTYCOM >
+    < tOPAS >
+    {
+      // Comprobar que existe el simbolo en la tabla
+      
+    } expresion() < tPUNTYCOM >
   }
   catch (ParseException e)
   {
@@ -469,11 +478,54 @@ void asignacion() :
 // Regla de lista_asignables OK
 void lista_asignables() :
 {
+  //Declaracion de variables
+  LinkedList<String> listaIdentificadores;
+
+  // identificador a evaluar
+  String idActual;
 }
 {
   try
   {
-    identificadores()
+    // Retorno de la lista de identificadores
+    listaIdentificadores = identificadores()
+    {
+      // Tamaño de la lista de identificadores
+      int dimension = listaIdentificadores.size();
+
+	  // Simbolo a evaluar
+	  Simbolo s;
+
+	  // Recorrido de la lista 
+      for (int i = 0; i < dimension; i++) {
+        
+        // obtencion del i-esimo identificador
+        idActual = listaIdentificadores.get(i);
+
+		try {
+		  // Busqueda del simbolo en la tabla de simbolos
+		  s = tabla.buscar_simbolo(idActual);
+		  
+		  // Simbolo se encuentra en la tabla
+		  if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
+		  	&& s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO
+		  	&& (!s.es_Variable_Entero() && !s.es_Variable_Char() && !s.es_Variable_Cadena()))
+		  {
+		  	 // Error semantico en la lista de asignables
+		  	 ErrorSemantico eSM = new ErrorSemantico("Tipo invalido de variable de lectura");
+		  }
+		  else if (s.es_Simbolo_Variable() && s.es_Parametro_Valor()) {
+		     // Error semantico en la lista de asignables
+		  	 ErrorSemantico eSM = new ErrorSemantico("Variable por valor en lectura");
+		  }
+		  // HACER ALGO ?
+        }
+        catch (SimboloNoEncontradoException e){
+           // Simbolo no encontrado en la tabla
+           e.simboloNoEncontrado(idActual);
+        }
+      }
+    }
   }
   catch (ParseException e)
   {
@@ -545,13 +597,51 @@ void escribible() :
 }
 
 // Regla de invocacion accion OK
-void invocacion_accion() :
+void invocacion_accion(Token t) :
 {
+  // Declaracion de variables
+  Simbolo s = null;
+  boolean args = false;
 }
 {
   try
   {
-    (argumentos()) ? < tPUNTYCOM >
+    // Buscar el token t en la tabla de simbolos
+    try
+    {
+      { 
+        // Busqueda del simbolo en la tabla
+      	s = tabla.buscar_simbolo(t.image);
+
+      	// Busqueda con exito en la tabla de simbolos
+      	if (!s.es_Simbolo_Accion())
+      	{
+      	  // error al invocar la accion
+      	  ErrorSemantico eSM = new ErrorSemantico("No se puede realizar una llamada " +
+      	  						 " a una accion sobre un parametro");
+      	}
+     }
+    }
+    catch (SimboloNoEncontradoException e) {
+        // Simbolo no encontrado
+        e.simboloNoEncontrado(t.image);
+    }
+    // Continuacion de evaluacion de la expresion
+    (argumentos(s)
+  	{
+  	  args = true;
+  	}
+      )? < tPUNTYCOM >
+    {
+      // Comprobar el numero de parametros en caso de que se llame sin ninguno
+      int argc = s.getLista_parametros().size();
+      if(!args && s!= null && argc != 0) {
+        	// Error por falta de parametros
+        	ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+        	"  -  Se esperaban " + argc + " parámetros al invocar a la accion " +
+        	s.getNombre());
+       }
+    }
   }
   catch (ParseException e)
   {
@@ -562,11 +652,23 @@ void invocacion_accion() :
 //Regla de mientras que OK
 void mientras_que() :
 {
+  // Declaracion de variables
+  RegistroExp tpExp;
 }
 {
   try
   {
-    < tMQ > expresion() lista_sentencias() < tFMQ >
+    < tMQ > tpExp = expresion()
+    {
+      if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+      	&& (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+      {
+        // Error en la condicion del mientras que
+        ErrorSemantico eSM = new ErrorSemantico("La condicion de mientras_que debe ser booleana");
+      }
+    }
+    lista_sentencias()
+    < tFMQ >
   }
   catch (ParseException e)
   {
@@ -575,13 +677,33 @@ void mientras_que() :
 }
 
 // Regla para los argumentos OK
-void argumentos() :
+void argumentos(Simbolo s) :
 {
+  //Declaracion de variables
+  boolean ok = false;
 }
 {
   try
   {
-    < tPARENTESIS_IZDA > (lista_expresiones()) ? < tPARENTESIS_DCHA >
+    < tPARENTESIS_IZDA > ( lista_expresiones(s)
+    {
+      // Captura bien la expresion
+      ok = true;
+    }
+    )? < tPARENTESIS_DCHA >
+    {
+      // Comprobar los parametros de la invocacion en caso de que
+      // se invoque con parametros distintos
+      int argc = s.getLista_parametros().size();
+      
+      if (!ok && s != null && argc != 0)
+      {
+        // Error de invocacion de parametros
+        ErrorSemantico ESM = new ErrorSemantico("linea " + token.beginLine +
+        	" - Se esperaban " + argc + " parámetros al invocar a la accion " +
+        	 s.getNombre());
+      }
+    }
   }
   catch (ParseException e)
   {
@@ -590,13 +712,88 @@ void argumentos() :
 }
 
 // Regla de lista de expresiones
-void lista_expresiones() :
+void lista_expresiones(Simbolo s) :
 {
+  // Declaracion de variables
+  RegistroExp r;
+  int argc = 0;
+  boolean ok = true;
+  LinkedList<Simbolo> parametros;
 }
 {
   try
   {
-    expresion() (< tCOMA > expresion()) *
+    // Captura de la primera expresion
+    r = expresion()
+    {
+      if (s != null && !s.es_Variable_Desconocido()) {
+        	// Obtencion de la lista de parametros de la accion
+      	    parametros = s.getLista_parametros();
+      	    
+	    	argc++;
+
+	    	// Numero de parametros incorrecto
+	    	if(argc > parametros.size()) {
+				ErrorSemantico eMS = new ErrorSemantico("El número de parámetros de" +
+				                             " llamada a la función " + s.getNombre() +
+				                             " no coindice, se esperaban " + parametros.size());
+				ok = false;
+	     	}
+	     	// Comprobacion de los tipos en la funcion AQUI ESTAMOS
+	    	else if (r.getTipo() == parametros.get(argc - 1).getVariable())
+	    	{
+				ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
+														 s.getNombre() + " no coindicen");
+				ok = false;
+			}
+			else if (r.getClase() == Simbolo.Clase_parametro.VAL && !parametros.get(argc - 1).es_Parametro_Valor() ) {
+				ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
+				ok = false;
+			}
+		}
+		else
+		{
+		  // Todo ha ido bien
+		  ok = false;
+		}
+	}
+     (
+       < tCOMA >
+       // Procesamiento de la nueva expresion
+       r = expresion()
+       {
+          if (s != null && !s.es_Variable_Desconocido()) {
+        	// Obtencion de la lista de parametros de la accion
+      	    parametros = s.getLista_parametros();
+      	    
+	    	argc++;
+
+	    	// Numero de parametros incorrecto
+	    	if(argc > parametros.size()) {
+				ErrorSemantico eMS = new ErrorSemantico("El número de parámetros de" +
+				                             " llamada a la función " + s.getNombre() +
+				                             " no coindice, se esperaban " + parametros.size());
+				ok = false;
+	     	}
+	     	// Comprobacion de los tipos en la funcion AQUI ESTAMOS
+	    	else if (r.getTipo() == parametros.get(argc - 1).getVariable())
+	    	{
+				ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
+														 s.getNombre() + " no coindicen");
+				ok = false;
+			}
+			else if (r.getClase() == Simbolo.Clase_parametro.VAL && !parametros.get(argc - 1).es_Parametro_Valor() ) {
+				ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
+				ok = false;
+			}
+		}
+		else
+		{
+		  // Todo ha ido bien
+		  ok = false;
+		}
+	  }      
+     ) *
   }
   catch (ParseException e)
   {
@@ -1805,11 +2002,23 @@ RegistroExp factor() :
 // Regla de seelccion OK
 void seleccion() :
 {
+  // Declaracion de variables
+  RegistroExp tpExp;
 }
 {
   try
   {
-    < tSI > expresion() < tENT > lista_sentencias() (< tSI_NO > lista_sentencias()) ? < tFSI >
+    < tSI > tpExp = expresion()
+    {
+      // Evaluacion de la condicion
+      if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+      	&& (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+      {
+        // Se esperaba una condicion booleana
+        ErrorSemantico eSM = new ErrorSemantico("La condicion en la seleccion debe ser un booleano");
+      }
+    }
+    < tENT > lista_sentencias() (< tSI_NO > lista_sentencias()) ? < tFSI >
   }
   catch (ParseException e)
   {
