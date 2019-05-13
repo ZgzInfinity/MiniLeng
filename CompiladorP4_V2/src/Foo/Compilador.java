@@ -205,26 +205,29 @@ public class Compilador implements CompiladorConstants {
     try {
       jj_consume_token(tOPAS);
       // Comprobar que existe el simbolo en la tabla
-      try {
+      try
+      {
         // Se busca el simbolo en la tabla de simbolos
         s = tabla.buscar_simbolo(t.image);
-
         // el simbolo se ha encontrado bien
-        if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor()) {
-           ErrorSemantico eSM = new ErrorSemantico("No se permite realizar una asignacion a un" +
-                                                                                        " parametro pasado como valor");
-           // Tipo de simbolo desconocido
-           tipo = Simbolo.Tipo_variable.DESCONOCIDO;
-           ok = false;
+        if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
+        {
+          ErrorSemantico eSM = new ErrorSemantico("No se permite realizar una asignacion a un" +
+          " parametro pasado como valor");
+          // Tipo de simbolo desconocido
+          tipo = Simbolo.Tipo_variable.DESCONOCIDO;
+          ok = false;
         }
-        else {
-           tipo = s.getVariable();
+        else
+        {
+          tipo = s.getVariable();
         }
       }
-      catch (SimboloNoEncontradoException e){
+      catch (SimboloNoEncontradoException e)
+      {
         // Excepcion de simbolo no encontrado
         ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido " + t.image +
-                                                                                                "en la parte izquierda de la asignaci\u00f3n");
+        "en la parte izquierda de la asignaci\u00f3n");
         // Tipo de simbolo desconocido
         tipo = Simbolo.Tipo_variable.DESCONOCIDO;
         ok = false;
@@ -232,10 +235,10 @@ public class Compilador implements CompiladorConstants {
       // Procesamiento de la expresion
           tpExp = expresion();
       jj_consume_token(tPUNTYCOM);
-        if ( ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-        {
-            ErrorSemantico eSM = new ErrorSemantico("Tipos incompatibles en la asignacion");
-        }
+      if (ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+      {
+        ErrorSemantico eSM = new ErrorSemantico("Tipos incompatibles en la asignacion");
+      }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -244,8 +247,7 @@ public class Compilador implements CompiladorConstants {
 // Regla de lista_asignables OK
   static final public void lista_asignables() throws ParseException {
   //Declaracion de variables
-  LinkedList<String> listaIdentificadores;
-
+  LinkedList < String > listaIdentificadores;
   // identificador a evaluar
   String idActual;
     try {
@@ -253,37 +255,36 @@ public class Compilador implements CompiladorConstants {
           listaIdentificadores = identificadores();
       // Tamaño de la lista de identificadores
       int dimension = listaIdentificadores.size();
-
-          // Simbolo a evaluar
-          Simbolo s;
-
-          // Recorrido de la lista 
-      for (int i = 0; i < dimension; i++) {
-
+      // Simbolo a evaluar
+      Simbolo s;
+      // Recorrido de la lista 
+      for (int i = 0; i < dimension; i++)
+      {
         // obtencion del i-esimo identificador
         idActual = listaIdentificadores.get(i);
-
-                try {
-                  // Busqueda del simbolo en la tabla de simbolos
-                  s = tabla.buscar_simbolo(idActual);
-
-                  // Simbolo se encuentra en la tabla
-                  if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
-                        && s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO
-                        && (!s.es_Variable_Entero() && !s.es_Variable_Char() && !s.es_Variable_Cadena()))
-                  {
-                         // Error semantico en la lista de asignables
-                         ErrorSemantico eSM = new ErrorSemantico("Tipo invalido de variable de lectura");
-                  }
-                  else if (s.es_Simbolo_Variable() && s.es_Parametro_Valor()) {
-                     // Error semantico en la lista de asignables
-                         ErrorSemantico eSM = new ErrorSemantico("Variable por valor en lectura");
-                  }
-                  // HACER ALGO ?
+        try
+        {
+          // Busqueda del simbolo en la tabla de simbolos
+          s = tabla.buscar_simbolo(idActual);
+          // Simbolo se encuentra en la tabla
+          if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
+          && s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO
+          && (!s.es_Variable_Entero() && !s.es_Variable_Char() && !s.es_Variable_Cadena()))
+          {
+            // Error semantico en la lista de asignables
+            ErrorSemantico eSM = new ErrorSemantico("Tipo invalido de variable de lectura");
+          }
+          else if (s.es_Simbolo_Variable() && s.es_Parametro_Valor())
+          {
+            // Error semantico en la lista de asignables
+            ErrorSemantico eSM = new ErrorSemantico("Variable por valor en lectura");
+          }
+          // HACER ALGO ?
         }
-        catch (SimboloNoEncontradoException e){
-           // Simbolo no encontrado en la tabla
-           e.simboloNoEncontrado(idActual);
+        catch (SimboloNoEncontradoException e)
+        {
+          // Simbolo no encontrado en la tabla
+          e.simboloNoEncontrado(idActual);
         }
       }
     } catch (ParseException e) {
@@ -375,22 +376,21 @@ public class Compilador implements CompiladorConstants {
       try {
         // Busqueda del simbolo en la tabla
         s = tabla.buscar_simbolo(t.image);
-
         // Busqueda con exito en la tabla de simbolos
         if (!s.es_Simbolo_Accion())
         {
           // error al invocar la accion
           ErrorSemantico eSM = new ErrorSemantico("No se puede realizar una llamada " +
-                                                         " a una accion sobre un parametro");
+          " a una accion sobre un parametro");
         }
       } catch (SimboloNoEncontradoException e) {
-        // Simbolo no encontrado
-        e.simboloNoEncontrado(t.image);
+      // Simbolo no encontrado
+      e.simboloNoEncontrado(t.image);
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZDA:
         argumentos(s);
-          args = true;
+      args = true;
         break;
       default:
         jj_la1[5] = jj_gen;
@@ -399,12 +399,13 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tPUNTYCOM);
       // Comprobar el numero de parametros en caso de que se llame sin ninguno
       int argc = s.getLista_parametros().size();
-      if(!args && s!= null && argc != 0) {
-                // Error por falta de parametros
-                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
-                "  -  Se esperaban " + argc + " par\u00e1metros al invocar a la accion " +
-                s.getNombre());
-       }
+      if (!args && s != null && argc != 0)
+      {
+        // Error por falta de parametros
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+        "  -  Se esperaban " + argc + " par\u00e1metros al invocar a la accion " +
+        s.getNombre());
+      }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -418,7 +419,7 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tMQ);
       tpExp = expresion();
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-        && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+      && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
       {
         // Error en la condicion del mientras que
         ErrorSemantico eSM = new ErrorSemantico("La condicion de mientras_que debe ser booleana");
@@ -460,13 +461,12 @@ public class Compilador implements CompiladorConstants {
       // Comprobar los parametros de la invocacion en caso de que
       // se invoque con parametros distintos
       int argc = s.getLista_parametros().size();
-
       if (!ok && s != null && argc != 0)
       {
         // Error de invocacion de parametros
         ErrorSemantico ESM = new ErrorSemantico("linea " + token.beginLine +
-                " - Se esperaban " + argc + " par\u00e1metros al invocar a la accion " +
-                 s.getNombre());
+        " - Se esperaban " + argc + " par\u00e1metros al invocar a la accion " +
+        s.getNombre());
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -479,40 +479,41 @@ public class Compilador implements CompiladorConstants {
   RegistroExp r;
   int argc = 0;
   boolean ok = true;
-  LinkedList<Simbolo> parametros;
+  LinkedList < Simbolo > parametros;
     try {
       // Captura de la primera expresion
           r = expresion();
-      if (s != null && !s.es_Variable_Desconocido()) {
-                // Obtencion de la lista de parametros de la accion
-            parametros = s.getLista_parametros();
-
-                argc++;
-
-                // Numero de parametros incorrecto
-                if(argc > parametros.size()) {
-                                ErrorSemantico eMS = new ErrorSemantico("El n\u00famero de par\u00e1metros de" +
-                                                             " llamada a la funci\u00f3n " + s.getNombre() +
-                                                             " no coindice, se esperaban " + parametros.size());
-                                ok = false;
-                }
-                // Comprobacion de los tipos en la funcion AQUI ESTAMOS
-                else if (r.getTipo() == parametros.get(argc - 1).getVariable())
-                {
-                                ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
-                                                                                                                 s.getNombre() + " no coindicen");
-                                ok = false;
-                        }
-                        else if (r.getClase() == Simbolo.Clase_parametro.VAL && !parametros.get(argc - 1).es_Parametro_Valor() ) {
-                                ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
-                                ok = false;
-                        }
-                }
-                else
-                {
-                  // Todo ha ido bien
-                  ok = false;
-                }
+      if (s != null && !s.es_Variable_Desconocido())
+      {
+        // Obtencion de la lista de parametros de la accion
+        parametros = s.getLista_parametros();
+        argc++;
+        // Numero de parametros incorrecto
+        if (argc > parametros.size())
+        {
+          ErrorSemantico eMS = new ErrorSemantico("El n\u00famero de par\u00e1metros de" +
+          " llamada a la funci\u00f3n " + s.getNombre() +
+          " no coindice, se esperaban " + parametros.size());
+          ok = false;
+        }
+        // Comprobacion de los tipos en la funcion AQUI ESTAMOS
+        else if (r.getTipo() == parametros.get(argc - 1).getVariable())
+        {
+          ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
+          s.getNombre() + " no coindicen");
+          ok = false;
+        }
+        else if (r.getClase() == Simbolo.Clase_parametro.VAL && !parametros.get(argc - 1).es_Parametro_Valor())
+        {
+          ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
+          ok = false;
+        }
+      }
+      else
+      {
+        // Todo ha ido bien
+        ok = false;
+      }
       label_3:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -525,37 +526,38 @@ public class Compilador implements CompiladorConstants {
         }
         jj_consume_token(tCOMA);
         // Procesamiento de la nueva expresion
-               r = expresion();
-          if (s != null && !s.es_Variable_Desconocido()) {
-                // Obtencion de la lista de parametros de la accion
-            parametros = s.getLista_parametros();
-
-                argc++;
-
-                // Numero de parametros incorrecto
-                if(argc > parametros.size()) {
-                                ErrorSemantico eMS = new ErrorSemantico("El n\u00famero de par\u00e1metros de" +
-                                                             " llamada a la funci\u00f3n " + s.getNombre() +
-                                                             " no coindice, se esperaban " + parametros.size());
-                                ok = false;
-                }
-                // Comprobacion de los tipos en la funcion AQUI ESTAMOS
-                else if (r.getTipo() == parametros.get(argc - 1).getVariable())
-                {
-                                ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
-                                                                                                                 s.getNombre() + " no coindicen");
-                                ok = false;
-                        }
-                        else if (r.getClase() == Simbolo.Clase_parametro.VAL && !parametros.get(argc - 1).es_Parametro_Valor() ) {
-                                ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
-                                ok = false;
-                        }
-                }
-                else
-                {
-                  // Todo ha ido bien
-                  ok = false;
-                }
+            r = expresion();
+      if (s != null && !s.es_Variable_Desconocido())
+      {
+        // Obtencion de la lista de parametros de la accion
+        parametros = s.getLista_parametros();
+        argc++;
+        // Numero de parametros incorrecto
+        if (argc > parametros.size())
+        {
+          ErrorSemantico eMS = new ErrorSemantico("El n\u00famero de par\u00e1metros de" +
+          " llamada a la funci\u00f3n " + s.getNombre() +
+          " no coindice, se esperaban " + parametros.size());
+          ok = false;
+        }
+        // Comprobacion de los tipos en la funcion AQUI ESTAMOS
+        else if (r.getTipo() == parametros.get(argc - 1).getVariable())
+        {
+          ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
+          s.getNombre() + " no coindicen");
+          ok = false;
+        }
+        else if (r.getClase() == Simbolo.Clase_parametro.VAL && !parametros.get(argc - 1).es_Parametro_Valor())
+        {
+          ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
+          ok = false;
+        }
+      }
+      else
+      {
+        // Todo ha ido bien
+        ok = false;
+      }
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -567,12 +569,8 @@ public class Compilador implements CompiladorConstants {
   // Declaracion de expresiones a analizar
   RegistroExp tpExp1, tpExp2;
   TipoOperador op;
-
-  boolean ok;
+  boolean ok = true;
   RegistroExp regResult = new RegistroExp();
-
-  // Comparador de cadenas 	
-  int compare;
     try {
       // Obtencion de la primera expresion
           tpExp1 = expresion_simple();
@@ -593,489 +591,136 @@ public class Compilador implements CompiladorConstants {
         }
         op = operador_relacional();
         // Obtencion de la segunda expresion
-              tpExp2 = expresion_simple();
-        // Evaluacion de la expresion
-        // Resultado de evaluar la expresion
-        regResult = new RegistroExp();
-        ok = true;
-
-        // Evaluar el simbolo introducido
-        switch(op.getOperadorRelacional()) {
-          case IGUAL:
-                // El operador es una suma
-
-                // Evaluar primer termino de la expresion
-                if (tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter, cadena o booleano");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if (tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter, cadena o booleano");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Verficar que los dos operandos son del mismo tipo
-                  if (tpExp1.getTipo() == tpExp2.getTipo())
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-
-                                        // Extracion de los valores numericos de cada operador
-
-                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
-                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
-
-                                        // Resultado de evaluar la expresion
-                                        boolean resul;
-
-                                        // Evaluar la expresion logica
-                                        switch(tpVar) {
-                                          case ENTERO:
-                                                // Datos de tipo entero
-                                                int op1 = tpExp1.getValorEnt();
-                                        int op2 = tpExp2.getValorEnt();
-
-                                        // Evaluacion de la expresion
-                                                resul = op1 == op2;
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                                  break;
-                                          case BOOLEANO:
-                                                // Datos de tipo booleano
-                                                boolean op3 = tpExp1.isValorBool();
-                                        boolean op4 = tpExp2.isValorBool();
-
-                                        // Evaluacion de la expresion
-                                                resul = op3 == op4;
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                                          break;
-                                          case CHAR:
-                                          case CADENA:
-                                                // Datos de tipo caracter o cadena
-                                                String op5 = tpExp1.getValorString();
-                                        String op6 = tpExp2.getValorString();
-
-                                        // Evaluacion de la expresion
-                                                resul = op5 == op6;
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                                        }
-                  }
-                  else
-                  {
-                    // Error semantico de tipos distintos
-                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
-                  }
-                }
+            tpExp2 = expresion_simple();
+      // Evaluacion de la expresion
+      // Resultado de evaluar la expresion
+      regResult = new RegistroExp();
+      // Evaluar primer termino de la expresion
+      if (tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+      {
+        ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+        "caracter, cadena o booleano");
+        ok = false;
+      }
+      // Evaluar segundo termino de la expresion
+      if (tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+      {
+        ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+        "caracter, cadena o booleano");
+        ok = false;
+      }
+      // Comprobar que todo ha ido bien y evaluar la expresion
+      if (ok)
+      {
+        // Verficar que los dos operandos son del mismo tipo
+        if (tpExp1.getTipo() != tpExp2.getTipo())
+        {
+          ErrorSemantico eSM = new ErrorSemantico("Los operadores deben ser del mismo tipo");
+        }
+        else
+        {
+          // Tipo de la nueva expresion
+          regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+          // Evaluacion del tipo de la expresion
+          switch (tpExp1.getTipo())
+          {
+            // La expresion puede ser entera
+            case ENTERO :
+            // Comprobar que la segunda expresion es tambien entera
+            ok = tpExp2.getTipo() == Simbolo.Tipo_variable.ENTERO;
+            if (!ok)
+            {
+              // Resul tiene tipo DESCONOCIDO porque no coinciden
+              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+            }
+            else
+            {
+              // El resultado va a ser expresion entera
+              regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+              switch (op.getOperadorRelacional())
+              {
+                case MAYOR :
+                regResult.valorBool = tpExp1.valorEnt > tpExp2.valorEnt;
                 break;
-                case MENOR:
-                // El operador es una suma
-
-                // Evaluar primer termino de la expresion
-                if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpExp1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter o cadena");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if ((tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpExp2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter o cadena");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Verficar que los dos operandos son del mismo tipo
-                  if (tpExp1.getTipo() == tpExp2.getTipo())
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-
-                                        // Extracion de los valores numericos de cada operador
-
-                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
-                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
-
-                                        // Resultado de evaluar la expresion
-                                        boolean resul;
-
-                                        // Evaluar la expresion logica
-                                        switch(tpVar) {
-                                          case ENTERO:
-                                                // Datos de tipo entero
-                                                int op1 = tpExp1.getValorEnt();
-                                        int op2 = tpExp2.getValorEnt();
-
-                                        // Evaluacion de la expresion
-                                                resul = op1 < op2;
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                                  break;
-                                          case CHAR:
-                                          case CADENA:
-                                                // Datos de tipo caracter o cadena
-                                                String op5 = tpExp1.getValorString();
-                                        String op6 = tpExp2.getValorString();
-
-                                                // Comparacion de Strings
-                                        compare = op5.compareToIgnoreCase(op6);
-
-                                                if(compare < 0)
-                                                {
-                                                   // Es mas pequeño
-                                                   resul = true;
-                                                }
-                                                else
-                                                {
-                                                  // Es mayor
-                                                  resul = false;
-                                                }
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                                }
-                     }
-                  }
-                  else
-                  {
-                    // Error semantico de tipos distintos
-                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
-                  }
+                case MAYOR_IGUAL :
+                regResult.valorBool = tpExp1.valorEnt >= tpExp2.valorEnt;
                 break;
-                case MENOR_IGUAL:
-                // El operador es una suma
-
-                // Evaluar primer termino de la expresion
-                if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpExp1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter o cadena");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if ((tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpExp2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter o cadena");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Verficar que los dos operandos son del mismo tipo
-                  if (tpExp1.getTipo() == tpExp2.getTipo())
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-
-                                        // Extracion de los valores numericos de cada operador
-
-                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
-                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
-
-                                        // Resultado de evaluar la expresion
-                                        boolean resul;
-
-                                        // Evaluar la expresion logica
-                                        switch(tpVar) {
-                                          case ENTERO:
-                                                // Datos de tipo entero
-                                                int op1 = tpExp1.getValorEnt();
-                                        int op2 = tpExp2.getValorEnt();
-
-                                        // Evaluacion de la expresion
-                                                resul = op1 <= op2;
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                                  break;
-                                          case CHAR:
-                                          case CADENA:
-                                                // Datos de tipo caracter o cadena
-                                                String op5 = tpExp1.getValorString();
-                                        String op6 = tpExp2.getValorString();
-
-                                        // Comparacion de Strings
-                                        compare = op5.compareToIgnoreCase(op6);
-
-                                                if(compare <= 0)
-                                                {
-                                                   // Es mas pequeño o igual
-                                                   resul = true;
-                                                }
-                                                else
-                                                {
-                                                  // Es mayor
-                                                  resul = false;
-                                                }
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                         }
-                      }
-                  }
-                  else
-                  {
-                    // Error semantico de tipos distintos
-                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
-                  }
+                case IGUAL :
+                regResult.valorBool = tpExp1.valorEnt == tpExp2.valorEnt;
                 break;
-                case NO_IGUAL:
-                // El operador es una suma
-
-                // Evaluar primer termino de la expresion
-                if (tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter, cadena, booleano");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if (tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter, cadena o booleano");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Verficar que los dos operandos son del mismo tipo
-                  if (tpExp1.getTipo() == tpExp2.getTipo())
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-
-                                        // Extracion de los valores numericos de cada operador
-
-                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
-                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
-
-                                        // Resultado de evaluar la expresion
-                                        boolean resul;
-
-                                        // Evaluar la expresion logica
-                                        switch(tpVar) {
-                                          case ENTERO:
-                                                // Datos de tipo entero
-                                                int op1 = tpExp1.getValorEnt();
-                                        int op2 = tpExp2.getValorEnt();
-
-                                        // Evaluacion de la expresion
-                                                resul = op1 != op2;
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                                  break;
-                                          case BOOLEANO:
-                                                // Datos de tipo booleano
-                                                boolean op3 = tpExp1.isValorBool();
-                                        boolean op4 = tpExp2.isValorBool();
-
-                                        // Evaluacion de la expresion
-                                                resul = op3 != op4;
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                                          break;
-                                          case CHAR:
-                                          case CADENA:
-                                                // Datos de tipo caracter o cadena
-                                                String op5 = tpExp1.getValorString();
-                                        String op6 = tpExp2.getValorString();
-
-                                        // Evaluacion de la expresion
-                                                resul = op5 != op6;
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                        }
-                     }
-                  }
-                  else
-                  {
-                    // Error semantico de tipos distintos
-                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
-                  }
+                case NO_IGUAL :
+                regResult.valorBool = tpExp1.valorEnt != tpExp2.valorEnt;
                 break;
-                case MAYOR_IGUAL:
-                // El operador es una suma
-
-                // Evaluar primer termino de la expresion
-                if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpExp1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter o cadena");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if ((tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpExp2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter o cadena");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Verficar que los dos operandos son del mismo tipo
-                  if (tpExp1.getTipo() == tpExp2.getTipo())
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-
-                                        // Extracion de los valores numericos de cada operador
-
-                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
-                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
-
-                                        // Resultado de evaluar la expresion
-                                        boolean resul;
-
-                                        // Evaluar la expresion logica
-                                        switch(tpVar) {
-                                          case ENTERO:
-                                                // Datos de tipo entero
-                                                int op1 = tpExp1.getValorEnt();
-                                        int op2 = tpExp2.getValorEnt();
-
-                                        // Evaluacion de la expresion
-                                                resul = op1 >= op2;
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                                  break;
-                                          case CHAR:
-                                          case CADENA:
-                                                // Datos de tipo caracter o cadena
-                                                String op5 = tpExp1.getValorString();
-                                        String op6 = tpExp2.getValorString();
-
-                                        // Comparacion de Strings
-                                        compare = op5.compareToIgnoreCase(op6);
-
-                                                if(compare >= 0)
-                                                {
-                                                   // Es mayor o igual
-                                                   resul = true;
-                                                }
-                                                else
-                                                {
-                                                  // Es mas pequeño
-                                                  resul = false;
-                                                }
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                       }
-                     }
-                  }
-                  else
-                  {
-                    // Error semantico de tipos distintos
-                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
-                  }
+                case MENOR_IGUAL :
+                regResult.valorBool = tpExp1.valorEnt <= tpExp2.valorEnt;
                 break;
-                case MAYOR:
-                // El operador es una suma
-
-                // Evaluar primer termino de la expresion
-                if ((tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpExp1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter o cadena");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if ((tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpExp2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-                                                                                                                "caracter o cadena");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Verficar que los dos operandos son del mismo tipo
-                  if (tpExp1.getTipo() == tpExp2.getTipo())
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-
-                                        // Extracion de los valores numericos de cada operador
-
-                                        // Obtener el tipo de dato de los operandos (solo uno que son iguales)
-                                        Simbolo.Tipo_variable tpVar = tpExp1.getTipo();
-
-                                        // Resultado de evaluar la expresion
-                                        boolean resul;
-
-                                        // Evaluar la expresion logica
-                                        switch(tpVar) {
-                                          case ENTERO:
-                                                // Datos de tipo entero
-                                                int op1 = tpExp1.getValorEnt();
-                                        int op2 = tpExp2.getValorEnt();
-
-                                        // Evaluacion de la expresion
-                                                resul = op1 > op2;
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                                  break;
-                                          case CHAR:
-                                          case CADENA:
-                                                // Datos de tipo caracter o cadena
-                                                String op5 = tpExp1.getValorString();
-                                        String op6 = tpExp2.getValorString();
-
-                                        // Comparacion de Strings
-                                        compare = op5.compareToIgnoreCase(op6);
-
-                                                if(compare > 0)
-                                                {
-                                                   // Es mayor
-                                                   resul = true;
-                                                }
-                                                else
-                                                {
-                                                  // Es menor o igual
-                                                  resul = false;
-                                                }
-
-                                                // Asignacion del resultado a la expresion resultado 
-                                regResult.setValorBool(resul);
-                        }
-                     }
-                  }
-                  else
-                  {
-                    // Error semantico de tipos distintos
-                    ErrorSemantico eSM = new ErrorSemantico("Los operadores son distintos");
-                  }
-                default:
-                        // No es un operador aditivo valido
-                        ErrorSemantico eSM = new ErrorSemantico("El operador relacional es desconocido");
+                case MENOR :
+                regResult.valorBool = tpExp1.valorEnt < tpExp2.valorEnt;
+                break;
+                default :
+                break;
+              }
+            }
+            break;
+            case CADENA :
+            // Cmprobar que la segunda expresion es una cadena
+            ok = tpExp2.getTipo() == Simbolo.Tipo_variable.CADENA;
+            if (!ok)
+            {
+              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+            }
+            else
+            {
+              regResult.setTipo(Simbolo.Tipo_variable.CADENA);
+              switch (op.getOperadorRelacional())
+              {
+                case IGUAL :
+                regResult.valorBool = tpExp1.valorString.equals(tpExp2.valorString);
+                break;
+                case NO_IGUAL :
+                regResult.valorBool = !tpExp1.valorString.equals(tpExp2.valorString);
+                break;
+                default :
+                ErrorSemantico eSM = new ErrorSemantico("No se puede" +
+                " utilizar el operador " + op + " sobre una cadena");
+              }
+            }
+            break;
+            case BOOLEANO :
+            // Cmprobar que la segunda expresion es una cadena
+            ok = tpExp2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
+            if (!ok)
+            {
+              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+            }
+            else
+            {
+              regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+              switch (op.getOperadorRelacional())
+              {
+                case IGUAL :
+                regResult.valorBool = tpExp1.valorBool == tpExp2.valorBool;
+                break;
+                case NO_IGUAL :
+                regResult.valorBool = tpExp1.valorBool != tpExp2.valorBool;
+                break;
+                default :
+                ErrorSemantico eSM = new ErrorSemantico("No se puede" +
+                " utilizar el operador " + op + " sobre una cadena");
+              }
+            }
+            break;
+            case DESCONOCIDO :
+            regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+            break;
+            default :
+            ErrorSemantico eSM = new ErrorSemantico("El operador relacional es" +
+            " desconocido");
+          }
         }
         // Devolucion de la expresion
         {if (true) return regResult;}
+      }
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -1097,33 +742,33 @@ public class Compilador implements CompiladorConstants {
         break;
       case tMENOR:
         jj_consume_token(tMENOR);
-           // Es el operador <
-           op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR);
-       {if (true) return op;}
+      // Es el operador <
+      op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR);
+      {if (true) return op;}
         break;
       case tMEI:
         jj_consume_token(tMEI);
-           // Es el operador <=
-           op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR_IGUAL);
-       {if (true) return op;}
+      // Es el operador <=
+      op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR_IGUAL);
+      {if (true) return op;}
         break;
       case tNI:
         jj_consume_token(tNI);
-           // Es el operador <>
-           op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.NO_IGUAL);
-       {if (true) return op;}
+      // Es el operador <>
+      op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.NO_IGUAL);
+      {if (true) return op;}
         break;
       case tMAI:
         jj_consume_token(tMAI);
-           // Es el operador >=
-           op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR_IGUAL);
-       {if (true) return op;}
+      // Es el operador >=
+      op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR_IGUAL);
+      {if (true) return op;}
         break;
       case tMAYOR:
         jj_consume_token(tMAYOR);
-           // Es el operador >
-           op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR);
-       {if (true) return op;}
+      // Es el operador >
+      op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR);
+      {if (true) return op;}
         break;
       default:
         jj_la1[9] = jj_gen;
@@ -1144,21 +789,21 @@ public class Compilador implements CompiladorConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPLUS:
         jj_consume_token(tPLUS);
-        // El operador es una suma
-        op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.SUMA);
-        {if (true) return op;}
+      // El operador es una suma
+      op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.SUMA);
+      {if (true) return op;}
         break;
       case tMINUS:
         jj_consume_token(tMINUS);
-                // El operaodr es una resta
-            op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.RESTA);
-            {if (true) return op;}
+      // El operaodr es una resta
+      op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.RESTA);
+      {if (true) return op;}
         break;
       case tOR:
         jj_consume_token(tOR);
-                // El operador es un OR
-            op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.OR);
-            {if (true) return op;}
+      // El operador es un OR
+      op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.OR);
+      {if (true) return op;}
         break;
       default:
         jj_la1[10] = jj_gen;
@@ -1193,149 +838,84 @@ public class Compilador implements CompiladorConstants {
           break label_5;
         }
         // Operador de la expresion
-              op = operador_aditivo();
+            op = operador_aditivo();
         // Segundo termino de la expresion
-              regTerm2 = termino();
-        // Resultado de evaluar la expresion
-        regResult = new RegistroExp();
-        ok = true;
-
-        // Evaluar el simbolo introducido
-        switch(op.getOperadorAditivo()) {
-          case SUMA:
-                // El operador es una suma
-
-                // Evaluar primer termino de la expresion
-                if ((regTerm1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (regTerm1.getTipo() != Simbolo.Tipo_variable.ENTERO))
+            regTerm2 = termino();
+      // Resultado de evaluar la expresion
+      regResult = new RegistroExp();
+      ok = true;
+      // Evaluar el simbolo introducido
+      if (op.getOperadorAditivo() == TipoOperador.Tipo_Operador_Aditivo.OR)
+      {
+                // Comprobar que son los dos booleanos
+                ok = regTerm1.getTipo() == Simbolo.Tipo_variable.BOOLEANO
+                        && regTerm2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
+                    if (!ok)
+                    {
+                      ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                    }
+                    else
+                    {
+                      // Comprobar que son desconocidos
+                      if (regTerm1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
+                        || regTerm2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
+                      {
+                         regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                      }
+                      else
+                      {
+                        // Son los dos booleanos
+                regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+                        regResult.valorBool = regTerm1.valorBool | regTerm2.valorBool;
+                      }
+                    }
+      }
+      // No es operador OR
+      else
+      {
+        // Comprobar que son los dos enteros
+        ok = regTerm1.getTipo() == Simbolo.Tipo_variable.ENTERO
+                      && regTerm2.getTipo() == Simbolo.Tipo_variable.ENTERO;
+            if (!ok)
                 {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero");
-                          ok = false;
+                   ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
                 }
-                // Evaluar segundo termino de la expresion
-                if ((regTerm2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (regTerm2.getTipo() != Simbolo.Tipo_variable.ENTERO))
+                // Comprobar que no son desconocidos
+                else if (regTerm1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
+                      && regTerm2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
                 {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 2 debe ser entero");
-                          ok = false;
+                   // El resultado es desconocido
+           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
                 }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Calculo de la expresion
-                  if (regTerm1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
-                                && regTerm2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-
-                                        // Extracion de los valores numericos de cada operador
-                                int operando1 = regTerm1.getValorEnt();
-                                int operando2 = regTerm1.getValorEnt();
-
-                                        // Suma de los operandos numericos
-                                int resul = operando1 + operando2;
-
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorEnt(resul);
-                  }
-                  else
-                  {
-                    // El tipo de la expresion es desconocido
-                    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                  }
-                }
-                break;
-                case RESTA:
-                // El operador es una resta
-
-                // Evaluar primer termino de la expresion
-                if ((regTerm1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (regTerm1.getTipo() != Simbolo.Tipo_variable.ENTERO))
+                else
                 {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero");
-                          ok = false;
+                   // La expresion final es entera
+           regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+           if (ErrorSemantico.hayDesbordamiento(regTerm1.getValorEnt())
+                        || ErrorSemantico.hayDesbordamiento(regTerm2.getValorEnt()))
+           {
+             ErrorSemantico eSM = new ErrorSemantico("Valor fuera del rango");
+                 regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+           }
+           else
+           {
+             switch (op.getOperadorAditivo()) {
+                                case SUMA:
+                                        regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
+                                        break;
+                                case RESTA:
+                                        regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
+                                        break;
+                                default:
+                                        ErrorSemantico eSM = new ErrorSemantico("Operador aditivo desconocido");
+                                }
+           }
                 }
-                // Evaluar segundo termino de la expresion
-                if ((regTerm2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (regTerm2.getTipo() != Simbolo.Tipo_variable.ENTERO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 2 debe ser entero");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Calculo de la expresion
-                  if (regTerm1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
-                                && regTerm2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-
-                                        // Extracion de los valores numericos de cada operador
-                                int operando1 = regTerm1.getValorEnt();
-                                int operando2 = regTerm1.getValorEnt();
-
-                                        // Suma de los operandos numericos
-                                int resul = operando1 - operando2;
-
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorEnt(resul);
-                  }
-                  else
-                  {
-                    // El tipo de la expresion es desconocido
-                    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                  }
-                }
-                break;
-                case OR:
-                // El operador es un OR logico
-
-                // Evaluar primer termino de la expresion
-                if ((regTerm1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (regTerm1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser booleano");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if ((regTerm2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (regTerm2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El operador 2 debe ser booleano");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Calculo de la expresion
-                  if (regTerm1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
-                                && regTerm2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-
-                                        // Extracion de los valores numericos de cada operador
-                                boolean operando1 = regTerm1.isValorBool();
-                                boolean operando2 = regTerm1.isValorBool();
-
-                                        // Suma de los operandos numericos
-                                boolean resul = operando1 | operando2;
-
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorBool(resul);
-                  }
-                  else
-                  {
-                    // El tipo de la expresion es desconocido
-                    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                  }
-                }
-                break;
-                default:
-                        // No es un operador aditivo valido
-                        ErrorSemantico eSM = new ErrorSemantico("El operador aditivo es desconocido");
-        }
-        {if (true) return regResult;}
+      }
+      {if (true) return regResult;}
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -1347,14 +927,13 @@ public class Compilador implements CompiladorConstants {
 // Regla de termino OK
   static final public RegistroExp termino() throws ParseException {
   // Declaracion de factores y expresiones
-  RegistroExp tpFactor1, tpFactor2;
-
+  RegistroExp tpFactor1, tpFactor2, regResult;
   // Declaracion del operador
   TipoOperador op;
   boolean ok;
     try {
       // Evaluacion del primer factor
-           tpFactor1 = factor();
+          tpFactor1 = factor();
       label_6:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1370,223 +949,79 @@ public class Compilador implements CompiladorConstants {
           break label_6;
         }
         // Evaluacion del operador multiplicativo
-               op = operador_multiplicativo();
+            op = operador_multiplicativo();
         // Evaluacion del segundo factor
-               tpFactor2 = factor();
-          // Expresion a devolver
-          RegistroExp regResult = new RegistroExp();
+            tpFactor2 = factor();
+      regResult = new RegistroExp();
+      // El operaodr es una AND
+      if (op.getOperadorMultiplicativo() == TipoOperador.Tipo_Operador_Multiplicativo.AND)
+      {
+        // Comprobar que son los dos booleanos
+                ok = tpFactor1.getTipo() == Simbolo.Tipo_variable.BOOLEANO
+                        && tpFactor2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
+                    if (!ok)
+                    {
+                      ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                    }
+                    else if (tpFactor2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
+                                || tpFactor2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
+                    {
+                      // El resultado es desconocido
+              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                    }
+      }
+      else
+      {
+        // Es un operador multiplicativo distinto de AND
+        ok = tpFactor1.getTipo() == Simbolo.Tipo_variable.ENTERO
+                        && tpFactor2.getTipo() == Simbolo.Tipo_variable.ENTERO;
+                    if (!ok)
+                    {
+                      ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                    }
+                    else
+                    {
+              regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
 
-          ok = true;
-
-        // Evaluar el simbolo introducido
-        switch(op.getOperadorMultiplicativo()) {
-          case MULTIPLICACION:
-                // El operador es una suma
-
-                // Evaluar primer termino de la expresion
-                if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpFactor1.getTipo() != Simbolo.Tipo_variable.ENTERO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El factor 1 del producto " +
-                                                                                                                "debe ser entero");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if ((tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El factor 2 del producto " +
-                                                                                                                "debe ser entero");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Calculo de la expresion
-                  if (tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
-                                && tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-
-                                        // Extracion de los valores numericos de cada operador
-                                int operando1 = tpFactor1.getValorEnt();
-                                int operando2 = tpFactor2.getValorEnt();
-
-                                        // Multiplicacion de los operandos numericos
-                                int resul = operando1 * operando2;
-
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorEnt(resul);
-                  }
-                  else
-                  {
-                    // El tipo de la expresion es desconocido
-                    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                  }
-                }
-                break;
-                case DIVISION:
-                // El operador es una resta
-
-                // Evaluar primer termino de la expresion
-                if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El dividendo debe ser entero");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El divisor debe ser entero");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Calculo de la expresion
-                  if (tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
-                                && tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                  {
-                        // Comprobacion de que el segundo termino no es cero
-                        int operando2 = tpFactor2.getValorEnt();
-
-                        if (operando2 != 0)
-                        {
-                          // La operacion se puede efectuar
-                          // Tipo de la nueva expresion
-                              regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-
-                                          // Extracion de los valores numericos de cada operador
-                                  int operando1 = tpFactor1.getValorEnt();
-
-
-                                      // Cocientes de los operandos
-                                  int resul = operando1 / operando2;
-
-                              // Asignacion del resultado a la expresion resultado 
-                              regResult.setValorEnt(resul);
-                        }
-                        else
-                        {
-                          // Error al dividir por cero
-                          ErrorSemantico eSM = new ErrorSemantico("Division por cero");
-                                  ok = false;
-                        }
-                  }
-                  else
-                  {
-                    // El tipo de la expresion es desconocido
-                    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                  }
-                }
-                break;
-                case MOD:
-                // El operador es un OR logico
-
-                // Evaluar primer termino de la expresion
-                if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpFactor1.getTipo() != Simbolo.Tipo_variable.ENTERO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El dividendo debe ser entero");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if ((tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpFactor2.getTipo() != Simbolo.Tipo_variable.ENTERO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El divisor debe ser entero");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Calculo de la expresion
-                  if (tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
-                                && tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                  {
-                        // Comprobacion de que el segundo termino no es cero
-                        int operando2 = tpFactor2.getValorEnt();
-
-                        if (operando2 != 0)
-                        {
-                          // La operacion se puede efectuar
-                          // Tipo de la nueva expresion
-                              regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-
-                                          // Extracion de los valores numericos de cada operador
-                                  int operando1 = tpFactor1.getValorEnt();
-
-
-                                      // Modulo de los operandos
-                                  int resul = operando1 % operando2;
-
-                              // Asignacion del resultado a la expresion resultado 
-                              regResult.setValorEnt(resul);
-                        }
-                        else
-                        {
-                          // Error al dividir por cero
-                          ErrorSemantico eSM = new ErrorSemantico("Modulo por cero");
-                                  ok = false;
-                        }
-                  }
-                  else
-                  {
-                    // El tipo de la expresion es desconocido
-                    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                  }
-                }
-                break;
-                case AND:
-                // El operador es una AND logica
-
-                // Evaluar primer termino de la expresion
-                if ((tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpFactor1.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El factor 1 debe ser booleano");
-                          ok = false;
-                }
-                // Evaluar segundo termino de la expresion
-                if ((tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                        && (tpFactor2.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
-                {
-                          ErrorSemantico eSM = new ErrorSemantico("El factor 2 debe ser booleano");
-                          ok = false;
-                }
-                // Comprobar que todo ha ido bien y evaluar la expresion
-                if (ok) {
-                  // Calculo de la expresion
-                  if (tpFactor1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO
-                                && tpFactor2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-                  {
-                        // Tipo de la nueva expresion
-                        regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-
-                                        // Extracion de los valores numericos de cada operador
-                                boolean operando1 = tpFactor1.isValorBool();
-                                boolean operando2 = tpFactor2.isValorBool();
-
-                                        // Operacion logica AND de los operandos
-                                boolean resul = operando1 & operando2;
-
-                                // Asignacion del resultado a la expresion resultado 
-                        regResult.setValorBool(resul);
-                  }
-                  else
-                  {
-                    // El tipo de la expresion es desconocido
-                    regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                  }
-                }
-                break;
-                default:
-                        // No es un operador aditivo valido
-                        ErrorSemantico eSM = new ErrorSemantico("El operador multiplicativo" +
-                                                                                                        " es desconocido");
-        }
-        // Devolucion de la expresion
-        {if (true) return regResult;}
+              if (ErrorSemantico.hayDesbordamiento(tpFactor1.valorEnt)
+                        || ErrorSemantico.hayDesbordamiento(tpFactor2.valorEnt))
+              {
+                ErrorSemantico eSM = new ErrorSemantico("Valor fuera del rango");
+                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+              }
+              else
+              {
+                switch (op.getOperadorMultiplicativo()) {
+                                                case MULTIPLICACION:
+                                                regResult.valorEnt = tpFactor1.valorEnt * tpFactor2.valorEnt;
+                                                        break;
+                                                case DIVISION:
+                                                if ( tpFactor2.valorEnt == 0 ) {
+                                                ErrorSemantico eSM = new ErrorSemantico("Division por 0");
+                                                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                                                }
+                                                        else{
+                                                    regResult.valorEnt = tpFactor1.valorEnt / tpFactor2.valorEnt;
+                                                        }
+                                                    break;
+                                            case MOD:
+                                            if ( tpFactor2.valorEnt == 0 ) {
+                                                ErrorSemantico eSM =  new ErrorSemantico("Modulo por 0");
+                                                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                                            }
+                                            else{
+                                                regResult.valorEnt = tpFactor1.valorEnt % tpFactor2.valorEnt;
+                                            }
+                                                        break;
+                                                default:
+                                            ErrorSemantico eSM = new ErrorSemantico("Operador multiplicativo desconocido");
+                                 }
+              }
+                    }
+      }
+      {if (true) return regResult;}
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -1608,25 +1043,25 @@ public class Compilador implements CompiladorConstants {
         break;
       case tDIVIDE:
         jj_consume_token(tDIVIDE);
-          // El operador es un cociente (opcion 1)
+      // El operador es un cociente (opcion 1)
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       {if (true) return op;}
         break;
       case tDIV:
         jj_consume_token(tDIV);
-          // El operador es un cociente (opcion 2)
+      // El operador es un cociente (opcion 2)
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       {if (true) return op;}
         break;
       case tMOD:
         jj_consume_token(tMOD);
-          // El operador es un modulo o residuo
+      // El operador es un modulo o residuo
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MOD);
       {if (true) return op;}
         break;
       case tAND:
         jj_consume_token(tAND);
-          // El operador es una AND logica
+      // El operador es una AND logica
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.AND);
       {if (true) return op;}
         break;
@@ -1643,12 +1078,11 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de factor OK
   static final public RegistroExp factor() throws ParseException {
-   // Declaracion de factores y expresiones
-   RegistroExp tpFactor, tpExp;
-   RegistroExp result = new RegistroExp();
-
-        // Token a procesar
-   Token t;
+  // Declaracion de factores y expresiones
+  RegistroExp tpFactor, tpExp;
+  RegistroExp result = new RegistroExp();
+  // Token a procesar
+  Token t;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tNOT:
@@ -1656,7 +1090,7 @@ public class Compilador implements CompiladorConstants {
         tpFactor = factor();
       // Comprobacion de si es o no booleano
       if ((tpFactor.getTipo() != Simbolo.Tipo_variable.BOOLEANO)
-          && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
+      && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
         // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba BOOLEANO");
@@ -1669,7 +1103,7 @@ public class Compilador implements CompiladorConstants {
         tpFactor = factor();
       // Comprobacion de si es o no booleano
       if ((tpFactor.getTipo() != Simbolo.Tipo_variable.ENTERO)
-          && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
+      && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
         // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba ENTERO");
@@ -1681,50 +1115,48 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(tPARENTESIS_IZDA);
         tpExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
-          // Devuelve la expresiom normal
-          {if (true) return tpExp;}
+      // Devuelve la expresiom normal
+      {if (true) return tpExp;}
         break;
       case tENTACAR:
         jj_consume_token(tENTACAR);
         jj_consume_token(tPARENTESIS_IZDA);
         tpExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
-          // Comprobacion de si es entera la expresion
-          if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
-                  && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
-          {
-            // Comprobacion de si es booleano o no 
+      // Comprobacion de si es entera la expresion
+      if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
+      && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
+      {
+        // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("La expresion no se puede convertir " +
-                                                                                        " en un caracter valido");
-          }
-          else
-          {
-            // Es un entero y se comprueba que no hay desbordamiento
-            int valor = tpExp.getValorEnt();
-
-            // Error de desbordamiento
-            ErrorSemantico eSM = new ErrorSemantico();
-
-            if (!eSM.hayDesbordamiento(valor))
-            {
-              // Comprobacion de si es booleano o no 
+        " en un caracter valido");
+      }
+      else
+      {
+        // Es un entero y se comprueba que no hay desbordamiento
+        int valor = tpExp.getValorEnt();
+        // Error de desbordamiento
+        ErrorSemantico eSM = new ErrorSemantico();
+        if (!eSM.hayDesbordamiento(valor))
+        {
+          // Comprobacion de si es booleano o no 
           eSM = new ErrorSemantico("Desbordamiento detectado");
-                }
-          }
-          {if (true) return tpExp;}
+        }
+      }
+      {if (true) return tpExp;}
         break;
       case tCARAENT:
         jj_consume_token(tCARAENT);
         jj_consume_token(tPARENTESIS_IZDA);
         tpExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
-          if ((tpExp.getTipo() != Simbolo.Tipo_variable.CHAR)
-                        && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
-          {
-                // Comprobacion de si es o no caracter
+      if ((tpExp.getTipo() != Simbolo.Tipo_variable.CHAR)
+      && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
+      {
+        // Comprobacion de si es o no caracter
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba CARACTER");
-          }
-          {if (true) return tpExp;}
+      }
+      {if (true) return tpExp;}
         break;
       case tIDENTIFICADOR:
         jj_consume_token(tIDENTIFICADOR);
@@ -1732,51 +1164,49 @@ public class Compilador implements CompiladorConstants {
         break;
       case tCONSTANTE_NUMERICA:
         t = jj_consume_token(tCONSTANTE_NUMERICA);
-          // Obtener el valor del token y pasarlo a entero para guardarlo
-          int valor = Integer.parseInt(t.image);
-          result.setValorEnt(valor);
-
-          // Tipo de la variable entero
-          result.setTipo(Simbolo.Tipo_variable.ENTERO);
-
-          // Devolucion del resultado
-          {if (true) return result;}
+      // Obtener el valor del token y pasarlo a entero para guardarlo
+      int valor = Integer.parseInt(t.image);
+      result.setValorEnt(valor);
+      // Tipo de la variable entero
+      result.setTipo(Simbolo.Tipo_variable.ENTERO);
+      // Devolucion del resultado
+      {if (true) return result;}
         break;
       case tCONSTCHAR:
         t = jj_consume_token(tCONSTCHAR);
-           // Guardar el contenido de la cadena
-          result.setValorString(t.image);
-          // Char
-          result.setTipo(Simbolo.Tipo_variable.CHAR);
-          // Devolucion del resultado
-          {if (true) return result;}
+      // Guardar el contenido de la cadena
+      result.setValorString(t.image);
+      // Char
+      result.setTipo(Simbolo.Tipo_variable.CHAR);
+      // Devolucion del resultado
+      {if (true) return result;}
         break;
       case tCONSTCAD:
         t = jj_consume_token(tCONSTCAD);
-          // Guardar el contenido de la cadena
-          result.setValorString(t.image);
-          // Tipo cadena de caracteres
-          result.setTipo(Simbolo.Tipo_variable.CADENA);
-          // Devolucion del resultado
-          {if (true) return result;}
+      // Guardar el contenido de la cadena
+      result.setValorString(t.image);
+      // Tipo cadena de caracteres
+      result.setTipo(Simbolo.Tipo_variable.CADENA);
+      // Devolucion del resultado
+      {if (true) return result;}
         break;
       case tTRUE:
         jj_consume_token(tTRUE);
-          // Guardar el contenido de la cadena
-          result.setValorBool(true);
-          // Tipo cadena de caracteres
-          result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-          // Devolucion del resultado
-          {if (true) return result;}
+      // Guardar el contenido de la cadena
+      result.setValorBool(true);
+      // Tipo cadena de caracteres
+      result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+      // Devolucion del resultado
+      {if (true) return result;}
         break;
       case tFALSE:
         jj_consume_token(tFALSE);
-          // Guardar el contenido de la cadena
-          result.setValorBool(false);
-          // Tipo cadena de caracteres
-          result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-          // Devolucion del resultado
-          {if (true) return result;}
+      // Guardar el contenido de la cadena
+      result.setValorBool(false);
+      // Tipo cadena de caracteres
+      result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+      // Devolucion del resultado
+      {if (true) return result;}
         break;
       default:
         jj_la1[14] = jj_gen;
@@ -1798,7 +1228,7 @@ public class Compilador implements CompiladorConstants {
       tpExp = expresion();
       // Evaluacion de la condicion
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-        && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+      && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
       {
         // Se esperaba una condicion booleana
         ErrorSemantico eSM = new ErrorSemantico("La condicion en la seleccion debe ser un booleano");

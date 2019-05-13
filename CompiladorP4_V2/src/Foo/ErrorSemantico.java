@@ -22,7 +22,7 @@ public class ErrorSemantico extends Exception {
 	 * Post: Ha devuelto <<true>> si y solo contenido de <<valor>>
 	 * 		 no esta entre COTA_MINIMA y COTA_MAXIMA
 	 */
-	boolean hayDesbordamiento(int valor) {
+	static boolean hayDesbordamiento(int valor) {
 		return valor < COTA_MINIMA || valor > COTA_MAXIMA;
 	}
 }
