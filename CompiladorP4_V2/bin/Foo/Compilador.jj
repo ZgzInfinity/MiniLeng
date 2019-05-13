@@ -459,6 +459,8 @@ void asignacion(Token t) :
   // Declaracion de variables
   RegistroExp tpExp;
   Simbolo s;
+  Simbolo.Tipo_variable tipo;
+  boolean ok = true;
 }
 {
   try
@@ -466,8 +468,39 @@ void asignacion(Token t) :
     < tOPAS >
     {
       // Comprobar que existe el simbolo en la tabla
-      
-    } expresion() < tPUNTYCOM >
+      try {
+        // Se busca el simbolo en la tabla de simbolos
+        s = tabla.buscar_simbolo(t.image);
+
+        // el simbolo se ha encontrado bien
+        if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor()) {
+           ErrorSemantico eSM = new ErrorSemantico("No se permite realizar una asignacion a un" +
+            										" parametro pasado como valor");
+           // Tipo de simbolo desconocido
+           tipo = Simbolo.Tipo_variable.DESCONOCIDO;
+       	   ok = false;
+        }
+        else {
+           tipo = s.getVariable();
+        }
+      }
+      catch (SimboloNoEncontradoException e){
+        // Excepcion de simbolo no encontrado
+        ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido " + t.image +
+        											"en la parte izquierda de la asignación");
+        // Tipo de simbolo desconocido
+        tipo = Simbolo.Tipo_variable.DESCONOCIDO;
+        ok = false;
+      }
+    }
+    // Procesamiento de la expresion
+    tpExp = expresion() < tPUNTYCOM >
+    {
+    	if ( ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+    	{
+            ErrorSemantico eSM = new ErrorSemantico("Tipos incompatibles en la asignacion");
+     	}
+    }
   }
   catch (ParseException e)
   {

@@ -179,7 +179,7 @@ public class Compilador implements CompiladorConstants {
           t = jj_consume_token(tIDENTIFICADOR);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tOPAS:
-        asignacion();
+        asignacion(t);
         break;
       case tPUNTYCOM:
       case tPARENTESIS_IZDA:
@@ -196,11 +196,46 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de asignacion OK
-  static final public void asignacion() throws ParseException {
+  static final public void asignacion(Token t) throws ParseException {
+  // Declaracion de variables
+  RegistroExp tpExp;
+  Simbolo s;
+  Simbolo.Tipo_variable tipo;
+  boolean ok = true;
     try {
       jj_consume_token(tOPAS);
-      expresion();
+      // Comprobar que existe el simbolo en la tabla
+      try {
+        // Se busca el simbolo en la tabla de simbolos
+        s = tabla.buscar_simbolo(t.image);
+
+        // el simbolo se ha encontrado bien
+        if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor()) {
+           ErrorSemantico eSM = new ErrorSemantico("No se permite realizar una asignacion a un" +
+                                                                                        " parametro pasado como valor");
+           // Tipo de simbolo desconocido
+           tipo = Simbolo.Tipo_variable.DESCONOCIDO;
+           ok = false;
+        }
+        else {
+           tipo = s.getVariable();
+        }
+      }
+      catch (SimboloNoEncontradoException e){
+        // Excepcion de simbolo no encontrado
+        ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido " + t.image +
+                                                                                                "en la parte izquierda de la asignaci\u00f3n");
+        // Tipo de simbolo desconocido
+        tipo = Simbolo.Tipo_variable.DESCONOCIDO;
+        ok = false;
+      }
+      // Procesamiento de la expresion
+          tpExp = expresion();
       jj_consume_token(tPUNTYCOM);
+        if ( ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+        {
+            ErrorSemantico eSM = new ErrorSemantico("Tipos incompatibles en la asignacion");
+        }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -385,6 +420,7 @@ public class Compilador implements CompiladorConstants {
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
         && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
       {
+        // Error en la condicion del mientras que
         ErrorSemantico eSM = new ErrorSemantico("La condicion de mientras_que debe ser booleana");
       }
       lista_sentencias();
