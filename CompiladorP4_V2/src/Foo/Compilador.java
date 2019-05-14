@@ -227,7 +227,7 @@ public class Compilador implements CompiladorConstants {
       {
         // Excepcion de simbolo no encontrado
         ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido " + t.image +
-        "en la parte izquierda de la asignaci\u00f3n");
+        " en la parte izquierda de la asignacion");
         // Tipo de simbolo desconocido
         tipo = Simbolo.Tipo_variable.DESCONOCIDO;
         ok = false;
