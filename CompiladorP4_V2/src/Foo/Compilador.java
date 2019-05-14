@@ -340,28 +340,74 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de lista_escribibles OK
   static final public void escribible() throws ParseException {
+  // Declaracion de variables
+  Token t = null;
+  Simbolo s;
+  RegistroExp regExp = null;
+  RegistroExp result = new RegistroExp();
+  boolean constCad = false, entCad = false;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tCONSTCHAR:
-        jj_consume_token(tCONSTCHAR);
+        t = jj_consume_token(tCONSTCHAR);
+      constCad = true;
         break;
       case tCONSTCAD:
-        jj_consume_token(tCONSTCAD);
+        t = jj_consume_token(tCONSTCAD);
+      constCad = true;
+        break;
+      case tIDENTIFICADOR:
+        t = jj_consume_token(tIDENTIFICADOR);
         break;
       case tENTACAR:
         jj_consume_token(tENTACAR);
         jj_consume_token(tPARENTESIS_IZDA);
-        jj_consume_token(tCONSTANTE_NUMERICA);
+        regExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
-        break;
-      case tIDENTIFICADOR:
-        jj_consume_token(tIDENTIFICADOR);
+          entCad = true;
         break;
       default:
         jj_la1[4] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
+          if (constCad)
+          {
+            // La expresion es una cadena
+            result.setTipo(Simbolo.Tipo_variable.CADENA);
+          }
+          else if (entCad)
+          {
+            if (regExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
+            {
+              ErrorSemantico eSM = new ErrorSemantico("Se esperaba una expresion del tipo" +
+                                                                                                        " ENTERO en la funcion entacar");
+            }
+            else
+            {
+                result.setTipo(Simbolo.Tipo_variable.ENTERO);
+            }
+          }
+          else
+          {
+            try {
+               // Lo busca bien
+               s = tabla.buscar_simbolo(t.image);
+
+               if (!s.es_Simbolo_Parametro())
+               {
+                  ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido");
+               }
+               else if (!s.es_Variable_Char() && !s.es_Variable_Cadena() && !s.es_Variable_Entero())
+               {
+                  ErrorSemantico eSM = new ErrorSemantico("Variable no valida en escribir");
+               }
+            }
+            catch (SimboloNoEncontradoException e) {
+                // Error 
+                e.simboloNoEncontrado(t.image);
+            }
+           }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -847,73 +893,74 @@ public class Compilador implements CompiladorConstants {
       // Evaluar el simbolo introducido
       if (op.getOperadorAditivo() == TipoOperador.Tipo_Operador_Aditivo.OR)
       {
-                // Comprobar que son los dos booleanos
-                ok = regTerm1.getTipo() == Simbolo.Tipo_variable.BOOLEANO
-                        && regTerm2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
-                    if (!ok)
-                    {
-                      ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
-              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                    }
-                    else
-                    {
-                      // Comprobar que son desconocidos
-                      if (regTerm1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
-                        || regTerm2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
-                      {
-                         regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                      }
-                      else
-                      {
-                        // Son los dos booleanos
-                regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-                        regResult.valorBool = regTerm1.valorBool | regTerm2.valorBool;
-                      }
-                    }
+        // Comprobar que son los dos booleanos
+        ok = regTerm1.getTipo() == Simbolo.Tipo_variable.BOOLEANO
+        && regTerm2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
+        if (!ok)
+        {
+          ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+          regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+        }
+        else
+        {
+          // Comprobar que son desconocidos
+          if (regTerm1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
+          || regTerm2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
+          {
+            regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+          }
+          else
+          {
+            // Son los dos booleanos
+            regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+            regResult.valorBool = regTerm1.valorBool
+          | regTerm2.valorBool;
+          }
+        }
       }
       // No es operador OR
       else
       {
         // Comprobar que son los dos enteros
         ok = regTerm1.getTipo() == Simbolo.Tipo_variable.ENTERO
-                      && regTerm2.getTipo() == Simbolo.Tipo_variable.ENTERO;
-            if (!ok)
-                {
-                   ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
-           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                }
-                // Comprobar que no son desconocidos
-                else if (regTerm1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
-                      && regTerm2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
-                {
-                   // El resultado es desconocido
-           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                }
-                else
-                {
-                   // La expresion final es entera
-           regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-
-           if (ErrorSemantico.hayDesbordamiento(regTerm1.getValorEnt())
-                        || ErrorSemantico.hayDesbordamiento(regTerm2.getValorEnt()))
-           {
-             ErrorSemantico eSM = new ErrorSemantico("Valor fuera del rango");
-                 regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-           }
-           else
-           {
-             switch (op.getOperadorAditivo()) {
-                                case SUMA:
-                                        regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
-                                        break;
-                                case RESTA:
-                                        regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
-                                        break;
-                                default:
-                                        ErrorSemantico eSM = new ErrorSemantico("Operador aditivo desconocido");
-                                }
-           }
-                }
+        && regTerm2.getTipo() == Simbolo.Tipo_variable.ENTERO;
+        if (!ok)
+        {
+          ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+          regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+        }
+        // Comprobar que no son desconocidos
+        else if (regTerm1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
+        && regTerm2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
+        {
+          // El resultado es desconocido
+          regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+        }
+        else
+        {
+          // La expresion final es entera
+          regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+          if (ErrorSemantico.hayDesbordamiento(regTerm1.getValorEnt())
+          || ErrorSemantico.hayDesbordamiento(regTerm2.getValorEnt()))
+          {
+            ErrorSemantico eSM = new ErrorSemantico("Valor fuera del rango");
+            regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+          }
+          else
+          {
+            switch (op.getOperadorAditivo())
+            {
+              case SUMA :
+              regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
+              break;
+              case RESTA :
+              regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
+              break;
+              default :
+              ErrorSemantico eSM = new ErrorSemantico("Operador aditivo desconocido");
+            }
+          }
+        }
       }
       {if (true) return regResult;}
       }
@@ -957,69 +1004,73 @@ public class Compilador implements CompiladorConstants {
       if (op.getOperadorMultiplicativo() == TipoOperador.Tipo_Operador_Multiplicativo.AND)
       {
         // Comprobar que son los dos booleanos
-                ok = tpFactor1.getTipo() == Simbolo.Tipo_variable.BOOLEANO
-                        && tpFactor2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
-                    if (!ok)
-                    {
-                      ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
-              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                    }
-                    else if (tpFactor2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
-                                || tpFactor2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
-                    {
-                      // El resultado es desconocido
-              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                    }
+        ok = tpFactor1.getTipo() == Simbolo.Tipo_variable.BOOLEANO
+        && tpFactor2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
+        if (!ok)
+        {
+          ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+          regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+        }
+        else if (tpFactor2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
+        || tpFactor2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
+        {
+          // El resultado es desconocido
+          regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+        }
       }
       else
       {
         // Es un operador multiplicativo distinto de AND
         ok = tpFactor1.getTipo() == Simbolo.Tipo_variable.ENTERO
-                        && tpFactor2.getTipo() == Simbolo.Tipo_variable.ENTERO;
-                    if (!ok)
-                    {
-                      ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
-              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                    }
-                    else
-                    {
-              regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-
-              if (ErrorSemantico.hayDesbordamiento(tpFactor1.valorEnt)
-                        || ErrorSemantico.hayDesbordamiento(tpFactor2.valorEnt))
+        && tpFactor2.getTipo() == Simbolo.Tipo_variable.ENTERO;
+        if (!ok)
+        {
+          ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+          regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+        }
+        else
+        {
+          regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
+          if (ErrorSemantico.hayDesbordamiento(tpFactor1.valorEnt)
+          || ErrorSemantico.hayDesbordamiento(tpFactor2.valorEnt))
+          {
+            ErrorSemantico eSM = new ErrorSemantico("Valor fuera del rango");
+            regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+          }
+          else
+          {
+            switch (op.getOperadorMultiplicativo())
+            {
+              case MULTIPLICACION :
+              regResult.valorEnt = tpFactor1.valorEnt * tpFactor2.valorEnt;
+              break;
+              case DIVISION :
+              if (tpFactor2.valorEnt == 0)
               {
-                ErrorSemantico eSM = new ErrorSemantico("Valor fuera del rango");
+                ErrorSemantico eSM = new ErrorSemantico("Division por 0");
                 regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
               }
               else
               {
-                switch (op.getOperadorMultiplicativo()) {
-                                                case MULTIPLICACION:
-                                                regResult.valorEnt = tpFactor1.valorEnt * tpFactor2.valorEnt;
-                                                        break;
-                                                case DIVISION:
-                                                if ( tpFactor2.valorEnt == 0 ) {
-                                                ErrorSemantico eSM = new ErrorSemantico("Division por 0");
-                                                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                                                }
-                                                        else{
-                                                    regResult.valorEnt = tpFactor1.valorEnt / tpFactor2.valorEnt;
-                                                        }
-                                                    break;
-                                            case MOD:
-                                            if ( tpFactor2.valorEnt == 0 ) {
-                                                ErrorSemantico eSM =  new ErrorSemantico("Modulo por 0");
-                                                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                                            }
-                                            else{
-                                                regResult.valorEnt = tpFactor1.valorEnt % tpFactor2.valorEnt;
-                                            }
-                                                        break;
-                                                default:
-                                            ErrorSemantico eSM = new ErrorSemantico("Operador multiplicativo desconocido");
-                                 }
+                regResult.valorEnt = tpFactor1.valorEnt / tpFactor2.valorEnt;
               }
-                    }
+              break;
+              case MOD :
+              if (tpFactor2.valorEnt == 0)
+              {
+                ErrorSemantico eSM = new ErrorSemantico("Modulo por 0");
+                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+              }
+              else
+              {
+                regResult.valorEnt = tpFactor1.valorEnt % tpFactor2.valorEnt;
+              }
+              break;
+              default :
+              ErrorSemantico eSM = new ErrorSemantico("Operador multiplicativo desconocido");
+            }
+          }
+        }
       }
       {if (true) return regResult;}
       }
@@ -1094,9 +1145,15 @@ public class Compilador implements CompiladorConstants {
       {
         // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba BOOLEANO");
+
+        result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+      }
+      else
+      {
+        result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
       }
       // Devuelve el tipo de factor
-      {if (true) return tpFactor;}
+      {if (true) return result;}
         break;
       case tMINUS:
         jj_consume_token(tMINUS);
@@ -1107,9 +1164,15 @@ public class Compilador implements CompiladorConstants {
       {
         // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba ENTERO");
+
+        result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+      }
+      else
+      {
+        result.setTipo(Simbolo.Tipo_variable.ENTERO);
       }
       // Devuelve el tipo de factor
-      {if (true) return tpFactor;}
+      {if (true) return result;}
         break;
       case tPARENTESIS_IZDA:
         jj_consume_token(tPARENTESIS_IZDA);
@@ -1130,20 +1193,24 @@ public class Compilador implements CompiladorConstants {
         // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("La expresion no se puede convertir " +
         " en un caracter valido");
+
+        result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
       }
       else
       {
         // Es un entero y se comprueba que no hay desbordamiento
         int valor = tpExp.getValorEnt();
         // Error de desbordamiento
-        ErrorSemantico eSM = new ErrorSemantico();
-        if (!eSM.hayDesbordamiento(valor))
+        if (!ErrorSemantico.hayDesbordamiento(valor))
         {
           // Comprobacion de si es booleano o no 
-          eSM = new ErrorSemantico("Desbordamiento detectado");
+          ErrorSemantico eSM = new ErrorSemantico("La operacion ENTACAR debe recibir un par\u00e1metro " +
+                                                                        "del tipo entero comprendido entre 0 y 255");
         }
+
+        result.setTipo(Simbolo.Tipo_variable.CHAR);
       }
-      {if (true) return tpExp;}
+      {if (true) return result;}
         break;
       case tCARAENT:
         jj_consume_token(tCARAENT);
@@ -1155,12 +1222,54 @@ public class Compilador implements CompiladorConstants {
       {
         // Comprobacion de si es o no caracter
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba CARACTER");
+
+        result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
       }
-      {if (true) return tpExp;}
+      else
+      {
+        result.setTipo(Simbolo.Tipo_variable.ENTERO);
+      }
+      {if (true) return result;}
         break;
       case tIDENTIFICADOR:
-        jj_consume_token(tIDENTIFICADOR);
+        t = jj_consume_token(tIDENTIFICADOR);
+                try {
+                   Simbolo s;
+                   // Busqueda en la tabla de simbolos	
+                   s = tabla.buscar_simbolo(t.image);
 
+                   if (!s.es_Simbolo_Parametro())
+                   {
+                         try {
+                                // Introduccion del simbolo como desconocido
+                        tabla.introducir_variable(t.image, Simbolo.Tipo_variable.DESCONOCIDO, nivel, 0);
+                         }
+                         catch (VariableRepetidaException varRepExp) {
+
+                            varRepExp.variableRepetidaExcepcion(t.image);
+                                result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                         }
+                   }
+                   else {
+
+                     result.setTipo(s.getVariable());
+                     result.setClase(s.getParametro());
+                   }
+                }
+                catch(SimboloNoEncontradoException e) {
+
+                        e.simboloNoEncontrado(t.image);
+
+                        try {
+                                // Introduccion del simbolo como desconocido
+                        tabla.introducir_variable(t.image, Simbolo.Tipo_variable.DESCONOCIDO, nivel, 0);
+                        }
+                        catch (VariableRepetidaException varRepExp) {
+
+                            varRepExp.variableRepetidaExcepcion(t.image);
+                                result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                        }
+                }
         break;
       case tCONSTANTE_NUMERICA:
         t = jj_consume_token(tCONSTANTE_NUMERICA);
@@ -1174,21 +1283,25 @@ public class Compilador implements CompiladorConstants {
         break;
       case tCONSTCHAR:
         t = jj_consume_token(tCONSTCHAR);
-      // Guardar el contenido de la cadena
-      result.setValorString(t.image);
-      // Char
-      result.setTipo(Simbolo.Tipo_variable.CHAR);
-      // Devolucion del resultado
-      {if (true) return result;}
+      if(t.image.length() > 3) {
+                ErrorSemantico eSM = new ErrorSemantico("No se puede utilizar cadenas en expresiones");
+          }
+          else {
+                        result.valorString = t.image;
+                        result.setTipo(Simbolo.Tipo_variable.CHAR);
+          }
+          {if (true) return result;}
         break;
       case tCONSTCAD:
         t = jj_consume_token(tCONSTCAD);
-      // Guardar el contenido de la cadena
-      result.setValorString(t.image);
-      // Tipo cadena de caracteres
-      result.setTipo(Simbolo.Tipo_variable.CADENA);
-      // Devolucion del resultado
-      {if (true) return result;}
+      if(t.image.length() > 3) {
+                ErrorSemantico eSM = new ErrorSemantico("No se puede utilizar cadenas en expresiones");
+          }
+          else {
+                        result.valorString = t.image;
+                        result.setTipo(Simbolo.Tipo_variable.CHAR);
+          }
+          {if (true) return result;}
         break;
       case tTRUE:
         jj_consume_token(tTRUE);
