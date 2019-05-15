@@ -23,6 +23,7 @@ public class ErrorSemantico extends Exception {
 	 * 		 no esta entre COTA_MINIMA y COTA_MAXIMA
 	 */
 	static boolean hayDesbordamiento(int valor) {
+		System.out.println(valor);
 		return valor < COTA_MINIMA || valor > COTA_MAXIMA;
 	}
 }

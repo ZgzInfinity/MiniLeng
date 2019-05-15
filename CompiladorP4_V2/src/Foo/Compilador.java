@@ -210,6 +210,7 @@ public class Compilador implements CompiladorConstants {
         // Se busca el simbolo en la tabla de simbolos
         s = tabla.buscar_simbolo(t.image);
         // el simbolo se ha encontrado bien
+
         if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
         {
           ErrorSemantico eSM = new ErrorSemantico("No se permite realizar una asignacion a un" +
@@ -235,6 +236,7 @@ public class Compilador implements CompiladorConstants {
       // Procesamiento de la expresion
           tpExp = expresion();
       jj_consume_token(tPUNTYCOM);
+      System.out.println("Res " + tpExp.valorBool);
       if (ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
       {
         ErrorSemantico eSM = new ErrorSemantico("Tipos incompatibles en la asignacion");
@@ -613,7 +615,7 @@ public class Compilador implements CompiladorConstants {
 // Regla de expresion OK
   static final public RegistroExp expresion() throws ParseException {
   // Declaracion de expresiones a analizar
-  RegistroExp tpExp1, tpExp2;
+  RegistroExp tpExp1 = null, tpExp2 = null;
   TipoOperador op;
   boolean ok = true;
   RegistroExp regResult = new RegistroExp();
@@ -764,9 +766,16 @@ public class Compilador implements CompiladorConstants {
             " desconocido");
           }
         }
-        // Devolucion de la expresion
-        {if (true) return regResult;}
       }
+      }
+      // Comprobar que la expresion es compuesta
+      if (tpExp2 == null)
+      {
+        {if (true) return tpExp1;}
+      }
+      else
+      {
+        {if (true) return regResult;}
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -865,7 +874,7 @@ public class Compilador implements CompiladorConstants {
 // regla de expresion simple OK
   static final public RegistroExp expresion_simple() throws ParseException {
   // Declaracion de variables
-  RegistroExp regTerm1, regTerm2, regResult;
+  RegistroExp regTerm1 = null, regTerm2 = null, regResult = null;
   TipoOperador op;
   boolean ok;
     try {
@@ -954,7 +963,7 @@ public class Compilador implements CompiladorConstants {
               regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
               break;
               case RESTA :
-              regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
+              regResult.valorEnt = regTerm1.valorEnt - regTerm2.valorEnt;
               break;
               default :
               ErrorSemantico eSM = new ErrorSemantico("Operador aditivo desconocido");
@@ -962,7 +971,15 @@ public class Compilador implements CompiladorConstants {
           }
         }
       }
-      {if (true) return regResult;}
+      }
+      // Comprobar que la expresion simple es compuesta
+      if (regTerm2 == null)
+      {
+        {if (true) return regTerm1;}
+      }
+      else
+      {
+        {if (true) return regResult;}
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -974,7 +991,7 @@ public class Compilador implements CompiladorConstants {
 // Regla de termino OK
   static final public RegistroExp termino() throws ParseException {
   // Declaracion de factores y expresiones
-  RegistroExp tpFactor1, tpFactor2, regResult;
+  RegistroExp tpFactor1 = null, tpFactor2 = null, regResult = null;
   // Declaracion del operador
   TipoOperador op;
   boolean ok;
@@ -1016,6 +1033,14 @@ public class Compilador implements CompiladorConstants {
         {
           // El resultado es desconocido
           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+        }
+        else
+        {
+          // El resultado es desconocido
+          regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+
+          // Hacer operacion AND
+          regResult.valorBool = tpFactor1.valorBool & tpFactor2.valorBool;
         }
       }
       else
@@ -1072,8 +1097,16 @@ public class Compilador implements CompiladorConstants {
           }
         }
       }
-      {if (true) return regResult;}
       }
+      // Comprobar que es expresion compuesta
+          if (tpFactor2 == null)
+          {
+            {if (true) return tpFactor1;}
+          }
+          else
+          {
+            {if (true) return regResult;}
+          }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -1112,6 +1145,7 @@ public class Compilador implements CompiladorConstants {
         break;
       case tAND:
         jj_consume_token(tAND);
+      System.out.println("HOSTIA");
       // El operador es una AND logica
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.AND);
       {if (true) return op;}
@@ -1137,6 +1171,7 @@ public class Compilador implements CompiladorConstants {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tNOT:
+      System.out.println("hola");
         jj_consume_token(tNOT);
         tpFactor = factor();
       // Comprobacion de si es o no booleano
@@ -1186,6 +1221,7 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(tPARENTESIS_IZDA);
         tpExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
+      System.out.println("hola eee");
       // Comprobacion de si es entera la expresion
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
       && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
@@ -1200,6 +1236,7 @@ public class Compilador implements CompiladorConstants {
       {
         // Es un entero y se comprueba que no hay desbordamiento
         int valor = tpExp.getValorEnt();
+
         // Error de desbordamiento
         if (!ErrorSemantico.hayDesbordamiento(valor))
         {

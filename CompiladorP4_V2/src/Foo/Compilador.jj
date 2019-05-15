@@ -474,6 +474,7 @@ void asignacion(Token t) :
         // Se busca el simbolo en la tabla de simbolos
         s = tabla.buscar_simbolo(t.image);
         // el simbolo se ha encontrado bien
+
         if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
         {
           ErrorSemantico eSM = new ErrorSemantico("No se permite realizar una asignacion a un" + 
@@ -499,6 +500,9 @@ void asignacion(Token t) :
     }
     // Procesamiento de la expresion
     tpExp = expresion() < tPUNTYCOM >
+    {
+      System.out.println("Res " + tpExp.valorBool);
+    }
     {
       if (ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
       {
@@ -898,7 +902,7 @@ void lista_expresiones(Simbolo s) :
 RegistroExp expresion() :
 {
   // Declaracion de expresiones a analizar
-  RegistroExp tpExp1, tpExp2;
+  RegistroExp tpExp1 = null, tpExp2 = null;
   TipoOperador op;
   boolean ok = true;
   RegistroExp regResult = new RegistroExp();
@@ -908,9 +912,9 @@ RegistroExp expresion() :
   try
   {
     // Obtencion de la primera expresion
-    tpExp1 = expresion_simple() 
-    (op = operador_relacional() 
-    // Obtencion de la segunda expresion
+    tpExp1 = expresion_simple()
+    (op = operador_relacional()
+     // Obtencion de la segunda expresion
     tpExp2 = expresion_simple()
     {
       // Evaluacion de la expresion
@@ -1039,11 +1043,20 @@ RegistroExp expresion() :
             " desconocido");
           }
         }
-        // Devolucion de la expresion
-        return regResult;
       }
     }
     ) *
+    {
+      // Comprobar que la expresion es compuesta
+      if (tpExp2 == null)
+      {
+        return tpExp1;
+      }
+      else
+      {
+        return regResult;
+      }
+    }
   }
   catch (ParseException e)
   {
@@ -1141,7 +1154,7 @@ TipoOperador operador_aditivo() :
 RegistroExp expresion_simple() :
 {
   // Declaracion de variables
-  RegistroExp regTerm1, regTerm2, regResult;
+  RegistroExp regTerm1 = null, regTerm2 = null, regResult = null;
   TipoOperador op;
   boolean ok;
 }
@@ -1149,7 +1162,7 @@ RegistroExp expresion_simple() :
   try
   {
     // Primer termino de la expresion
-    regTerm1 = termino() 
+    regTerm1 = termino()
     (
     // Operador de la expresion
     op = operador_aditivo() 
@@ -1223,7 +1236,7 @@ RegistroExp expresion_simple() :
               regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
               break;
               case RESTA : 
-              regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
+              regResult.valorEnt = regTerm1.valorEnt - regTerm2.valorEnt;
               break;
               default : 
               ErrorSemantico eSM = new ErrorSemantico("Operador aditivo desconocido");
@@ -1231,9 +1244,19 @@ RegistroExp expresion_simple() :
           }
         }
       }
-      return regResult;
     }
     ) *
+    {
+      // Comprobar que la expresion simple es compuesta
+      if (regTerm2 == null)
+      {
+        return regTerm1;
+      }
+      else
+      {
+        return regResult;
+      }
+    }
   }
   catch (ParseException e)
   {
@@ -1246,7 +1269,7 @@ RegistroExp expresion_simple() :
 RegistroExp termino() :
 {
   // Declaracion de factores y expresiones
-  RegistroExp tpFactor1, tpFactor2, regResult;
+  RegistroExp tpFactor1 = null, tpFactor2 = null, regResult = null;
   // Declaracion del operador
   TipoOperador op;
   boolean ok;
@@ -1255,7 +1278,7 @@ RegistroExp termino() :
   try
   {
     // Evaluacion del primer factor
-    tpFactor1 = factor() 
+    tpFactor1 = factor()
     (
     // Evaluacion del operador multiplicativo
     op = operador_multiplicativo() 
@@ -1279,6 +1302,14 @@ RegistroExp termino() :
         {
           // El resultado es desconocido
           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+        }
+        else
+        {
+          // El resultado es desconocido
+          regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+          
+          // Hacer operacion AND
+          regResult.valorBool = tpFactor1.valorBool & tpFactor2.valorBool;
         }
       }
       else
@@ -1335,9 +1366,19 @@ RegistroExp termino() :
           }
         }
       }
-      return regResult;
     }
     ) *
+    {
+      // Comprobar que es expresion compuesta
+	  if (tpFactor2 == null)
+	  { 
+	    return tpFactor1;
+	  }
+	  else
+	  { 
+	    return regResult;
+	  }  
+    }
   }
   catch (ParseException e)
   {
@@ -1380,6 +1421,7 @@ TipoOperador operador_multiplicativo() :
     }
   | < tAND >
     {
+      System.out.println("HOSTIA");
       // El operador es una AND logica
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.AND);
       return op;
@@ -1403,6 +1445,9 @@ RegistroExp factor() :
 {
   try
   {
+    {
+      System.out.println("hola");
+    }
     < tNOT > tpFactor = factor()
     {
       // Comprobacion de si es o no booleano
@@ -1446,6 +1491,8 @@ RegistroExp factor() :
     }
   | < tENTACAR > < tPARENTESIS_IZDA > tpExp = expresion() < tPARENTESIS_DCHA >
     {
+
+      System.out.println("hola eee");
       // Comprobacion de si es entera la expresion
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO) 
       && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
@@ -1460,6 +1507,7 @@ RegistroExp factor() :
       {
         // Es un entero y se comprueba que no hay desbordamiento
         int valor = tpExp.getValorEnt();
+
         // Error de desbordamiento
         if (!ErrorSemantico.hayDesbordamiento(valor))
         {
