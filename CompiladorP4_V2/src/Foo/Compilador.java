@@ -204,39 +204,34 @@ public class Compilador implements CompiladorConstants {
   boolean ok = true;
     try {
       jj_consume_token(tOPAS);
-      // Comprobar que existe el simbolo en la tabla
-      try
-      {
-        // Se busca el simbolo en la tabla de simbolos
-        s = tabla.buscar_simbolo(t.image);
-        // el simbolo se ha encontrado bien
+       // Se busca el simbolo en la tabla de simbolos
+       s = tabla.buscar_simbolo(t.image);
+       // el simbolo se ha encontrado bien
 
-        if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
-        {
+       if (s == null)
+       {
+          // Excepcion de simbolo no encontrado
+          ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido " + t.image +
+          " en la parte izquierda de la asignacion");
+         // Tipo de simbolo desconocido
+         tipo = Simbolo.Tipo_variable.DESCONOCIDO;
+         ok = false;
+       }
+       else if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
+       {
           ErrorSemantico eSM = new ErrorSemantico("No se permite realizar una asignacion a un" +
           " parametro pasado como valor");
           // Tipo de simbolo desconocido
           tipo = Simbolo.Tipo_variable.DESCONOCIDO;
           ok = false;
-        }
-        else
-        {
+       }
+       else
+       {
           tipo = s.getVariable();
-        }
-      }
-      catch (SimboloNoEncontradoException e)
-      {
-        // Excepcion de simbolo no encontrado
-        ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido " + t.image +
-        " en la parte izquierda de la asignacion");
-        // Tipo de simbolo desconocido
-        tipo = Simbolo.Tipo_variable.DESCONOCIDO;
-        ok = false;
-      }
+       }
       // Procesamiento de la expresion
           tpExp = expresion();
       jj_consume_token(tPUNTYCOM);
-      System.out.println("Res " + tpExp.valorBool);
       if (ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
       {
         ErrorSemantico eSM = new ErrorSemantico("Tipos incompatibles en la asignacion");
@@ -264,30 +259,25 @@ public class Compilador implements CompiladorConstants {
       {
         // obtencion del i-esimo identificador
         idActual = listaIdentificadores.get(i);
-        try
-        {
-          // Busqueda del simbolo en la tabla de simbolos
-          s = tabla.buscar_simbolo(idActual);
 
-          // Simbolo se encuentra en la tabla
-          if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
+        // Busqueda del simbolo en la tabla de simbolos
+        s = tabla.buscar_simbolo(idActual);
+
+        if (s == null)
+        {
+           ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido" + idActual);
+        }
+        else if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
           && s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO
           && (!s.es_Variable_Entero() && !s.es_Variable_Char() && !s.es_Variable_Cadena()))
-          {
-            // Error semantico en la lista de asignables
-            ErrorSemantico eSM = new ErrorSemantico("Tipo invalido de variable de lectura");
-          }
-          else if (s.es_Simbolo_Variable() && s.es_Parametro_Valor())
-          {
+        {
+           // Error semantico en la lista de asignables
+           ErrorSemantico eSM = new ErrorSemantico("Tipo invalido de variable de lectura");
+        }
+        else if (s.es_Simbolo_Variable() && s.es_Parametro_Valor())
+        {
             // Error semantico en la lista de asignables
             ErrorSemantico eSM = new ErrorSemantico("Variable por valor en lectura");
-          }
-          // HACER ALGO ?
-        }
-        catch (SimboloNoEncontradoException e)
-        {
-          // Simbolo no encontrado en la tabla
-          e.simboloNoEncontrado(idActual);
         }
       }
     } catch (ParseException e) {
@@ -393,23 +383,21 @@ public class Compilador implements CompiladorConstants {
           }
           else
           {
-            try {
-               // Lo busca bien
-               s = tabla.buscar_simbolo(t.image);
+              // Lo busca bien el token en la tabla de simbolos
+              s = tabla.buscar_simbolo(t.image);
 
-               if (!s.es_Simbolo_Parametro())
-               {
-                  ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido");
-               }
-               else if (!s.es_Variable_Char() && !s.es_Variable_Cadena() && !s.es_Variable_Entero())
-               {
-                  ErrorSemantico eSM = new ErrorSemantico("Variable no valida en escribir");
-               }
-            }
-            catch (SimboloNoEncontradoException e) {
-                // Error 
-                e.simboloNoEncontrado(t.image);
-            }
+                  if (s == null)
+                  {
+                    ErrorSemantico eSM = new ErrorSemantico("Identificador no esta en la tabla de simbolos");
+                  }
+              else if (!s.es_Simbolo_Parametro())
+              {
+                 ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido" + t.image);
+              }
+              else if (!s.es_Variable_Char() && !s.es_Variable_Cadena() && !s.es_Variable_Entero())
+              {
+                 ErrorSemantico eSM = new ErrorSemantico("Variable no valida en escribir" + t.image);
+              }
            }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -422,39 +410,38 @@ public class Compilador implements CompiladorConstants {
   Simbolo s = null;
   boolean args = false;
     try {
-      try {
-        // Busqueda del simbolo en la tabla
-        s = tabla.buscar_simbolo(t.image);
-        // Busqueda con exito en la tabla de simbolos
-        if (!s.es_Simbolo_Accion())
-        {
-          // error al invocar la accion
-          ErrorSemantico eSM = new ErrorSemantico("No se puede realizar una llamada " +
-          " a una accion sobre un parametro");
-        }
-      } catch (SimboloNoEncontradoException e) {
-      // Simbolo no encontrado
-      e.simboloNoEncontrado(t.image);
-      }
+              // Busqueda del simbolo en la tabla
+              s = tabla.buscar_simbolo(t.image);
+              if (s == null)
+              {
+                ErrorSemantico eSM = new ErrorSemantico("Identificador " + t.image + " desconocido en llamada a accion");
+              }
+              // Busqueda con exito en la tabla de simbolos
+              else if (!s.es_Simbolo_Accion())
+              {
+                 // error al invocar la accion
+                 ErrorSemantico eSM = new ErrorSemantico("No se puede realizar una llamada" +
+                  " a una accion sobre el parametro " + t.image);
+              }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZDA:
         argumentos(s);
-      args = true;
+              args = true;
         break;
       default:
         jj_la1[5] = jj_gen;
         ;
       }
       jj_consume_token(tPUNTYCOM);
-      // Comprobar el numero de parametros en caso de que se llame sin ninguno
-      int argc = s.getLista_parametros().size();
-      if (!args && s != null && argc != 0)
-      {
-        // Error por falta de parametros
-        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
-        "  -  Se esperaban " + argc + " par\u00e1metros al invocar a la accion " +
-        s.getNombre());
-      }
+              // Comprobar el numero de parametros en caso de que se llame sin ninguno
+              int argc = s.getLista_parametros().size();
+              if (!args && s != null && argc != 0)
+              {
+                // Error por falta de parametros
+                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                "  -  Se esperaban " + argc + " parametros al invocar a la accion " +
+                s.getNombre());
+              }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -540,8 +527,8 @@ public class Compilador implements CompiladorConstants {
         // Numero de parametros incorrecto
         if (argc > parametros.size())
         {
-          ErrorSemantico eMS = new ErrorSemantico("El n\u00famero de par\u00e1metros de" +
-          " llamada a la funci\u00f3n " + s.getNombre() +
+          ErrorSemantico eMS = new ErrorSemantico("El nufamero de parametros de" +
+          " llamada a la funcion " + s.getNombre() +
           " no coindice, se esperaban " + parametros.size());
           ok = false;
         }
@@ -791,6 +778,7 @@ public class Compilador implements CompiladorConstants {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tIGUAL:
+
         jj_consume_token(tIGUAL);
       // Es el operador =
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.IGUAL);
@@ -1270,49 +1258,26 @@ public class Compilador implements CompiladorConstants {
         // Obtener el tipo de dato entero del caracter
         char cadena = tpExp.valorString.charAt(0);
         result.setValorEnt((int)cadena);
-        System.out.println(result.valorEnt);
         result.setTipo(Simbolo.Tipo_variable.ENTERO);
       }
       {if (true) return result;}
         break;
       case tIDENTIFICADOR:
         t = jj_consume_token(tIDENTIFICADOR);
-                try {
-                   Simbolo s;
-                   // Busqueda en la tabla de simbolos	
-                   s = tabla.buscar_simbolo(t.image);
-
-                   if (!s.es_Simbolo_Parametro())
-                   {
-                         try {
-                                // Introduccion del simbolo como desconocido
-                        tabla.introducir_variable(t.image, Simbolo.Tipo_variable.DESCONOCIDO, nivel, 0);
-                         }
-                         catch (VariableRepetidaException varRepExp) {
-
-                            varRepExp.variableRepetidaExcepcion(t.image);
-                                result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                         }
-                   }
-                   else {
-
-                     result.setTipo(s.getVariable());
-                     result.setClase(s.getParametro());
-                   }
+                Simbolo s;
+                System.out.println("CAPULLO" + t.image);
+            // Busqueda en la tabla de simbolos	
+                s = tabla.buscar_simbolo(t.image);
+                if (s == null)
+                {
+                ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido");
+                    tabla.introducir_variable(t.image, Simbolo.Tipo_variable.DESCONOCIDO, nivel, 0);
+                result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
                 }
-                catch(SimboloNoEncontradoException e) {
-
-                        e.simboloNoEncontrado(t.image);
-
-                        try {
-                                // Introduccion del simbolo como desconocido
-                        tabla.introducir_variable(t.image, Simbolo.Tipo_variable.DESCONOCIDO, nivel, 0);
-                        }
-                        catch (VariableRepetidaException varRepExp) {
-
-                            varRepExp.variableRepetidaExcepcion(t.image);
-                                result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
-                        }
+                else
+                {
+                    result.setTipo(s.getVariable());
+                    result.setClase(s.getParametro());
                 }
         break;
       case tCONSTANTE_NUMERICA:
@@ -1462,17 +1427,21 @@ public class Compilador implements CompiladorConstants {
     try {
       jj_consume_token(tACCION);
       tId = jj_consume_token(tIDENTIFICADOR);
-      // Insertar en la tabla de simbolos el nuevo identificador
-      try
-      {
-        s = tabla.introducir_accion(tId.image, nivel, dir);
-        ok = true;
-      }
-      catch (AccionRepetidaException aRepExcep)
-      {
-        // El simbolo ya existe en la tabla de simbolos
-        aRepExcep.accionRepetidaExcepcion(tId.image);
-      }
+        // Buscar el simbolo en la tabla de simbolos
+        s = tabla.buscar_simbolo(tId.image);
+
+                // 
+        if ((s == null) || (s.getNivel() != nivel))
+        {
+                // Introducir accion en la tabla de simbolos
+                tabla.introducir_accion(tId.image, nivel, dir);
+                ok = true;
+        }
+        else
+        {
+            ErrorSemantico eSM = new ErrorSemantico("Identificador de accion duplicado");
+            ok = false;
+        }
       // Incrementar el nivel actual
       nivel++;
       // Procesamiento de los parametros
@@ -1573,17 +1542,20 @@ public class Compilador implements CompiladorConstants {
         // Obtener identificador actual
         identificadorActual = listaIdentificadores.get(i);
         // Comprobar que existe o no simbolo en la tabla
-        try
+
+        // Insercion del parametro en la tabla de simbolos
+        s = tabla.introducir_parametro(identificadorActual, tipo_Var, cl_Param, nivel, dir);
+
+                // Si se ha creado el simbolo
+        if (s != null)
         {
-          // Insercion del parametro en la tabla de simbolos
-          s = tabla.introducir_parametro(identificadorActual, tipo_Var, cl_Param, nivel, dir);
-          // Añadir parametro a la lista de parametros
-          lista.add(s);
+           // Añadir parametro a la lista de parametros
+                lista.add(s);
         }
-        catch (ParametroRepetidoException pRepExcep)
+        else
         {
-          // El parametro ya esta repetido 
-          pRepExcep.parametroRepetidoExcepcion(identificadorActual);
+          // Comprobar que la variable esta en la tabla de simbolos
+          ErrorSemantico eSM = new ErrorSemantico("Parametro repetido" + identificadorActual);
         }
       }
       // Devolucion de la lista de parametros
@@ -1688,15 +1660,14 @@ public class Compilador implements CompiladorConstants {
         // Obtencion del identificador actual
         identificadorActual = lista.get(i);
         // Simbolo ya existente en la tabla de simbolos
-        try
+
+        // introducir el nuevo simbolo
+        s = tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
+
+                // Comprobar que la variable esta en la tabla de simbolos
+        if (s == null)
         {
-          // introducir el nuevo simbolo
-          tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
-        }
-        catch (VariableRepetidaException vRepExcep)
-        {
-          // El identificador ya existe en la tabla de simbolos
-          vRepExcep.variableRepetidaExcepcion(identificadorActual);
+          ErrorSemantico eSM = new ErrorSemantico("Variable repetida " + identificadorActual);
         }
       }
     } catch (ParseException e) {

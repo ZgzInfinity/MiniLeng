@@ -119,4 +119,13 @@ public class RegistroExp {
 		this.clase = clase;
 	}
 
+
+
+	@Override
+	public String toString() {
+		return "RegistroExp [valorEnt=" + valorEnt + ", valorBool=" + valorBool + ", valorString=" + valorString
+				+ ", tipo=" + tipo + ", clase=" + clase + "]";
+	}
+
+	
 }

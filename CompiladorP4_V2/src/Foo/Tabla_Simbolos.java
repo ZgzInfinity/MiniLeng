@@ -108,15 +108,17 @@ public class Tabla_Simbolos {
 	 }
 	
 	
+	/* Añade un simbolo en la tabla de simbolos */
 	private void anyadir(String nombre, Simbolo s) {
 		int h = hash_function(nombre);
 		LinkedList<Simbolo> lista = tabla.get(h);
 		if (lista == null) {
 			lista = new LinkedList<Simbolo>();
+			lista.push(s);
+			tabla.add(h, lista);
 		}
 		else {
 			lista.push(s);
-			tabla.add(h, lista);
 		}
 	}
 	
@@ -141,7 +143,7 @@ public class Tabla_Simbolos {
 	 * del parametro (se distinguen minúsculas y mayúsculas). Si existe, devuelve un 
 	 * puntero como resultado, de lo contrario lanza una excepción
 	 */
-	public Simbolo buscar_simbolo(String nombre) throws SimboloNoEncontradoException { 
+	public Simbolo buscar_simbolo(String nombre){ 
 		Simbolo ret = null;
 		int h = hash_function(nombre);
 		if(tabla.get(h) != null) {
@@ -153,9 +155,6 @@ public class Tabla_Simbolos {
 					ret = s;
 				}
 			}
-		}
-		if (ret == null) {
-			throw new SimboloNoEncontradoException();
 		}
 		return ret;
 	}
@@ -180,23 +179,14 @@ public class Tabla_Simbolos {
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, devuelve NULL 
 	 * De lo contrario, introduce un símbolo VARIABLE (simple) con los datos de los argumentos. 
 	 */
-	public Simbolo introducir_variable(String nombre, Tipo_variable variable, int nivel, long dir) throws VariableRepetidaException {
-		try {
-			Simbolo esta = buscar_simbolo(nombre);
-			if (esta.getNivel() == nivel) {
-				// Hay un simbolo accion con el mismo nivel y el mismo nombre en la tabla
-				throw new VariableRepetidaException();
-			}
-			else {
-				// Hay un simbolo variable en la lista pero con distinto nivel
-				Simbolo s = new Simbolo(Tipo_simbolo.VARIABLE, variable, null, nombre, nivel, dir);	
-				anyadir(nombre, s);
-				return s;
-			}
+	public Simbolo introducir_variable(String nombre, Tipo_variable variable, int nivel, long dir) {
+		Simbolo esta = buscar_simbolo(nombre);
+		if (esta != null) {
+			return null;	
 		}
-		catch (SimboloNoEncontradoException e) {
-			// No hay ningun simbolo variable en la tabla
-			Simbolo s = new Simbolo(Tipo_simbolo.VARIABLE, variable, null, nombre, nivel, dir);
+		else {
+			// No está en la lista y lo añado
+			Simbolo s = new Simbolo(Tipo_simbolo.VARIABLE, variable, null, nombre, nivel, dir);					// Dir
 			anyadir(nombre, s);
 			return s;
 		}
@@ -208,23 +198,16 @@ public class Tabla_Simbolos {
 	 * Si existe un símbolo en la tabla del mismo nivel y con el mismo nombre, devuelve NULL. 
 	 *  De lo contrario, introduce un símbolo ACCION con los datos de los argumentos. 
 	 */
-    public Simbolo introducir_accion(String nombre, int nivel, long dir) throws AccionRepetidaException {
-    	try {
-    		Simbolo esta = buscar_simbolo(nombre);
-    		if (esta.getNivel() == nivel) {
-				// Hay un simbolo accion con el mismo nivel y el mismo nombre en la tabla
-				throw new AccionRepetidaException();
-			}
-			// Hay un simbolo accion con el mismo nombre pero distinto nivel
-			Simbolo s = new Simbolo(Tipo_simbolo.ACCION, null, null, nombre, nivel, dir	);	
+    public Simbolo introducir_accion(String nombre, int nivel, long dir){
+    	Simbolo esta = buscar_simbolo(nombre);
+		if (esta != null) { 
+			return null;
+		}
+		else {
+			// No está en la lista y lo añado
+			Simbolo s = new Simbolo(Tipo_simbolo.ACCION, null, null, nombre, nivel,	dir);								
 			anyadir(nombre, s);
 			return s;
-		}	
-    	catch (SimboloNoEncontradoException e) {
-    		// No hay ningun simbolo accion en la tabla
-    		Simbolo s = new Simbolo(Tipo_simbolo.ACCION, null, null, nombre, nivel, dir	);	
-   			anyadir(nombre, s);
-    		return s;
 		}
     }
 	 
@@ -234,23 +217,14 @@ public class Tabla_Simbolos {
      *  De lo contrario, introduce un símbolo PARAMETRO con los datos de los argumentos. 
      */
 	public Simbolo introducir_parametro (String nombre, Tipo_variable variable, 
-											Clase_parametro parametro, int nivel, long dir) throws ParametroRepetidoException {
-		try {
+											Clase_parametro parametro, int nivel, long dir) {
 			Simbolo esta = buscar_simbolo(nombre);
-			if (esta.getNivel() == nivel) {
-				// Hay un simbolo parametro con el mismo nivel y el mismo nombre en la tabla
-				throw new ParametroRepetidoException();
+			if (esta != null) { 
+				return null;
 			}
 			else {
-				// Hay un simbolo identico en nombre pero con distinto nivel
-				Simbolo s = new Simbolo(Tipo_simbolo.PARAMETRO, variable, parametro, nombre, nivel,	dir	);
-				anyadir(nombre, s);
-				return s;
-		    }
-		}
-		catch (SimboloNoEncontradoException e) {
-			// No ha encontrado ningun simbolo parametro identico 
-			Simbolo s = new Simbolo(Tipo_simbolo.PARAMETRO, variable, parametro, nombre, nivel,	dir	);
+				// No está en la lista y lo añado
+			Simbolo s = new Simbolo(Tipo_simbolo.PARAMETRO, variable, parametro, nombre, nivel, dir);					
 			anyadir(nombre, s);
 			return s;
 		}
