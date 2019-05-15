@@ -19,6 +19,9 @@ public class Compilador implements CompiladorConstants {
   // Variable de direccion por defecto a 0
   public static long dir = 0;
 
+  // Variable para controlar que es o no Entacar
+  public static boolean esEntCar = false;
+
   public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
   public static void main(String args []) throws ParseException
@@ -268,6 +271,7 @@ public class Compilador implements CompiladorConstants {
         {
           // Busqueda del simbolo en la tabla de simbolos
           s = tabla.buscar_simbolo(idActual);
+
           // Simbolo se encuentra en la tabla
           if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
           && s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO
@@ -363,6 +367,8 @@ public class Compilador implements CompiladorConstants {
         break;
       case tENTACAR:
         jj_consume_token(tENTACAR);
+          // control de paso de entero a caracter
+          esEntCar = true;
         jj_consume_token(tPARENTESIS_IZDA);
         regExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
@@ -644,16 +650,16 @@ public class Compilador implements CompiladorConstants {
       // Resultado de evaluar la expresion
       regResult = new RegistroExp();
       // Evaluar primer termino de la expresion
-      if (tpExp1.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+      if (tpExp1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
       {
         ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
         "caracter, cadena o booleano");
         ok = false;
       }
       // Evaluar segundo termino de la expresion
-      if (tpExp2.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
+      if (tpExp2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
       {
-        ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
+        ErrorSemantico eSM = new ErrorSemantico("El operador 2 debe ser entero " +
         "caracter, cadena o booleano");
         ok = false;
       }
@@ -683,8 +689,6 @@ public class Compilador implements CompiladorConstants {
             }
             else
             {
-              // El resultado va a ser expresion entera
-              regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
               switch (op.getOperadorRelacional())
               {
                 case MAYOR :
@@ -710,16 +714,17 @@ public class Compilador implements CompiladorConstants {
               }
             }
             break;
-            case CADENA :
+            case CHAR:
             // Cmprobar que la segunda expresion es una cadena
-            ok = tpExp2.getTipo() == Simbolo.Tipo_variable.CADENA;
+            ok = tpExp2.getTipo() == Simbolo.Tipo_variable.CHAR;
             if (!ok)
             {
               regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
             }
             else
             {
-              regResult.setTipo(Simbolo.Tipo_variable.CADENA);
+              regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+
               switch (op.getOperadorRelacional())
               {
                 case IGUAL :
@@ -729,8 +734,9 @@ public class Compilador implements CompiladorConstants {
                 regResult.valorBool = !tpExp1.valorString.equals(tpExp2.valorString);
                 break;
                 default :
+
                 ErrorSemantico eSM = new ErrorSemantico("No se puede" +
-                " utilizar el operador " + op + " sobre una cadena");
+                " utilizar el operador " + op + " sobre caracteres");
               }
             }
             break;
@@ -754,7 +760,7 @@ public class Compilador implements CompiladorConstants {
                 break;
                 default :
                 ErrorSemantico eSM = new ErrorSemantico("No se puede" +
-                " utilizar el operador " + op + " sobre una cadena");
+                " utilizar el operador " + op + " sobre una booleano");
               }
             }
             break;
@@ -791,7 +797,7 @@ public class Compilador implements CompiladorConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tIGUAL:
         jj_consume_token(tIGUAL);
-      // Es el operador ==
+      // Es el operador =
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.IGUAL);
       {if (true) return op;}
         break;
@@ -1145,7 +1151,6 @@ public class Compilador implements CompiladorConstants {
         break;
       case tAND:
         jj_consume_token(tAND);
-      System.out.println("HOSTIA");
       // El operador es una AND logica
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.AND);
       {if (true) return op;}
@@ -1171,7 +1176,6 @@ public class Compilador implements CompiladorConstants {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tNOT:
-      System.out.println("hola");
         jj_consume_token(tNOT);
         tpFactor = factor();
       // Comprobacion de si es o no booleano
@@ -1217,11 +1221,11 @@ public class Compilador implements CompiladorConstants {
       {if (true) return tpExp;}
         break;
       case tENTACAR:
-        jj_consume_token(tENTACAR);
+        t = jj_consume_token(tENTACAR);
+          esEntCar = true;
         jj_consume_token(tPARENTESIS_IZDA);
         tpExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
-      System.out.println("hola eee");
       // Comprobacion de si es entera la expresion
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
       && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
@@ -1238,13 +1242,18 @@ public class Compilador implements CompiladorConstants {
         int valor = tpExp.getValorEnt();
 
         // Error de desbordamiento
-        if (!ErrorSemantico.hayDesbordamiento(valor))
+        if (ErrorSemantico.hayDesbordamiento(valor))
         {
           // Comprobacion de si es booleano o no 
           ErrorSemantico eSM = new ErrorSemantico("La operacion ENTACAR debe recibir un par\u00e1metro " +
                                                                         "del tipo entero comprendido entre 0 y 255");
         }
 
+                // Extraigo el numero entero y lo guardo a caracter
+        result.setValorString(String.valueOf((char)valor));
+        result.setTipo(Simbolo.Tipo_variable.CHAR);
+
+        // Lo guardo en CHAR    
         result.setTipo(Simbolo.Tipo_variable.CHAR);
       }
       {if (true) return result;}
@@ -1264,6 +1273,10 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
+        // Obtener el tipo de dato entero del caracter
+        char cadena = tpExp.valorString.charAt(0);
+        result.setValorEnt((int)cadena);
+        System.out.println(result.valorEnt);
         result.setTipo(Simbolo.Tipo_variable.ENTERO);
       }
       {if (true) return result;}
@@ -1310,7 +1323,7 @@ public class Compilador implements CompiladorConstants {
         break;
       case tCONSTANTE_NUMERICA:
         t = jj_consume_token(tCONSTANTE_NUMERICA);
-      // Obtener el valor del token y pasarlo a entero para guardarlo
+      // Y si es entacar
       int valor = Integer.parseInt(t.image);
       result.setValorEnt(valor);
       // Tipo de la variable entero
@@ -1324,7 +1337,8 @@ public class Compilador implements CompiladorConstants {
                 ErrorSemantico eSM = new ErrorSemantico("No se puede utilizar cadenas en expresiones");
           }
           else {
-                        result.valorString = t.image;
+                // No coger las comillas
+                        result.valorString = String.valueOf(t.image.charAt(1));
                         result.setTipo(Simbolo.Tipo_variable.CHAR);
           }
           {if (true) return result;}
@@ -1335,7 +1349,8 @@ public class Compilador implements CompiladorConstants {
                 ErrorSemantico eSM = new ErrorSemantico("No se puede utilizar cadenas en expresiones");
           }
           else {
-                        result.valorString = t.image;
+                // No coger las comillas
+                        result.valorString = String.valueOf(t.image.charAt(1));
                         result.setTipo(Simbolo.Tipo_variable.CHAR);
           }
           {if (true) return result;}
@@ -1375,6 +1390,7 @@ public class Compilador implements CompiladorConstants {
   RegistroExp tpExp;
     try {
       jj_consume_token(tSI);
+      System.out.println("AQUI LLEGA");
       tpExp = expresion();
       // Evaluacion de la condicion
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
