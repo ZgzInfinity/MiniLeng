@@ -19,9 +19,6 @@ public class Compilador implements CompiladorConstants {
   // Variable de direccion por defecto a 0
   public static long dir = 0;
 
-  // Variable para controlar que es o no Entacar
-  public static boolean esEntCar = false;
-
   public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
   public static void main(String args []) throws ParseException
@@ -367,8 +364,6 @@ public class Compilador implements CompiladorConstants {
         break;
       case tENTACAR:
         jj_consume_token(tENTACAR);
-          // control de paso de entero a caracter
-          esEntCar = true;
         jj_consume_token(tPARENTESIS_IZDA);
         regExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
@@ -1222,7 +1217,6 @@ public class Compilador implements CompiladorConstants {
         break;
       case tENTACAR:
         t = jj_consume_token(tENTACAR);
-          esEntCar = true;
         jj_consume_token(tPARENTESIS_IZDA);
         tpExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);

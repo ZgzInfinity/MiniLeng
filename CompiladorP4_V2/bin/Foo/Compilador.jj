@@ -30,9 +30,6 @@ public class Compilador
   // Variable de direccion por defecto a 0
   public static long dir = 0;
 
-  // Variable para controlar que es o no Entacar
-  public static boolean esEntCar = false;
-
   public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
   public static void main(String args []) throws ParseException
@@ -644,12 +641,7 @@ void escribible() :
       constCad = true;
     }
   | t = < tIDENTIFICADOR >
-  | < tENTACAR >
-  	{
-  	  // control de paso de entero a caracter
-  	  esEntCar = true;
-  	}
-  	< tPARENTESIS_IZDA > regExp = expresion() < tPARENTESIS_DCHA >
+  | < tENTACAR > < tPARENTESIS_IZDA > regExp = expresion() < tPARENTESIS_DCHA >
   	{
   	  entCad = true;
   	}
@@ -1494,11 +1486,7 @@ RegistroExp factor() :
       // Devuelve la expresiom normal
       return tpExp;
     }
-  | t = < tENTACAR >
-  	{
-  	  esEntCar = true;
-  	}
-    < tPARENTESIS_IZDA > tpExp = expresion() < tPARENTESIS_DCHA >
+  | t = < tENTACAR > < tPARENTESIS_IZDA > tpExp = expresion() < tPARENTESIS_DCHA >
     {
       
       // Comprobacion de si es entera la expresion
