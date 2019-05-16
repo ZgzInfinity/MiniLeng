@@ -1202,11 +1202,11 @@ public class Compilador implements CompiladorConstants {
         // Comprobacion de si es booleano o no 
         ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba BOOLEANO");
 
-        result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+        result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
       }
       else
       {
-        result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+        result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
       }
       // Devuelve el tipo de factor
       {if (true) return result;}
