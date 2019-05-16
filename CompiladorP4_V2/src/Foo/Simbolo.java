@@ -9,7 +9,7 @@ public class Simbolo {
 	
 	// Representacion del tipo simbolo con enum
 	 enum Tipo_simbolo {
-		PROGRAMA, VARIABLE, ACCION, PARAMETRO
+		PROGRAMA, VARIABLE, ACCION, PARAMETRO, CONST
 	}
 	
 	// Representacion del tipo variable con enum
@@ -222,9 +222,10 @@ public class Simbolo {
 		int dimension = listaDeParametros.size();
 		
 		// Insercion de los parametros en la accion
-		for (int i = 0; i < dimension; i++) {
-			this.lista_parametros.add(listaDeParametros.get(i));
-		}
+	
+		// 
+		this.lista_parametros.addAll(listaDeParametros);
+		
 	}
 	
 	

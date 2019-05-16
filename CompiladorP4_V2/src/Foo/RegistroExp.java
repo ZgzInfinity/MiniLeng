@@ -18,6 +18,21 @@ public class RegistroExp {
 	
 	// Tipo de clase de parametro
 	Simbolo.Clase_parametro clase;
+	
+	// Tipo de simbolo
+	Simbolo.Tipo_simbolo simbolo;
+
+
+
+	public Simbolo.Tipo_simbolo getSimbolo() {
+		return simbolo;
+	}
+
+
+
+	public void setSimbolo(Simbolo.Tipo_simbolo simbolo) {
+		this.simbolo = simbolo;
+	}
 
 
 

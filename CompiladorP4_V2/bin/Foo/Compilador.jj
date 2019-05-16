@@ -535,23 +535,23 @@ void lista_asignables() :
        
         // Busqueda del simbolo en la tabla de simbolos
         s = tabla.buscar_simbolo(idActual);
-
+        
         if (s == null)
         {
            ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido" + idActual);
         }
-        else if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE 
-          && s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO 
+        else if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
+          && s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO
           && (!s.es_Variable_Entero() && !s.es_Variable_Char() && !s.es_Variable_Cadena()))
         {
            // Error semantico en la lista de asignables
            ErrorSemantico eSM = new ErrorSemantico("Tipo invalido de variable de lectura");
         }
-        else if (s.es_Simbolo_Variable() && s.es_Parametro_Valor())
+        else if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
         {
             // Error semantico en la lista de asignables
             ErrorSemantico eSM = new ErrorSemantico("Variable por valor en lectura");
-        }
+        }   	
       }      
     }
   }
@@ -568,7 +568,8 @@ void leer() :
 {
   try
   {
-    < tLEER > < tPARENTESIS_IZDA > lista_asignables() < tPARENTESIS_DCHA >
+    < tLEER >
+    < tPARENTESIS_IZDA > lista_asignables() < tPARENTESIS_DCHA >
   }
   catch (ParseException e)
   {
@@ -902,6 +903,7 @@ RegistroExp expresion() :
       // Evaluacion de la expresion
       // Resultado de evaluar la expresion
       regResult = new RegistroExp();
+
       // Evaluar primer termino de la expresion
       if (tpExp1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
       {
@@ -935,13 +937,21 @@ RegistroExp expresion() :
             case ENTERO : 
             // Comprobar que la segunda expresion es tambien entera
             ok = tpExp2.getTipo() == Simbolo.Tipo_variable.ENTERO;
+            
+            // Tipo de la nueva expresion
+            regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+            
             if (!ok)
             {
               // Resul tiene tipo DESCONOCIDO porque no coinciden
               regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
             }
-            else
+            // Son constantes
+            else if (tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
+            	&& tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
+
+              regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);             
               switch (op.getOperadorRelacional())
               {
                 case MAYOR : 
@@ -969,40 +979,48 @@ RegistroExp expresion() :
             break;
             case CHAR:
             // Cmprobar que la segunda expresion es una cadena
+
+            // El tipo es booleano
+	        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+	        
             ok = tpExp2.getTipo() == Simbolo.Tipo_variable.CHAR;
             if (!ok)
             {
               regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
             }
-            else
+            // Los datos son constantes y se puede trabajar
+            else if (tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
+            	&& tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
-              regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-              
-              switch (op.getOperadorRelacional())
-              {
-                case IGUAL :
-                regResult.valorBool = tpExp1.valorString.equals(tpExp2.valorString);
-                break;
-                case NO_IGUAL :                                        
-                regResult.valorBool = !tpExp1.valorString.equals(tpExp2.valorString);
-                break;
-                default :
-                           
-                ErrorSemantico eSM = new ErrorSemantico("No se puede" + 
-                " utilizar el operador " + op + " sobre caracteres");
-              }
+				  switch (op.getOperadorRelacional())
+	              {
+	                case IGUAL :
+	                regResult.valorBool = tpExp1.valorString.equals(tpExp2.valorString);
+	                break;
+	                case NO_IGUAL :                                        
+	                regResult.valorBool = !tpExp1.valorString.equals(tpExp2.valorString);
+	                break;
+	                default :           
+	                ErrorSemantico eSM = new ErrorSemantico("No se puede" + 
+	                " utilizar el operador " + op + " sobre caracteres");
+	              }             
             }
             break;
             case BOOLEANO : 
             // Cmprobar que la segunda expresion es una cadena
+
+            // El tipo es booleano
+	        regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+	        
             ok = tpExp2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
             if (!ok)
             {
               regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
             }
-            else
+            else if(tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
+            	&& tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
-              regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+              // Son constantes
               switch (op.getOperadorRelacional())
               {
                 case IGUAL : 
@@ -1180,16 +1198,25 @@ RegistroExp expresion_simple() :
           {
             // Son los dos booleanos
             regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-            regResult.valorBool = regTerm1.valorBool
-          | regTerm2.valorBool;
+
+			// Si son constantes calculamos la expresion
+            if (regTerm1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
+            	&& regTerm2.getSimbolo() != Simbolo.Tipo_simbolo.CONST)
+            {
+              	regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
+            	regResult.valorBool = regTerm1.valorBool | regTerm2.valorBool;
+            }
           }
         }
       }
       // No es operador OR
       else
       {
+        System.out.println(regTerm1.toString());
+        System.out.println(regTerm2.toString());
         // Comprobar que son los dos enteros
-        ok = regTerm1.getTipo() == Simbolo.Tipo_variable.ENTERO 
+        
+        ok = regTerm1.getTipo() == Simbolo.Tipo_variable.ENTERO
         && regTerm2.getTipo() == Simbolo.Tipo_variable.ENTERO;
         if (!ok)
         {
@@ -1215,17 +1242,23 @@ RegistroExp expresion_simple() :
           }
           else
           {
-            switch (op.getOperadorAditivo())
+            // Comprobar que son constantes
+            if (regTerm1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
+            	&& regTerm2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
-              case SUMA : 
-              regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
-              break;
-              case RESTA : 
-              regResult.valorEnt = regTerm1.valorEnt - regTerm2.valorEnt;
-              break;
-              default : 
-              ErrorSemantico eSM = new ErrorSemantico("Operador aditivo desconocido");
-            }
+              	regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
+	            switch (op.getOperadorAditivo())
+	            {
+	              case SUMA :	             
+	              regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
+	              break;
+	              case RESTA : 
+	              regResult.valorEnt = regTerm1.valorEnt - regTerm2.valorEnt;
+	              break;
+	              default : 
+	              ErrorSemantico eSM = new ErrorSemantico("Operador aditivo desconocido");
+	            }
+	        }
           }
         }
       }
@@ -1318,36 +1351,44 @@ RegistroExp termino() :
           }
           else
           {
-            switch (op.getOperadorMultiplicativo())
+            // Comprobar que son constantes para operar
+            if (tpFactor1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
+            	&& tpFactor2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
-              case MULTIPLICACION : 
-              regResult.valorEnt = tpFactor1.valorEnt * tpFactor2.valorEnt;
-              break;
-              case DIVISION : 
-              if (tpFactor2.valorEnt == 0)
-              {
-                ErrorSemantico eSM = new ErrorSemantico("Division por 0");					
-                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);				
-              }
-              else
-              {
-                regResult.valorEnt = tpFactor1.valorEnt / tpFactor2.valorEnt;
-              }
-              break;
-              case MOD : 
-              if (tpFactor2.valorEnt == 0)
-              {
-                ErrorSemantico eSM = new ErrorSemantico("Modulo por 0");					
-                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);		
-              }
-              else
-              {
-                regResult.valorEnt = tpFactor1.valorEnt % tpFactor2.valorEnt;
-              }
-              break;
-              default : 
-              ErrorSemantico eSM = new ErrorSemantico("Operador multiplicativo desconocido");					
-            }
+              	// El resultado tambien es constante
+              	regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
+              	
+	            switch (op.getOperadorMultiplicativo())
+	            {
+	              case MULTIPLICACION : 
+	              regResult.valorEnt = tpFactor1.valorEnt * tpFactor2.valorEnt;
+	              break;
+	              case DIVISION : 
+	              if (tpFactor2.valorEnt == 0)
+	              {
+	                ErrorSemantico eSM = new ErrorSemantico("Division por 0");					
+	                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);				
+	              }
+	              else
+	              {
+	                regResult.valorEnt = tpFactor1.valorEnt / tpFactor2.valorEnt;
+	              }
+	              break;
+	              case MOD : 
+	              if (tpFactor2.valorEnt == 0)
+	              {
+	                ErrorSemantico eSM = new ErrorSemantico("Modulo por 0");					
+	                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);		
+	              }
+	              else
+	              {
+	                regResult.valorEnt = tpFactor1.valorEnt % tpFactor2.valorEnt;
+	              }
+	              break;
+	              default : 
+	              ErrorSemantico eSM = new ErrorSemantico("Operador multiplicativo desconocido");					
+	            }
+	         }
           }
         }
       }
@@ -1356,7 +1397,7 @@ RegistroExp termino() :
     {
       // Comprobar que es expresion compuesta
 	  if (tpFactor2 == null)
-	  { 
+	  {
 	    return tpFactor1;
 	  }
 	  else
@@ -1541,7 +1582,7 @@ RegistroExp factor() :
 		    result.setTipo(s.getVariable());
 		    result.setClase(s.getParametro());
 		}
-		
+		return result;	
 	}    
   | t = < tCONSTANTE_NUMERICA >
     {
@@ -1549,7 +1590,11 @@ RegistroExp factor() :
       int valor = Integer.parseInt(t.image);
       result.setValorEnt(valor);
       // Tipo de la variable entero
-      result.setTipo(Simbolo.Tipo_variable.ENTERO);   
+      result.setTipo(Simbolo.Tipo_variable.ENTERO);
+
+	  // El simbolo es una constante
+      result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
+      
       // Devolucion del resultado
       return result;
     }
@@ -1559,7 +1604,8 @@ RegistroExp factor() :
        		ErrorSemantico eSM = new ErrorSemantico("No se puede utilizar cadenas en expresiones");
    	  }
    	  else {
-   	    	// No coger las comillas
+   	    	// El simbolo es una constante
+      		result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 	   		result.valorString = String.valueOf(t.image.charAt(1));
 	   		result.setTipo(Simbolo.Tipo_variable.CHAR);
    	  }
@@ -1572,6 +1618,8 @@ RegistroExp factor() :
    	  }
    	  else {
    	    	// No coger las comillas
+   	    	// El simbolo es una constante
+      		result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 	   		result.valorString = String.valueOf(t.image.charAt(1));
 	   		result.setTipo(Simbolo.Tipo_variable.CHAR);
    	  }
@@ -1579,6 +1627,8 @@ RegistroExp factor() :
     }
   | < tTRUE >
     {
+      // El simbolo es una constante
+      result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
       // Guardar el contenido de la cadena
       result.setValorBool(true);
       // Tipo cadena de caracteres
@@ -1588,6 +1638,8 @@ RegistroExp factor() :
     }
   | < tFALSE >
     {
+      // El simbolo es una constante
+      result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
       // Guardar el contenido de la cadena
       result.setValorBool(false);
       // Tipo cadena de caracteres
@@ -1612,9 +1664,6 @@ void seleccion() :
   try
   {
     < tSI >
-    {
-      System.out.println("AQUI LLEGA");
-    }
     tpExp = expresion()
     {
       // Evaluacion de la condicion
@@ -1692,12 +1741,11 @@ void cabecera_accion() :
     {
         // Buscar el simbolo en la tabla de simbolos
      	s = tabla.buscar_simbolo(tId.image);
-
-		// 
+     	
      	if ((s == null) || (s.getNivel() != nivel))
      	{
      	  	// Introducir accion en la tabla de simbolos
-     	  	tabla.introducir_accion(tId.image, nivel, dir);
+     	  	s = tabla.introducir_accion(tId.image, nivel, dir);
         	ok = true;	
         }
         else
