@@ -4,7 +4,6 @@ import Foo.Tabla_Simbolos;
 import Foo.Simbolo.Tipo_simbolo;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
-import Foo.SimboloNoEncontradoException;
 import Foo.TipoOperador.Tipo_Operador_Aditivo;
 import Foo.TipoOperador.Tipo_Operador_Multiplicativo;
 import Foo.TipoOperador.Tipo_Operador_Relacional;

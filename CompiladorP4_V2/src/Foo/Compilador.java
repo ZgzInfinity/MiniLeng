@@ -4,7 +4,6 @@ import Foo.Tabla_Simbolos;
 import Foo.Simbolo.Tipo_simbolo;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Clase_parametro;
-import Foo.SimboloNoEncontradoException;
 import Foo.TipoOperador.Tipo_Operador_Aditivo;
 import Foo.TipoOperador.Tipo_Operador_Multiplicativo;
 import Foo.TipoOperador.Tipo_Operador_Relacional;
@@ -110,7 +109,7 @@ public class Compilador implements CompiladorConstants {
       tabla.ocultar_parametros(nivel);
       // Detectado el fin de un bloque de sentencias
       // Mostrar el contenido de la tabla Hash
-      tabla.mostrarTabla_Simbolos();
+
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -265,7 +264,7 @@ public class Compilador implements CompiladorConstants {
 
         if (s == null)
         {
-           ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido" + idActual);
+           ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido " + idActual);
         }
         else if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
           && s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO
@@ -385,19 +384,15 @@ public class Compilador implements CompiladorConstants {
           {
               // Lo busca bien el token en la tabla de simbolos
               s = tabla.buscar_simbolo(t.image);
-
                   if (s == null)
                   {
-                    ErrorSemantico eSM = new ErrorSemantico("Identificador no esta en la tabla de simbolos");
+                    ErrorSemantico eSM = new ErrorSemantico("Identificador no esta en la tabla de simbolos ");
                   }
-              else if (!s.es_Simbolo_Parametro())
+              else if (s.es_Variable_Desconocido())
               {
-                 ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido" + t.image);
+                 ErrorSemantico eSM = new ErrorSemantico("Variable no valida en escribir " + t.image);
               }
-              else if (!s.es_Variable_Char() && !s.es_Variable_Cadena() && !s.es_Variable_Entero())
-              {
-                 ErrorSemantico eSM = new ErrorSemantico("Variable no valida en escribir" + t.image);
-              }
+              // Controlar despues los BOOLEANOS
            }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -658,6 +653,7 @@ public class Compilador implements CompiladorConstants {
         {
           // Tipo de la nueva expresion
           regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+
           // Evaluacion del tipo de la expresion
           switch (tpExp1.getTipo())
           {
@@ -942,8 +938,6 @@ public class Compilador implements CompiladorConstants {
       // No es operador OR
       else
       {
-        System.out.println(regTerm1.toString());
-        System.out.println(regTerm2.toString());
         // Comprobar que son los dos enteros
 
         ok = regTerm1.getTipo() == Simbolo.Tipo_variable.ENTERO
@@ -1046,7 +1040,7 @@ public class Compilador implements CompiladorConstants {
         && tpFactor2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
         if (!ok)
         {
-          ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+          ErrorSemantico eSM = new ErrorSemantico("Joderse");
           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
         }
         else if (tpFactor2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
@@ -1260,7 +1254,7 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // Es un entero y se comprueba que no hay desbordamiento
+         // Es un entero y se comprueba que no hay desbordamiento
         int valor = tpExp.getValorEnt();
 
         // Error de desbordamiento
@@ -1270,13 +1264,22 @@ public class Compilador implements CompiladorConstants {
           ErrorSemantico eSM = new ErrorSemantico("La operacion ENTACAR debe recibir un par\u00e1metro " +
                                                                         "del tipo entero comprendido entre 0 y 255");
         }
-
-                // Extraigo el numero entero y lo guardo a caracter
-        result.setValorString(String.valueOf((char)valor));
-        result.setTipo(Simbolo.Tipo_variable.CHAR);
-
-        // Lo guardo en CHAR    
-        result.setTipo(Simbolo.Tipo_variable.CHAR);
+        else
+        {
+            // Comprobar que es constante
+                if (tpExp.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
+                {
+                                // Extraigo el numero entero y lo guardo a caracter
+                        result.setValorString(String.valueOf((char)valor));
+                        result.setTipo(Simbolo.Tipo_variable.CHAR);
+                        }
+                        else
+                        {
+                          // GENERADOR DE CODIGO
+                        }
+                // Lo guardo en CHAR    
+                result.setTipo(Simbolo.Tipo_variable.CHAR);
+        }
       }
       {if (true) return result;}
         break;
@@ -1295,9 +1298,16 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // Obtener el tipo de dato entero del caracter
-        char cadena = tpExp.valorString.charAt(0);
-        result.setValorEnt((int)cadena);
+        if (tpExp.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
+        {
+                // Obtener el tipo de dato entero del caracter porque es cosnstante
+                char cadena = tpExp.valorString.charAt(0);
+                result.setValorEnt((int)cadena);
+        }
+        else
+        {
+          // No es constante
+        }
         result.setTipo(Simbolo.Tipo_variable.ENTERO);
       }
       {if (true) return result;}

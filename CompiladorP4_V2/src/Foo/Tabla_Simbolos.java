@@ -11,7 +11,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import Foo.Simbolo.Clase_parametro;
 import Foo.Simbolo.Tipo_variable;
 import Foo.Simbolo.Tipo_simbolo;
-import Foo.SimboloNoEncontradoException;
 
 public class Tabla_Simbolos {
 	
