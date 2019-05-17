@@ -211,7 +211,7 @@ public class Compilador implements CompiladorConstants {
   // Declaracion de variables
   RegistroExp tpExp;
   Simbolo s;
-  Simbolo.Tipo_variable tipo;
+  Simbolo.Tipo_variable tipo = null;
   boolean ok = true;
     try {
       jj_consume_token(tOPAS);
@@ -234,6 +234,14 @@ public class Compilador implements CompiladorConstants {
           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Prohibido asignar a " + s.getNombre() +
           ", es un parametro pasado como valor");
+          // Tipo de simbolo desconocido
+          tipo = Simbolo.Tipo_variable.DESCONOCIDO;
+          ok = false;
+       }
+       else if (s.es_Simbolo_Accion())
+       {
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                ", columna " + token.beginColumn + "  - Prohibida la asignacion a la accion " + s.getNombre());
           // Tipo de simbolo desconocido
           tipo = Simbolo.Tipo_variable.DESCONOCIDO;
           ok = false;
@@ -701,7 +709,9 @@ public class Compilador implements CompiladorConstants {
         {
           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Los operadores deben ser del mismo tipo " +
-                        " en la expresion");
+                        " en la expresion " + tpExp1.getTipo().toString() + " : " + tpExp2.getTipo().toString());
+
+              regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
         }
         else
         {
@@ -781,7 +791,8 @@ public class Compilador implements CompiladorConstants {
                         default :
                         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                                         ", columna " + token.beginColumn + "  - No se puede" +
-                                " utilizar el operador " + op.toString() + " sobre caracteres");
+                                " utilizar el operador relacional " + op.getOperadorRelacional().toString() +
+                                " sobre caracteres");
                       }
             }
             break;
@@ -811,7 +822,8 @@ public class Compilador implements CompiladorConstants {
                 default :
                 ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                                 ", columna " + token.beginColumn + "  - No se puede" +
-                        " utilizar el operador " + op.toString() + " sobre una booleano");
+                        " utilizar el operador " + op.getOperadorRelacional().toString() +
+                        " sobre una booleano");
               }
             }
             break;
@@ -1406,6 +1418,14 @@ public class Compilador implements CompiladorConstants {
                     tabla.introducir_variable(t.image, Simbolo.Tipo_variable.DESCONOCIDO, nivel, 0);
                 result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
                 }
+                else if (s.es_Simbolo_Accion())
+                {
+                   ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - La accion " + s.getNombre() + " no puede " +
+                        " formar parte de una expresion");
+                    tabla.introducir_variable(t.image, Simbolo.Tipo_variable.DESCONOCIDO, nivel, 0);
+                result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+                }
                 else
                 {
                     result.setTipo(s.getVariable());
@@ -1455,7 +1475,7 @@ public class Compilador implements CompiladorConstants {
                 result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
                         result.valorString = String.valueOf(t.image.charAt(1));
           }
-          result.setTipo(Simbolo.Tipo_variable.CHAR);
+          result.setTipo(Simbolo.Tipo_variable.CADENA);
           {if (true) return result;}
         break;
       case tTRUE:
@@ -1593,8 +1613,8 @@ public class Compilador implements CompiladorConstants {
       // Incrementar el nivel actual
       nivel++;
       // Procesamiento de los parametros
-          listaDeParametros = parametros_formales();
-      // Se ha efectuado con exito
+          listaDeParametros = parametros_formales(tId);
+      // Limpiar parametros de la posible acc
       if (ok)
       {
         for (int i = 0; i < listaDeParametros.size(); i++)
@@ -1602,6 +1622,8 @@ public class Compilador implements CompiladorConstants {
           // Añadir la lista de parametros al simbolo
           s.anyadirParametrosAccion(listaDeParametros.get(i));
         }
+        // Limpiar parametros de la posible accion anterior
+        tabla.limpiarListaParametros();
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -1609,14 +1631,13 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de parametros formales OK
-  static final public LinkedList < LinkedList < Simbolo > > parametros_formales() throws ParseException {
+  static final public LinkedList < LinkedList < Simbolo > > parametros_formales(Token t) throws ParseException {
   // Lista global de listas de identificadores
   LinkedList < LinkedList < Simbolo > > parametros = new LinkedList < LinkedList < Simbolo > > ();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZDA:
         parametros = lista_parametros();
-      // Guardado de la lista de parametros procesada
       tabla.asignarListaParametros(parametros);
         break;
       default:
@@ -1639,7 +1660,6 @@ public class Compilador implements CompiladorConstants {
     try {
       jj_consume_token(tPARENTESIS_IZDA);
       lista = parametros();
-      // Vaciar lista de identificadores de parametros para evitar su resinsercion
       listaGlobal.add(lista);
       label_8:
       while (true) {
@@ -1682,6 +1702,8 @@ public class Compilador implements CompiladorConstants {
       listaIdentificadores = identificadores();
       // Tamaño de la lista de identificadores
       int dimension = listaIdentificadores.size();
+
+
       // Identificador del simbolo a procesar
       String identificadorActual;
 
@@ -1690,6 +1712,7 @@ public class Compilador implements CompiladorConstants {
       {
         // Obtener identificador actual
         identificadorActual = listaIdentificadores.get(i);
+
         // Comprobar que existe o no simbolo en la tabla
 
         // Insercion del parametro en la tabla de simbolos
@@ -1708,7 +1731,6 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Parametro repetido " + identificadorActual);
         }
       }
-      // Devolucion de la lista de parametros
       {if (true) return lista;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);

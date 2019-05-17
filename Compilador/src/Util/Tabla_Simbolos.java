@@ -90,6 +90,15 @@ public class Tabla_Simbolos {
 	}
 	
 	
+	/*
+	 * Pre: ---
+	 * Post: Devuelve la lista de parametros asociados a una accion
+	 */
+	public void limpiarListaParametros(){
+		Tabla_Simbolos.listaParametrosAccion.clear();
+	}
+	
+	
 	/* 
 	 * Funcion para poder mezclar un vector de manera 
 	 * totalmente aleatoria 
@@ -176,6 +185,10 @@ public class Tabla_Simbolos {
 		return ret;
 	}
 	*/
+	 
+	
+	 
+	
 	
 	/*
 	 * Introduce en la tabla un simbolo PROGRAMA,  con el nombre del parametro, de nivel 0, 
@@ -197,7 +210,7 @@ public class Tabla_Simbolos {
 	 */
 	public Simbolo introducir_variable(String nombre, Tipo_variable variable, int nivel, long dir) {
 		Simbolo esta = buscar_simbolo(nombre, nivel);
-		if (esta != null) {
+		if (esta != null && esta.getNivel() == nivel) {
 			return null;	
 		}
 		else {
@@ -216,7 +229,7 @@ public class Tabla_Simbolos {
 	 */
     public Simbolo introducir_accion(String nombre, int nivel, long dir){
     	Simbolo esta = buscar_simbolo(nombre, nivel);
-		if (esta != null) { 
+		if (esta != null && esta.getNivel() == nivel) { 
 			return null;
 		}
 		else {
@@ -235,7 +248,7 @@ public class Tabla_Simbolos {
 	public Simbolo introducir_parametro (String nombre, Tipo_variable variable, 
 											Clase_parametro parametro, int nivel, long dir) {
 			Simbolo esta = buscar_simbolo(nombre, nivel);
-			if (esta != null) { 
+			if (esta != null && esta.getNivel() == nivel) { 
 				return null;
 			}
 			else {

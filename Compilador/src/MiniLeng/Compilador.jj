@@ -470,14 +470,15 @@ void asignacion(Token t) :
   // Declaracion de variables
   RegistroExp tpExp;
   Simbolo s;
-  Simbolo.Tipo_variable tipo;
+  Simbolo.Tipo_variable tipo = null;
   boolean ok = true;
 }
 {
   try
   {
     < tOPAS >
-    {  
+    {
+
        // Se busca el simbolo en la tabla de simbolos
        s = tabla.buscar_simbolo(t.image, nivel);
        // el simbolo se ha encontrado bien
@@ -501,6 +502,14 @@ void asignacion(Token t) :
           tipo = Simbolo.Tipo_variable.DESCONOCIDO;
           ok = false;
        }
+       else if (s.es_Simbolo_Accion())
+       {
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+	        ", columna " + token.beginColumn + "  - Prohibida la asignacion a la accion " + s.getNombre());
+          // Tipo de simbolo desconocido
+          tipo = Simbolo.Tipo_variable.DESCONOCIDO;
+          ok = false;
+       }
        else
        {
           tipo = s.getVariable();
@@ -509,6 +518,7 @@ void asignacion(Token t) :
     // Procesamiento de la expresion
     tpExp = expresion() < tPUNTYCOM >
     {
+      
       if (ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
       {
         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -972,7 +982,9 @@ RegistroExp expresion() :
         {
           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - Los operadores deben ser del mismo tipo " +
-	        	" en la expresion");
+	        	" en la expresion " + tpExp1.getTipo().toString() + " : " + tpExp2.getTipo().toString());
+
+	      regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
         }
         else
         {
@@ -1003,10 +1015,10 @@ RegistroExp expresion() :
               regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);             
               switch (op.getOperadorRelacional())
               {
-                case MAYOR : 
+                case MAYOR :
                 regResult.valorBool = tpExp1.valorEnt > tpExp2.valorEnt;
                 break;
-                case MAYOR_IGUAL : 
+                case MAYOR_IGUAL :
                 regResult.valorBool = tpExp1.valorEnt >= tpExp2.valorEnt;
                 break;
                 case IGUAL : 
@@ -1052,7 +1064,8 @@ RegistroExp expresion() :
 	                default :           
 	                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        			", columna " + token.beginColumn + "  - No se puede" + 
-	                	" utilizar el operador " + op.toString() + " sobre caracteres");
+	                	" utilizar el operador relacional " + op.getOperadorRelacional().toString() +
+	                	" sobre caracteres");
 	              }             
             }
             break;
@@ -1082,7 +1095,8 @@ RegistroExp expresion() :
                 default : 
                 ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        		", columna " + token.beginColumn + "  - No se puede" + 
-                	" utilizar el operador " + op.toString() + " sobre una booleano");
+                	" utilizar el operador " + op.getOperadorRelacional().toString() +
+                	" sobre una booleano");
               }
             }
             break;
@@ -1667,6 +1681,14 @@ RegistroExp factor() :
 		    tabla.introducir_variable(t.image, Simbolo.Tipo_variable.DESCONOCIDO, nivel, 0);
         	result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);		  
 		}
+		else if (s.es_Simbolo_Accion())
+		{
+		   ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+	        	", columna " + token.beginColumn + "  - La accion " + s.getNombre() + " no puede " +
+	        	" formar parte de una expresion");
+		    tabla.introducir_variable(t.image, Simbolo.Tipo_variable.DESCONOCIDO, nivel, 0);
+        	result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
+		}
 		else
 		{
 		    result.setTipo(s.getVariable());
@@ -1716,7 +1738,7 @@ RegistroExp factor() :
       		result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 	   		result.valorString = String.valueOf(t.image.charAt(1));
    	  }
-   	  result.setTipo(Simbolo.Tipo_variable.CHAR);
+   	  result.setTipo(Simbolo.Tipo_variable.CADENA);
    	  return result;
     }
   | < tTRUE >
@@ -1854,9 +1876,9 @@ void cabecera_accion() :
       nivel++;
     }
     // Procesamiento de los parametros
-    listaDeParametros = parametros_formales()
+    listaDeParametros = parametros_formales(tId)
     {
-      // Se ha efectuado con exito
+      // Limpiar parametros de la posible acc
       if (ok)
       {
         for (int i = 0; i < listaDeParametros.size(); i++)
@@ -1864,6 +1886,8 @@ void cabecera_accion() :
           // Añadir la lista de parametros al simbolo
           s.anyadirParametrosAccion(listaDeParametros.get(i));
         }
+        // Limpiar parametros de la posible accion anterior
+      	tabla.limpiarListaParametros();
       }
     }
   }
@@ -1874,7 +1898,7 @@ void cabecera_accion() :
 }
 
 // Regla de parametros formales OK
-LinkedList < LinkedList < Simbolo > > parametros_formales() :
+LinkedList < LinkedList < Simbolo > > parametros_formales(Token t) :
 {
   // Lista global de listas de identificadores
   LinkedList < LinkedList < Simbolo > > parametros = new LinkedList < LinkedList < Simbolo > > ();
@@ -1884,7 +1908,6 @@ LinkedList < LinkedList < Simbolo > > parametros_formales() :
   {
     (parametros = lista_parametros()
     {
-      // Guardado de la lista de parametros procesada
       tabla.asignarListaParametros(parametros);
     }
     ) ?
@@ -1912,7 +1935,6 @@ LinkedList < LinkedList < Simbolo > > lista_parametros() :
   {
     < tPARENTESIS_IZDA > lista = parametros()
     {
-      // Vaciar lista de identificadores de parametros para evitar su resinsercion
       listaGlobal.add(lista);		
     }
     (< tPUNTYCOM > lista = parametros()
@@ -1954,6 +1976,8 @@ LinkedList < Simbolo > parametros() :
     {
       // Tamaño de la lista de identificadores
       int dimension = listaIdentificadores.size();
+
+    
       // Identificador del simbolo a procesar
       String identificadorActual;
       
@@ -1962,6 +1986,7 @@ LinkedList < Simbolo > parametros() :
       {
         // Obtener identificador actual
         identificadorActual = listaIdentificadores.get(i);
+
         // Comprobar que existe o no simbolo en la tabla
 
         // Insercion del parametro en la tabla de simbolos
@@ -1980,7 +2005,6 @@ LinkedList < Simbolo > parametros() :
 	        	", columna " + token.beginColumn + "  - Parametro repetido " + identificadorActual);
         }
       }
-      // Devolucion de la lista de parametros
       return lista;
     }
   }

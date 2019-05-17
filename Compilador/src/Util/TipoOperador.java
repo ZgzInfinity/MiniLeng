@@ -60,37 +60,37 @@ public class TipoOperador {
 		 IGUAL {
 			 @Override
 		     public String toString() {
-		        return "PROGRAMA";
+		        return "=";
 		     }
 		 }, 
 		 MENOR {
 			 @Override
 		     public String toString() {
-		        return "PROGRAMA";
+		        return "<";
 		     }
 		 }, 
 		 MENOR_IGUAL {
 			 @Override
 		     public String toString() {
-		        return "PROGRAMA";
+		        return "<=";
 		     }
 		 }, 
 		 NO_IGUAL {
 			 @Override
 		     public String toString() {
-		        return "PROGRAMA";
+		        return "<>";
 		     }
 		 }, 
 		 MAYOR_IGUAL {
 			 @Override
 		     public String toString() {
-		        return "PROGRAMA";
+		        return ">=";
 		     }	 
 		 },
 		 MAYOR {
 			 @Override
 		     public String toString() {
-		        return "PROGRAMA";
+		        return ">";
 		     }
 		 };
 	}
