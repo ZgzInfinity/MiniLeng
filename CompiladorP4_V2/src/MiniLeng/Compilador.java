@@ -216,7 +216,7 @@ public class Compilador implements CompiladorConstants {
     try {
       jj_consume_token(tOPAS);
        // Se busca el simbolo en la tabla de simbolos
-       s = tabla.buscar_simbolo(t.image);
+       s = tabla.buscar_simbolo(t.image, nivel);
        // el simbolo se ha encontrado bien
 
        if (s == null)
@@ -272,12 +272,13 @@ public class Compilador implements CompiladorConstants {
         idActual = listaIdentificadores.get(i);
 
         // Busqueda del simbolo en la tabla de simbolos
-        s = tabla.buscar_simbolo(idActual);
+        s = tabla.buscar_simbolo(idActual, nivel);
 
         if (s == null)
         {
            ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido " + idActual);
         }
+        // CAMBIAR ESTO QUE ES FEO
         else if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
           && s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO
           && (!s.es_Variable_Entero() && !s.es_Variable_Char() && !s.es_Variable_Cadena()))
@@ -395,7 +396,7 @@ public class Compilador implements CompiladorConstants {
           else
           {
               // Lo busca bien el token en la tabla de simbolos
-              s = tabla.buscar_simbolo(t.image);
+              s = tabla.buscar_simbolo(t.image, nivel);
                   if (s == null)
                   {
                     ErrorSemantico eSM = new ErrorSemantico("Identificador no esta en la tabla de simbolos ");
@@ -418,7 +419,7 @@ public class Compilador implements CompiladorConstants {
   boolean args = false;
     try {
               // Busqueda del simbolo en la tabla
-              s = tabla.buscar_simbolo(t.image);
+              s = tabla.buscar_simbolo(t.image, nivel);
               if (s == null)
               {
                 ErrorSemantico eSM = new ErrorSemantico("Identificador " + t.image + " desconocido en llamada a accion");
@@ -508,7 +509,7 @@ public class Compilador implements CompiladorConstants {
       {
         // Error de invocacion de parametros
         ErrorSemantico ESM = new ErrorSemantico("linea " + token.beginLine +
-        " - Se esperaban " + argc + " par\u00e1metros al invocar a la accion " +
+        " - Se esperaban " + argc + " parametros al invocar a la accion " +
         s.getNombre());
       }
     } catch (ParseException e) {
@@ -530,19 +531,22 @@ public class Compilador implements CompiladorConstants {
       {
         // Obtencion de la lista de parametros de la accion
         parametros = s.getLista_parametros();
+
         argc++;
+
+        System.out.println("R EXPRESION " + r.toString());
+
         // Numero de parametros incorrecto
         if (argc > parametros.size())
         {
-          ErrorSemantico eMS = new ErrorSemantico("El nufamero de parametros de" +
+          ErrorSemantico eMS = new ErrorSemantico("El numero de parametros de" +
           " llamada a la funcion " + s.getNombre() +
           " no coindice, se esperaban " + parametros.size());
           ok = false;
         }
-        // Comprobacion de los tipos en la funcion AQUI ESTAMOS
-        else if (r.getTipo() == parametros.get(argc - 1).getVariable())
+        else if (r.getTipo() != parametros.get(argc - 1).getVariable())
         {
-          ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
+          ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion " +
           s.getNombre() + " no coindicen");
           ok = false;
         }
@@ -551,11 +555,11 @@ public class Compilador implements CompiladorConstants {
           ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
           ok = false;
         }
-      }
-      else
-      {
-        // Todo ha ido bien
-        ok = false;
+        else
+        {
+          // Todo ha ido bien
+          ok = false;
+        }
       }
       label_3:
       while (true) {
@@ -584,7 +588,7 @@ public class Compilador implements CompiladorConstants {
           ok = false;
         }
         // Comprobacion de los tipos en la funcion AQUI ESTAMOS
-        else if (r.getTipo() == parametros.get(argc - 1).getVariable())
+        else if (r.getTipo() != parametros.get(argc - 1).getVariable())
         {
           ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
           s.getNombre() + " no coindicen");
@@ -1328,7 +1332,7 @@ public class Compilador implements CompiladorConstants {
         t = jj_consume_token(tIDENTIFICADOR);
                 Simbolo s;
             // Busqueda en la tabla de simbolos	
-                s = tabla.buscar_simbolo(t.image);
+                s = tabla.buscar_simbolo(t.image, nivel);
                 if (s == null)
                 {
                 ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido");
@@ -1500,7 +1504,7 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tACCION);
       tId = jj_consume_token(tIDENTIFICADOR);
         // Buscar el simbolo en la tabla de simbolos
-        s = tabla.buscar_simbolo(tId.image);
+        s = tabla.buscar_simbolo(tId.image, nivel);
 
         if ((s == null) || (s.getNivel() != nivel))
         {
@@ -1607,6 +1611,7 @@ public class Compilador implements CompiladorConstants {
       int dimension = listaIdentificadores.size();
       // Identificador del simbolo a procesar
       String identificadorActual;
+
       // Bucle de recorrido de la lista de identificadores
       for (int i = 0; i < dimension; i++)
       {
@@ -1626,7 +1631,7 @@ public class Compilador implements CompiladorConstants {
         else
         {
           // Comprobar que la variable esta en la tabla de simbolos
-          ErrorSemantico eSM = new ErrorSemantico("Parametro repetido" + identificadorActual);
+          ErrorSemantico eSM = new ErrorSemantico("Parametro repetido " + identificadorActual);
         }
       }
       // Devolucion de la lista de parametros

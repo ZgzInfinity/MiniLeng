@@ -220,12 +220,10 @@ public class Simbolo {
 	public void anyadirParametrosAccion(LinkedList<Simbolo> listaDeParametros){
 		// Calculo del numero de parametros de la accion
 		int dimension = listaDeParametros.size();
-		
-		// Insercion de los parametros en la accion
-	
-		// 
-		this.lista_parametros.addAll(listaDeParametros);
-		
+			
+		for (int i = 0; i < dimension; i++) {
+			this.lista_parametros.add(listaDeParametros.get(i));
+		}
 	}
 	
 	
