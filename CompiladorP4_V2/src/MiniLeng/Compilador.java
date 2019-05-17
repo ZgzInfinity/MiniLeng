@@ -970,8 +970,8 @@ public class Compilador implements CompiladorConstants {
         {
           // La expresion final es entera
           regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-          if (ErrorSemantico.hayDesbordamiento(regTerm1.getValorEnt())
-          || ErrorSemantico.hayDesbordamiento(regTerm2.getValorEnt()))
+          if (ErrorSemantico.hayDesbordamientoEntero(regTerm1.getValorEnt())
+          || ErrorSemantico.hayDesbordamientoEntero(regTerm2.getValorEnt()))
           {
             ErrorSemantico eSM = new ErrorSemantico("Valor fuera del rango");
             regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
@@ -1083,8 +1083,8 @@ public class Compilador implements CompiladorConstants {
         else
         {
           regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-          if (ErrorSemantico.hayDesbordamiento(tpFactor1.valorEnt)
-          || ErrorSemantico.hayDesbordamiento(tpFactor2.valorEnt))
+          if (ErrorSemantico.hayDesbordamientoEntero(tpFactor1.valorEnt)
+          || ErrorSemantico.hayDesbordamientoEntero(tpFactor2.valorEnt))
           {
             ErrorSemantico eSM = new ErrorSemantico("Valor fuera del rango");
             regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
@@ -1270,7 +1270,7 @@ public class Compilador implements CompiladorConstants {
         int valor = tpExp.getValorEnt();
 
         // Error de desbordamiento
-        if (ErrorSemantico.hayDesbordamiento(valor))
+        if (ErrorSemantico.hayDesbordamientoEntacar(valor))
         {
           // Comprobacion de si es booleano o no 
           ErrorSemantico eSM = new ErrorSemantico("La operacion ENTACAR debe recibir un par\u00e1metro " +
