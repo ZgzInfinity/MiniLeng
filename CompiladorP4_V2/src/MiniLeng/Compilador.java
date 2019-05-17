@@ -222,7 +222,8 @@ public class Compilador implements CompiladorConstants {
        if (s == null)
        {
           // Excepcion de simbolo no encontrado
-          ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido " + t.image +
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Variable desconocida " + t.image +
           " en la parte izquierda de la asignacion");
          // Tipo de simbolo desconocido
          tipo = Simbolo.Tipo_variable.DESCONOCIDO;
@@ -230,8 +231,9 @@ public class Compilador implements CompiladorConstants {
        }
        else if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
        {
-          ErrorSemantico eSM = new ErrorSemantico("No se permite realizar una asignacion a un" +
-          " parametro pasado como valor");
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Prohibido asignar a " + s.getNombre() +
+          ", es un parametro pasado como valor");
           // Tipo de simbolo desconocido
           tipo = Simbolo.Tipo_variable.DESCONOCIDO;
           ok = false;
@@ -245,7 +247,9 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tPUNTYCOM);
       if (ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
       {
-        ErrorSemantico eSM = new ErrorSemantico("Tipos incompatibles en la asignacion");
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Tipos incompatibles en la asignacion: " +
+                "no se puede convetir " + tpExp.getTipo().toString() + " a " + tipo.toString());
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -276,20 +280,28 @@ public class Compilador implements CompiladorConstants {
 
         if (s == null)
         {
-           ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido " + idActual);
+           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Identificador de asignacion "
+                                                                        + idActual + " desconocido");
         }
-        // CAMBIAR ESTO QUE ES FEO
-        else if (s.getTipo() != Simbolo.Tipo_simbolo.VARIABLE
-          && s.getVariable() != Simbolo.Tipo_variable.DESCONOCIDO
-          && (!s.es_Variable_Entero() && !s.es_Variable_Char() && !s.es_Variable_Cadena()))
+        else if (s.getTipo() == Simbolo.Tipo_simbolo.VARIABLE
+        || s.getVariable() == Simbolo.Tipo_variable.DESCONOCIDO)
         {
+          // es variable o desconocido
+          if ((s.es_Variable_Booleano()))
+          {
            // Error semantico en la lista de asignables
-           ErrorSemantico eSM = new ErrorSemantico("Tipo invalido de variable de lectura");
+           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Tipo invalido de variable de lectura, se espera " +
+                                                                                                "entero, cadena o caracter");
+          }
         }
         else if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
         {
             // Error semantico en la lista de asignables
-            ErrorSemantico eSM = new ErrorSemantico("Variable por valor en lectura");
+            ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Variable " + s.getNombre() +
+                                                                                        " por valor en lectura");
         }
       }
     } catch (ParseException e) {
@@ -385,8 +397,10 @@ public class Compilador implements CompiladorConstants {
           {
             if (regExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
             {
-              ErrorSemantico eSM = new ErrorSemantico("Se esperaba una expresion del tipo" +
-                                                                                                        " ENTERO en la funcion entacar");
+              ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Se esperaba una expresion del tipo" +
+                                                " ENTERO en la funcion entacar. Se ha recibido una expresion de tipo " +
+                                                  regExp.getTipo().toString());
             }
             else
             {
@@ -399,11 +413,14 @@ public class Compilador implements CompiladorConstants {
               s = tabla.buscar_simbolo(t.image, nivel);
                   if (s == null)
                   {
-                    ErrorSemantico eSM = new ErrorSemantico("Identificador no esta en la tabla de simbolos ");
+                    ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Variable a escribir " + s.getNombre()
+                                                                                                        + " desconocida ");
                   }
               else if (s.es_Variable_Desconocido())
               {
-                 ErrorSemantico eSM = new ErrorSemantico("Variable no valida en escribir " + t.image);
+                 ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Variable " + t.image + " no valida para escritura");
               }
               // Controlar despues los BOOLEANOS
            }
@@ -422,13 +439,16 @@ public class Compilador implements CompiladorConstants {
               s = tabla.buscar_simbolo(t.image, nivel);
               if (s == null)
               {
-                ErrorSemantico eSM = new ErrorSemantico("Identificador " + t.image + " desconocido en llamada a accion");
+                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Identificador " + t.image +
+                                                                                                        " desconocido en llamada a accion");
               }
               // Busqueda con exito en la tabla de simbolos
               else if (!s.es_Simbolo_Accion())
               {
                  // error al invocar la accion
-                 ErrorSemantico eSM = new ErrorSemantico("No se puede realizar una llamada" +
+                 ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - No se puede realizar una llamada" +
                   " a una accion sobre el parametro " + t.image);
               }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -441,14 +461,18 @@ public class Compilador implements CompiladorConstants {
         ;
       }
       jj_consume_token(tPUNTYCOM);
-              // Comprobar el numero de parametros en caso de que se llame sin ninguno
-              int argc = s.getLista_parametros().size();
-              if (!args && s != null && argc != 0)
+              // Si la accion no existe
+              if (s != null)
               {
-                // Error por falta de parametros
-                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
-                "  -  Se esperaban " + argc + " parametros al invocar a la accion " +
-                s.getNombre());
+                // Comprobar el numero de parametros en caso de que se llame sin ninguno
+                int argc = s.getLista_parametros().size();
+                if (!args && argc != 0)
+                {
+                        // Error por falta de parametros
+                        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + " -  Se esperaban " + argc +
+                        " parametros al invocar a la accion " + s.getNombre());
+                }
               }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -466,7 +490,8 @@ public class Compilador implements CompiladorConstants {
       && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
       {
         // Error en la condicion del mientras que
-        ErrorSemantico eSM = new ErrorSemantico("La condicion de mientras_que debe ser booleana");
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + " - La condicion de mientras_que debe ser booleana");
       }
       lista_sentencias();
       jj_consume_token(tFMQ);
@@ -502,16 +527,21 @@ public class Compilador implements CompiladorConstants {
         ;
       }
       jj_consume_token(tPARENTESIS_DCHA);
-      // Comprobar los parametros de la invocacion en caso de que
-      // se invoque con parametros distintos
-      int argc = s.getLista_parametros().size();
-      if (!ok && s != null && argc != 0)
-      {
-        // Error de invocacion de parametros
-        ErrorSemantico ESM = new ErrorSemantico("linea " + token.beginLine +
-        " - Se esperaban " + argc + " parametros al invocar a la accion " +
-        s.getNombre());
-      }
+       // Comprobar los parametros de la invocacion en caso de que
+       // se invoque con parametros distintos
+           if (s != null)
+           {
+                   // Si la accion existe
+           int argc = s.getLista_parametros().size();
+
+           if (!ok && argc != 0)
+           {
+                        // Error de invocacion de parametros
+                        ErrorSemantico ESM = new ErrorSemantico("linea " + token.beginLine +
+                        " - Se esperaban " + argc + " parametros al invocar a la accion " +
+                        s.getNombre());
+                }
+        }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -534,25 +564,26 @@ public class Compilador implements CompiladorConstants {
 
         argc++;
 
-        System.out.println("R EXPRESION " + r.toString());
-
         // Numero de parametros incorrecto
         if (argc > parametros.size())
         {
-          ErrorSemantico eMS = new ErrorSemantico("El numero de parametros de" +
+          ErrorSemantico eMS = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - El numero de parametros de" +
           " llamada a la funcion " + s.getNombre() +
           " no coindice, se esperaban " + parametros.size());
           ok = false;
         }
         else if (r.getTipo() != parametros.get(argc - 1).getVariable())
         {
-          ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion " +
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Los tipos en la llamada a la funcion " +
           s.getNombre() + " no coindicen");
           ok = false;
         }
         else if (r.getClase() == Simbolo.Clase_parametro.VAL && !parametros.get(argc - 1).es_Parametro_Valor())
         {
-          ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Error al pasar un parametro por valor como referencia");
           ok = false;
         }
         else
@@ -582,21 +613,24 @@ public class Compilador implements CompiladorConstants {
         // Numero de parametros incorrecto
         if (argc > parametros.size())
         {
-          ErrorSemantico eMS = new ErrorSemantico("El n\u00famero de par\u00e1metros de" +
-          " llamada a la funci\u00f3n " + s.getNombre() +
-          " no coindice, se esperaban " + parametros.size());
+          ErrorSemantico eMS = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - El numero de parametros de" +
+                        " llamada a la funcion " + s.getNombre() +
+                        " no coindice, se esperaban " + parametros.size());
           ok = false;
         }
         // Comprobacion de los tipos en la funcion AQUI ESTAMOS
         else if (r.getTipo() != parametros.get(argc - 1).getVariable())
         {
-          ErrorSemantico eSM = new ErrorSemantico("Los tipos en la llamada a la funcion" +
-          s.getNombre() + " no coindicen");
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Los tipos en la llamada a la funcion" +
+                        s.getNombre() + " no coindicen");
           ok = false;
         }
         else if (r.getClase() == Simbolo.Clase_parametro.VAL && !parametros.get(argc - 1).es_Parametro_Valor())
         {
-          ErrorSemantico eSM = new ErrorSemantico("Error al pasar un parametro por valor como referencia");
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Error al pasar un parametro por valor como referencia");
           ok = false;
         }
       }
@@ -646,15 +680,17 @@ public class Compilador implements CompiladorConstants {
       // Evaluar primer termino de la expresion
       if (tpExp1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
       {
-        ErrorSemantico eSM = new ErrorSemantico("El operador 1 debe ser entero " +
-        "caracter, cadena o booleano");
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - El operador 1 debe ser entero " +
+                        "caracter, cadena o booleano");
         ok = false;
       }
       // Evaluar segundo termino de la expresion
       if (tpExp2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
       {
-        ErrorSemantico eSM = new ErrorSemantico("El operador 2 debe ser entero " +
-        "caracter, cadena o booleano");
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - El operador 2 debe ser entero " +
+                        "caracter, cadena o booleano");
         ok = false;
       }
       // Comprobar que todo ha ido bien y evaluar la expresion
@@ -663,7 +699,9 @@ public class Compilador implements CompiladorConstants {
         // Verficar que los dos operandos son del mismo tipo
         if (tpExp1.getTipo() != tpExp2.getTipo())
         {
-          ErrorSemantico eSM = new ErrorSemantico("Los operadores deben ser del mismo tipo");
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Los operadores deben ser del mismo tipo " +
+                        " en la expresion");
         }
         else
         {
@@ -741,8 +779,9 @@ public class Compilador implements CompiladorConstants {
                         regResult.valorBool = !tpExp1.valorString.equals(tpExp2.valorString);
                         break;
                         default :
-                        ErrorSemantico eSM = new ErrorSemantico("No se puede" +
-                        " utilizar el operador " + op + " sobre caracteres");
+                        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                                        ", columna " + token.beginColumn + "  - No se puede" +
+                                " utilizar el operador " + op.toString() + " sobre caracteres");
                       }
             }
             break;
@@ -770,8 +809,9 @@ public class Compilador implements CompiladorConstants {
                 regResult.valorBool = tpExp1.valorBool != tpExp2.valorBool;
                 break;
                 default :
-                ErrorSemantico eSM = new ErrorSemantico("No se puede" +
-                " utilizar el operador " + op + " sobre una booleano");
+                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                                ", columna " + token.beginColumn + "  - No se puede" +
+                        " utilizar el operador " + op.toString() + " sobre una booleano");
               }
             }
             break;
@@ -779,8 +819,9 @@ public class Compilador implements CompiladorConstants {
             regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
             break;
             default :
-            ErrorSemantico eSM = new ErrorSemantico("El operador relacional es" +
-            " desconocido");
+            ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - El operador relacional es" +
+                " desconocido");
           }
         }
       }
@@ -925,7 +966,9 @@ public class Compilador implements CompiladorConstants {
         && regTerm2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
         if (!ok)
         {
-          ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Incompatibilidad de expresiones en operacion: " +
+                                                regTerm1.getTipo().toString() + " y " + regTerm2.getTipo().toString());
           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
         }
         else
@@ -960,7 +1003,10 @@ public class Compilador implements CompiladorConstants {
         && regTerm2.getTipo() == Simbolo.Tipo_variable.ENTERO;
         if (!ok)
         {
-          ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Incompatibilidad de expresiones en operacion: " +
+                                                regTerm1.getTipo().toString() + " y " + regTerm2.getTipo().toString());
+
           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
         }
         // Comprobar que no son desconocidos
@@ -977,7 +1023,8 @@ public class Compilador implements CompiladorConstants {
           if (ErrorSemantico.hayDesbordamientoEntero(regTerm1.getValorEnt())
           || ErrorSemantico.hayDesbordamientoEntero(regTerm2.getValorEnt()))
           {
-            ErrorSemantico eSM = new ErrorSemantico("Valor fuera del rango");
+            ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Valor fuera del rango");
             regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
           }
           else
@@ -996,7 +1043,8 @@ public class Compilador implements CompiladorConstants {
                       regResult.valorEnt = regTerm1.valorEnt - regTerm2.valorEnt;
                       break;
                       default :
-                      ErrorSemantico eSM = new ErrorSemantico("Operador aditivo desconocido");
+                      ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Operador aditivo desconocido");
                     }
                 }
           }
@@ -1056,7 +1104,10 @@ public class Compilador implements CompiladorConstants {
         && tpFactor2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
         if (!ok)
         {
-          ErrorSemantico eSM = new ErrorSemantico("Joderse");
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Incompatibilidad de expresiones en operacion: " +
+                                                tpFactor1.getTipo().toString() + " y " + tpFactor2.getTipo().toString());
+
           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
         }
         else if (tpFactor2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
@@ -1081,7 +1132,10 @@ public class Compilador implements CompiladorConstants {
         && tpFactor2.getTipo() == Simbolo.Tipo_variable.ENTERO;
         if (!ok)
         {
-          ErrorSemantico eSM = new ErrorSemantico("Incompatibilidad de tipos en operacion");
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Incompatibilidad de expresiones en operacion: " +
+                                                tpFactor1.getTipo().toString() + " y " + tpFactor2.getTipo().toString());
+
           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
         }
         else
@@ -1090,7 +1144,8 @@ public class Compilador implements CompiladorConstants {
           if (ErrorSemantico.hayDesbordamientoEntero(tpFactor1.valorEnt)
           || ErrorSemantico.hayDesbordamientoEntero(tpFactor2.valorEnt))
           {
-            ErrorSemantico eSM = new ErrorSemantico("Valor fuera del rango");
+            ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Valor fuera del rango");
             regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
           }
           else
@@ -1110,7 +1165,8 @@ public class Compilador implements CompiladorConstants {
                       case DIVISION :
                       if (tpFactor2.valorEnt == 0)
                       {
-                        ErrorSemantico eSM = new ErrorSemantico("Division por 0");
+                        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Division por 0");
                         regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
                       }
                       else
@@ -1121,7 +1177,8 @@ public class Compilador implements CompiladorConstants {
                       case MOD :
                       if (tpFactor2.valorEnt == 0)
                       {
-                        ErrorSemantico eSM = new ErrorSemantico("Modulo por 0");
+                        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Modulo por 0");
                         regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
                       }
                       else
@@ -1130,7 +1187,8 @@ public class Compilador implements CompiladorConstants {
                       }
                       break;
                       default :
-                      ErrorSemantico eSM = new ErrorSemantico("Operador multiplicativo desconocido");
+                      ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Operador multiplicativo desconocido");
                     }
                  }
           }
@@ -1216,7 +1274,9 @@ public class Compilador implements CompiladorConstants {
       && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
         // Comprobacion de si es booleano o no 
-        ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba BOOLEANO");
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Tipo " + tpFactor.getTipo() + " incompatible con " +
+                                                                " operador <>. Se esperaba BOOLEANO ");
 
         result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
       }
@@ -1235,7 +1295,9 @@ public class Compilador implements CompiladorConstants {
       && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
         // Comprobacion de si es booleano o no 
-        ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba ENTERO");
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Tipo " + tpFactor.getTipo().toString() +
+                                " incompatible con operador -. Se esperaba ENTERO");
 
         result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
       }
@@ -1263,8 +1325,9 @@ public class Compilador implements CompiladorConstants {
       && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
         // Comprobacion de si es booleano o no 
-        ErrorSemantico eSM = new ErrorSemantico("La expresion no se puede convertir " +
-        " en un caracter valido");
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Argumento de tipo " + tpExp.getTipo().toString() +
+                        " incompatible en funcion ENTACAR. Se esperaba ENTERO");
 
         result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
       }
@@ -1277,7 +1340,8 @@ public class Compilador implements CompiladorConstants {
         if (ErrorSemantico.hayDesbordamientoEntacar(valor))
         {
           // Comprobacion de si es booleano o no 
-          ErrorSemantico eSM = new ErrorSemantico("La operacion ENTACAR debe recibir un par\u00e1metro " +
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - La operacion ENTACAR debe recibir un par\u00e1metro " +
                                                                         "del tipo entero comprendido entre 0 y 255");
         }
         else
@@ -1308,7 +1372,9 @@ public class Compilador implements CompiladorConstants {
       && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
         // Comprobacion de si es o no caracter
-        ErrorSemantico eSM = new ErrorSemantico("Tipo incompatible. Se esperaba CARACTER");
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Argumento de tipo " + tpExp.getTipo().toString() +
+                        " incompatible en funcion CARAENT. Se esperaba CARACTER");
 
         result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
       }
@@ -1335,7 +1401,8 @@ public class Compilador implements CompiladorConstants {
                 s = tabla.buscar_simbolo(t.image, nivel);
                 if (s == null)
                 {
-                ErrorSemantico eSM = new ErrorSemantico("Identificador desconocido");
+                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Variable " + t.image + " no definida");
                     tabla.introducir_variable(t.image, Simbolo.Tipo_variable.DESCONOCIDO, nivel, 0);
                 result.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
                 }
@@ -1363,28 +1430,32 @@ public class Compilador implements CompiladorConstants {
       case tCONSTCHAR:
         t = jj_consume_token(tCONSTCHAR);
       if(t.image.length() > 3) {
-                ErrorSemantico eSM = new ErrorSemantico("No se puede utilizar cadenas en expresiones");
+                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - No se puede usar el caracter " + t.image +
+                                                                                                 " en una expresion");
           }
           else {
                 // El simbolo es una constante
                 result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
                         result.valorString = String.valueOf(t.image.charAt(1));
-                        result.setTipo(Simbolo.Tipo_variable.CHAR);
           }
+          result.setTipo(Simbolo.Tipo_variable.CHAR);
           {if (true) return result;}
         break;
       case tCONSTCAD:
         t = jj_consume_token(tCONSTCAD);
       if(t.image.length() > 3) {
-                ErrorSemantico eSM = new ErrorSemantico("No se puede utilizar cadenas en expresiones");
+                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - No se puede usar la cadena " + t.image +
+                                                                                                " en una expresion");
           }
           else {
                 // No coger las comillas
                 // El simbolo es una constante
                 result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
                         result.valorString = String.valueOf(t.image.charAt(1));
-                        result.setTipo(Simbolo.Tipo_variable.CHAR);
           }
+          result.setTipo(Simbolo.Tipo_variable.CHAR);
           {if (true) return result;}
         break;
       case tTRUE:
@@ -1432,7 +1503,8 @@ public class Compilador implements CompiladorConstants {
       && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
       {
         // Se esperaba una condicion booleana
-        ErrorSemantico eSM = new ErrorSemantico("La condicion en la seleccion debe ser un booleano");
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - La condicion en la seleccion debe ser un booleano");
       }
       jj_consume_token(tENT);
       lista_sentencias();
@@ -1484,7 +1556,7 @@ public class Compilador implements CompiladorConstants {
       // Eliminar las acciones
       tabla.eliminar_acciones(nivel);
       // Eliminar los parametros ocultos
-      tabla.eliminar_parametros_ocultos(nivel + 1);
+      tabla.eliminar_parametros_ocultos(nivel);
       // Decrementar el nivel porque se cierra un bloque       
       nivel--;
     } catch (ParseException e) {
@@ -1514,7 +1586,8 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-            ErrorSemantico eSM = new ErrorSemantico("Identificador de accion duplicado");
+            ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Accion " + s.getNombre() + " duplicada");
             ok = false;
         }
       // Incrementar el nivel actual
@@ -1631,7 +1704,8 @@ public class Compilador implements CompiladorConstants {
         else
         {
           // Comprobar que la variable esta en la tabla de simbolos
-          ErrorSemantico eSM = new ErrorSemantico("Parametro repetido " + identificadorActual);
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Parametro repetido " + identificadorActual);
         }
       }
       // Devolucion de la lista de parametros
@@ -1743,7 +1817,8 @@ public class Compilador implements CompiladorConstants {
                 // Comprobar que la variable esta en la tabla de simbolos
         if (s == null)
         {
-          ErrorSemantico eSM = new ErrorSemantico("Variable repetida " + identificadorActual);
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Variable repetida " + identificadorActual);
         }
       }
     } catch (ParseException e) {
@@ -1815,7 +1890,8 @@ public class Compilador implements CompiladorConstants {
       else
       {
         // Clase de parametro erroneo
-        System.out.println("La clase de parametro no es correcta");
+        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - La clase de parametro no es correcta");
       }
       // El tipo de clase ha sido procesada
 

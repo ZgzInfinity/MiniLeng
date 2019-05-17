@@ -9,17 +9,86 @@ public class Simbolo {
 	
 	// Representacion del tipo simbolo con enum
 	 public enum Tipo_simbolo {
-		PROGRAMA, VARIABLE, ACCION, PARAMETRO, CONST
+		PROGRAMA {
+			@Override
+	        public String toString() {
+	            return "PROGRAMA";
+	        }
+		}, 
+		VARIABLE {
+			@Override
+	        public String toString() {
+	            return "VARIABLE";
+	        }
+		}, 
+		ACCION {
+			@Override
+	        public String toString() {
+	            return "ACCION";
+	        }
+		}, 
+		PARAMETRO {
+			@Override
+	        public String toString() {
+	            return "PARAMETRO";
+	        }
+		}, 
+		CONST {
+			@Override
+	        public String toString() {
+	            return "CONSTANTE";
+	        }
+		}
 	}
 	
 	// Representacion del tipo variable con enum
 	public enum Tipo_variable {
-		DESCONOCIDO, ENTERO, BOOLEANO, CHAR, CADENA 
+		DESCONOCIDO {
+			@Override
+	        public String toString() {
+	            return "DESCONOCIDO";
+	        }
+		}, 
+		ENTERO {
+			@Override
+	        public String toString() {
+	            return "ENTERO";
+	        }
+		}, 
+		BOOLEANO {
+			@Override
+	        public String toString() {
+	            return "BOOLEANO";
+	        }
+		}, 
+		CHAR {
+			@Override
+	        public String toString() {
+	            return "CARACTER";
+	        }
+		},
+		CADENA {
+			@Override
+	        public String toString() {
+	            return "CADENA";
+	        }
+		}
 	}
 	
 	// Representacion de la clase parametro con enum
 	public enum Clase_parametro{
-		VAL, REF 
+		VAL {
+			@Override
+	        public String toString() {
+	            return "VALOR";
+	        }
+		}, 
+		REF {
+			@Override
+	        public String toString() {
+	            return "REFERENCIA";
+	        }
+		}
 	}
 	
 	
@@ -220,7 +289,6 @@ public class Simbolo {
 	public void anyadirParametrosAccion(LinkedList<Simbolo> listaDeParametros){
 		// Calculo del numero de parametros de la accion
 		int dimension = listaDeParametros.size();
-			
 		for (int i = 0; i < dimension; i++) {
 			this.lista_parametros.add(listaDeParametros.get(i));
 		}

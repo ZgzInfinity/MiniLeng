@@ -45,7 +45,7 @@ public class TablaHash {
 	
 	
 	public static void mostrarTokensNormales() {
-		System.out.println("Total de apariciones de tokens");
+		System.out.println("\n\nTotal de apariciones de tokens");
 		System.out.println("--------------------------------");
 		Enumeration<String> e = tokensNormales.keys();
 		String clave;
@@ -60,7 +60,7 @@ public class TablaHash {
 	
 	
 	public static void mostrarIdentificadores() {
-		System.out.println("Total de apariciones de identificadores");
+		System.out.println("\n\nTotal de apariciones de identificadores");
 		System.out.println("---------------------------------------");
 		identificadores.keys();
 		Enumeration<String> e = identificadores.keys();

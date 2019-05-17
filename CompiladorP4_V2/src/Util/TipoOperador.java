@@ -5,19 +5,94 @@ public class TipoOperador {
 	
 	// Representacion del operador aditivo
 	public enum Tipo_Operador_Aditivo {
-		SUMA, RESTA, OR;
+		SUMA {
+			@Override
+	        public String toString() {
+	            return "+";
+	        }
+		}, 
+		RESTA {
+			@Override
+	        public String toString() {
+	            return "-";
+	        }
+		}, 
+		OR {
+			@Override
+	        public String toString() {
+	            return "OR";
+	        }
+		};
 	}
 	 
 	 
 	// Representacion de operador multiplicativos
 	public enum Tipo_Operador_Multiplicativo {
-		MULTIPLICACION, DIVISION, MOD, AND;
+		MULTIPLICACION {
+			@Override
+	        public String toString() {
+	            return "*";
+	        }
+		}, 
+		DIVISION {
+			@Override
+	        public String toString() {
+	            return "/";
+	        }
+		}, 
+		MOD {
+			@Override
+	        public String toString() {
+	            return "MOD";
+	        }
+		}, 
+		AND {
+			@Override
+	        public String toString() {
+	            return "AND";
+	        }
+		};
 	}
 	
 	
 	// Representacion de operador multiplicativos
 	public enum Tipo_Operador_Relacional {
-		 IGUAL, MENOR, MENOR_IGUAL, NO_IGUAL, MAYOR_IGUAL, MAYOR;
+		 IGUAL {
+			 @Override
+		     public String toString() {
+		        return "PROGRAMA";
+		     }
+		 }, 
+		 MENOR {
+			 @Override
+		     public String toString() {
+		        return "PROGRAMA";
+		     }
+		 }, 
+		 MENOR_IGUAL {
+			 @Override
+		     public String toString() {
+		        return "PROGRAMA";
+		     }
+		 }, 
+		 NO_IGUAL {
+			 @Override
+		     public String toString() {
+		        return "PROGRAMA";
+		     }
+		 }, 
+		 MAYOR_IGUAL {
+			 @Override
+		     public String toString() {
+		        return "PROGRAMA";
+		     }	 
+		 },
+		 MAYOR {
+			 @Override
+		     public String toString() {
+		        return "PROGRAMA";
+		     }
+		 };
 	}
 	
 	

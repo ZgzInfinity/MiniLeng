@@ -148,6 +148,24 @@ public class Tabla_Simbolos {
 			int max_nivel = -1;
 			// Busco en la lista enlazada el simbolo de mayor nivel 
 			for (Simbolo s : tabla.get(h)) {
+				if (s.getNombre().equals(nombre) && s.getNivel() > max_nivel) {
+					max_nivel = s.getNivel();
+					ret = s;
+				}
+			}
+		}
+		return ret;
+	}
+	
+	
+	/*
+	public Simbolo buscar_simbolo(String nombre, int nivel){ 
+		Simbolo ret = null;
+		int h = hash_function(nombre);
+		if(tabla.get(h) != null) {
+			int max_nivel = -1;
+			// Busco en la lista enlazada el simbolo de mayor nivel 
+			for (Simbolo s : tabla.get(h)) {
 				if (s.getNombre().equals(nombre)) {
 					if (s.getNivel() == nivel) {				
 						ret = s;
@@ -157,8 +175,7 @@ public class Tabla_Simbolos {
 		}
 		return ret;
 	}
-	
-	
+	*/
 	
 	/*
 	 * Introduce en la tabla un simbolo PROGRAMA,  con el nombre del parametro, de nivel 0, 
