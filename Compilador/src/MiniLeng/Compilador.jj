@@ -480,7 +480,7 @@ void asignacion(Token t) :
     {
 
        // Se busca el simbolo en la tabla de simbolos
-       s = tabla.buscar_simbolo(t.image, nivel);
+       s = tabla.buscar_simbolo(t.image);
        // el simbolo se ha encontrado bien
 
        if (s == null)
@@ -558,7 +558,7 @@ void lista_asignables() :
         idActual = listaIdentificadores.get(i);
        
         // Busqueda del simbolo en la tabla de simbolos
-        s = tabla.buscar_simbolo(idActual, nivel);
+        s = tabla.buscar_simbolo(idActual);
         
         if (s == null)
         {
@@ -691,7 +691,7 @@ void escribible() :
 	  else
 	  {
 	      // Lo busca bien el token en la tabla de simbolos
-	      s = tabla.buscar_simbolo(t.image, nivel);
+	      s = tabla.buscar_simbolo(t.image);
 		  if (s == null)
 		  {
 		    ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -725,7 +725,7 @@ void invocacion_accion(Token t) :
      {
 	     {
 	      // Busqueda del simbolo en la tabla
-	      s = tabla.buscar_simbolo(t.image, nivel);
+	      s = tabla.buscar_simbolo(t.image);
 	      if (s == null)
 	      {
 	        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -1673,7 +1673,7 @@ RegistroExp factor() :
     {	  
 		Simbolo s;
 	    // Busqueda en la tabla de simbolos	
-		s = tabla.buscar_simbolo(t.image, nivel);
+		s = tabla.buscar_simbolo(t.image);
 		if (s == null)
 		{
         	ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -1858,7 +1858,7 @@ void cabecera_accion() :
     tId = < tIDENTIFICADOR >
     {
         // Buscar el simbolo en la tabla de simbolos
-     	s = tabla.buscar_simbolo(tId.image, nivel);
+     	s = tabla.buscar_simbolo(tId.image);
      	
      	if ((s == null) || (s.getNivel() != nivel))
      	{

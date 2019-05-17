@@ -216,7 +216,7 @@ public class Compilador implements CompiladorConstants {
     try {
       jj_consume_token(tOPAS);
        // Se busca el simbolo en la tabla de simbolos
-       s = tabla.buscar_simbolo(t.image, nivel);
+       s = tabla.buscar_simbolo(t.image);
        // el simbolo se ha encontrado bien
 
        if (s == null)
@@ -284,7 +284,7 @@ public class Compilador implements CompiladorConstants {
         idActual = listaIdentificadores.get(i);
 
         // Busqueda del simbolo en la tabla de simbolos
-        s = tabla.buscar_simbolo(idActual, nivel);
+        s = tabla.buscar_simbolo(idActual);
 
         if (s == null)
         {
@@ -418,7 +418,7 @@ public class Compilador implements CompiladorConstants {
           else
           {
               // Lo busca bien el token en la tabla de simbolos
-              s = tabla.buscar_simbolo(t.image, nivel);
+              s = tabla.buscar_simbolo(t.image);
                   if (s == null)
                   {
                     ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -444,7 +444,7 @@ public class Compilador implements CompiladorConstants {
   boolean args = false;
     try {
               // Busqueda del simbolo en la tabla
-              s = tabla.buscar_simbolo(t.image, nivel);
+              s = tabla.buscar_simbolo(t.image);
               if (s == null)
               {
                 ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -1410,7 +1410,7 @@ public class Compilador implements CompiladorConstants {
         t = jj_consume_token(tIDENTIFICADOR);
                 Simbolo s;
             // Busqueda en la tabla de simbolos	
-                s = tabla.buscar_simbolo(t.image, nivel);
+                s = tabla.buscar_simbolo(t.image);
                 if (s == null)
                 {
                 ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -1596,7 +1596,7 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tACCION);
       tId = jj_consume_token(tIDENTIFICADOR);
         // Buscar el simbolo en la tabla de simbolos
-        s = tabla.buscar_simbolo(tId.image, nivel);
+        s = tabla.buscar_simbolo(tId.image);
 
         if ((s == null) || (s.getNivel() != nivel))
         {

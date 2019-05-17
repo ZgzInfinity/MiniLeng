@@ -150,7 +150,7 @@ public class Tabla_Simbolos {
 	 * del parametro (se distinguen minúsculas y mayúsculas). Si existe, devuelve un 
 	 * puntero como resultado, de lo contrario lanza una excepción
 	 */
-	public Simbolo buscar_simbolo(String nombre, int nivel){ 
+	public Simbolo buscar_simbolo(String nombre){ 
 		Simbolo ret = null;
 		int h = hash_function(nombre);
 		if(tabla.get(h) != null) {
@@ -165,30 +165,6 @@ public class Tabla_Simbolos {
 		}
 		return ret;
 	}
-	
-	
-	/*
-	public Simbolo buscar_simbolo(String nombre, int nivel){ 
-		Simbolo ret = null;
-		int h = hash_function(nombre);
-		if(tabla.get(h) != null) {
-			int max_nivel = -1;
-			// Busco en la lista enlazada el simbolo de mayor nivel 
-			for (Simbolo s : tabla.get(h)) {
-				if (s.getNombre().equals(nombre)) {
-					if (s.getNivel() == nivel) {				
-						ret = s;
-					}
-				}
-			}
-		}
-		return ret;
-	}
-	*/
-	 
-	
-	 
-	
 	
 	/*
 	 * Introduce en la tabla un simbolo PROGRAMA,  con el nombre del parametro, de nivel 0, 
@@ -209,7 +185,7 @@ public class Tabla_Simbolos {
 	 * De lo contrario, introduce un símbolo VARIABLE (simple) con los datos de los argumentos. 
 	 */
 	public Simbolo introducir_variable(String nombre, Tipo_variable variable, int nivel, long dir) {
-		Simbolo esta = buscar_simbolo(nombre, nivel);
+		Simbolo esta = buscar_simbolo(nombre);
 		if (esta != null && esta.getNivel() == nivel) {
 			return null;	
 		}
@@ -228,7 +204,7 @@ public class Tabla_Simbolos {
 	 *  De lo contrario, introduce un símbolo ACCION con los datos de los argumentos. 
 	 */
     public Simbolo introducir_accion(String nombre, int nivel, long dir){
-    	Simbolo esta = buscar_simbolo(nombre, nivel);
+    	Simbolo esta = buscar_simbolo(nombre);
 		if (esta != null && esta.getNivel() == nivel) { 
 			return null;
 		}
@@ -247,7 +223,7 @@ public class Tabla_Simbolos {
      */
 	public Simbolo introducir_parametro (String nombre, Tipo_variable variable, 
 											Clase_parametro parametro, int nivel, long dir) {
-			Simbolo esta = buscar_simbolo(nombre, nivel);
+			Simbolo esta = buscar_simbolo(nombre);
 			if (esta != null && esta.getNivel() == nivel) { 
 				return null;
 			}
