@@ -27,6 +27,8 @@ public class RegistroExp {
 	// Nodo ASTNodo
 	public ASTNodo nodoAST;
 
+	public Simbolo s;
+
 	public Simbolo.Tipo_simbolo getSimbolo() {
 		return simbolo;
 	}

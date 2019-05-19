@@ -25,7 +25,7 @@ public class ASTNodo {
 	int	valor;
 	
 	// Campo de direccion
-	int	dir;
+	long dir;
 	
 	// Nivel del nodo
 	int nivel;
@@ -75,7 +75,7 @@ public class ASTNodo {
 		this.nombre = nombre;
 		this.valor = valor;
 	}
-	public ASTNodo(String nombre, int nivel, int dir) {
+	public ASTNodo(String nombre, int nivel, long dir) {
 		super();
 		this.nivel = nivel;
 		this.nombre = nombre;
@@ -219,7 +219,7 @@ public class ASTNodo {
 	 * Pre: ---
 	 * Post: Devuelve la direccion del nodo
 	 */
-	public int getDir() {
+	public long getDir() {
 		return dir;
 	}
 
@@ -228,7 +228,7 @@ public class ASTNodo {
 	 * Pre: ---
 	 * Post: Asigna como direccion de nodo el valor <<dir>>
 	 */
-	public void setDir(int dir) {
+	public void setDir(long dir) {
 		this.dir = dir;
 	}
 

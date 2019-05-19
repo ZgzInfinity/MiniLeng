@@ -118,7 +118,11 @@ public class Simbolo {
 	// Representacion de la direccion del simbolo
 	private long dir;
 	
+	// Etiqueta del nodo
+	String etiqueta;
 	
+
+
 	// CONSTRUCTOR DEL DATO SIMBOLO
 	public Simbolo (Tipo_simbolo tipo, Tipo_variable variable, Clase_parametro parametro,
 							String nombre, int nivel, long dir) {
@@ -198,6 +202,17 @@ public class Simbolo {
 	public void setDir(long dir) {
 		this.dir = dir;
 	}
+	
+	
+	public String getEtiqueta() {
+		return etiqueta;
+	}
+
+
+	public void setEtiqueta(String etiqueta) {
+		this.etiqueta = etiqueta;
+	}
+
 	
 	
 	/* METODOS AUXILIARES PARA SIMBOLOS EN ANALISIS SEMANTICO */

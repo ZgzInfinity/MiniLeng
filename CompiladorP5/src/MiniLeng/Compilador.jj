@@ -46,6 +46,16 @@ public class Compilador
 
   public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
+
+  public static void createSubTreeAST(ASTNodo root, ASTNodo left, ASTNodo right,
+						ASTNodo.TipoNodo type, TipoOperador op) {
+     // Generacion de codigo
+     root.setTipo(type);
+     root.setTipoOp(op);
+     root.setIzquierda(left);
+     root.setDerecha(right);
+  }
+
   public static void main(String args []) throws ParseException
   {
     /* nombre del fichero */
@@ -575,7 +585,7 @@ ASTNodo asignacion(Token t, GeneradorCodigo genCod) :
   Simbolo.Tipo_variable tipo = null;
   boolean ok = true;
 
-  ASTNodo = null;
+  ASTNodo nodo = null;
 }
 {
   try
@@ -620,7 +630,7 @@ ASTNodo asignacion(Token t, GeneradorCodigo genCod) :
        }      
     }
     // Procesamiento de la expresion
-    tpExp = expresion() < tPUNTYCOM >
+    tpExp = expresion(genCod) < tPUNTYCOM >
     {
       
       if (ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
@@ -637,7 +647,7 @@ ASTNodo asignacion(Token t, GeneradorCodigo genCod) :
 		nodo.setNivel(nivel);
 		nodo.setIzquierda(new ASTNodo(t.image, s.getNivel(), s.getDir()));
 		nodo.getIzquierda().setTipoParametro(s.getParametro());
-		nodo.setRight(r.nodoAST);
+		nodo.setDerecha(tpExp.nodoAST);
       }
       return nodo;
     }
@@ -649,13 +659,13 @@ ASTNodo asignacion(Token t, GeneradorCodigo genCod) :
 }
 
 // Regla de lista_asignables OK
-void lista_asignables() :
+ASTNodo lista_asignables(GeneradorCodigo genCod) :
 {
   //Declaracion de variables
   LinkedList < String > listaIdentificadores;
   // identificador a evaluar
   String idActual;
-
+  boolean ok;
   ASTNodo aux = null, resul = new ASTNodo("rd", nivel, ASTNodo.TipoNodo.RD);
 }
 {
@@ -749,7 +759,7 @@ ASTNodo escribir(GeneradorCodigo genCod) :
 {
   try
   {
-    < tESCRIBIR > < tPARENTESIS_IZDA > resul = lista_escribibles() < tPARENTESIS_DCHA >
+    < tESCRIBIR > < tPARENTESIS_IZDA > resul = lista_escribibles(genCod) < tPARENTESIS_DCHA >
     {
       return resul;
     }
@@ -761,13 +771,13 @@ ASTNodo escribir(GeneradorCodigo genCod) :
 }
 
 // Regla de lista_escribibles OK
-void lista_escribibles() :
+ASTNodo lista_escribibles(GeneradorCodigo genCod) :
 {
 }
 {
   try
   {
-    escribible() (< tCOMA > escribible()) *
+    escribible(genCod) (< tCOMA > escribible(genCod)) *
   }
   catch (ParseException e)
   {
@@ -776,7 +786,7 @@ void lista_escribibles() :
 }
 
 // Regla de lista_escribibles OK
-void escribible() :
+void escribible(GeneradorCodigo genCod) :
 {
   // Declaracion de variables
   Token t = null;
@@ -798,7 +808,7 @@ void escribible() :
       constCad = true;
     }
   | t = < tIDENTIFICADOR >
-  | < tENTACAR > < tPARENTESIS_IZDA > regExp = expresion() < tPARENTESIS_DCHA >
+  | < tENTACAR > < tPARENTESIS_IZDA > regExp = expresion(genCod) < tPARENTESIS_DCHA >
   	{
   	  entCad = true;
   	}
@@ -855,6 +865,7 @@ ASTNodo invocacion_accion(Token t, GeneradorCodigo genCod) :
   Simbolo s = null;
   boolean args = false;
   ASTNodo resul = null, argsAST = null;
+  boolean ok = true;
 }
 {
   try
@@ -867,6 +878,7 @@ ASTNodo invocacion_accion(Token t, GeneradorCodigo genCod) :
 	        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - Identificador " + t.image +
 	        											" desconocido en llamada a accion");
+	        ok = false;
 	      }
 	      // Busqueda con exito en la tabla de simbolos
 	      else if (!s.es_Simbolo_Accion())
@@ -875,11 +887,13 @@ ASTNodo invocacion_accion(Token t, GeneradorCodigo genCod) :
 	         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - No se puede realizar una llamada" + 
 	          " a una accion sobre el parametro " + t.image);
+
+	         ok = false;
 	      }
 	      else
 	      {
 	        resul = new ASTNodo(s.getNombre(), nivel, ASTNodo.TipoNodo.INVOCACION);
-            resul.setCond(new ASTNodo(s.getEtiqueta(), g.OSF_s));
+            resul.setCond(new ASTNodo(s.getEtiqueta(), genCod.OSF_s));
             resul.getCond().setNivel(s.getNivel());
 	      }
 	     }
@@ -905,8 +919,8 @@ ASTNodo invocacion_accion(Token t, GeneradorCodigo genCod) :
 	      	else if (args && ok)
 	      	{
 	      	    // Invertir los argumentos para crear estructura de pila
-	      	  	resul.setLeft(argsAST);
-				resul.getCond().setValor(s.getDir());
+	      	  	resul.setIzquierda(argsAST);
+				resul.getCond().setValor((int)(long)s.getDir());
 	      	}
 	      }
 	      return resul;
@@ -924,11 +938,12 @@ ASTNodo mientras_que(GeneradorCodigo genCod) :
   // Declaracion de variables
   RegistroExp tpExp;
   ASTNodo nodoWhile = null, sentencias;
+  boolean ok;
 }
 {
   try
   {
-    < tMQ > tpExp = expresion()
+    < tMQ > tpExp = expresion(genCod)
     {
       ok = tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO;
       
@@ -947,7 +962,7 @@ ASTNodo mientras_que(GeneradorCodigo genCod) :
     sentencias = lista_sentencias(genCod) 
     < tFMQ >
     {
-		nodoWhile.setRight(sentencias);
+		nodoWhile.setDerecha(sentencias);
 		return nodoWhile;
     }
   }
@@ -967,7 +982,7 @@ ASTNodo argumentos(Simbolo s, GeneradorCodigo genCod) :
 {
   try
   {
-    < tPARENTESIS_IZDA > ( resul = lista_expresiones(s, gendCod)
+    < tPARENTESIS_IZDA > ( resul = lista_expresiones(s, genCod)
     {
       // Captura bien la expresion
       ok = true;
@@ -1007,14 +1022,14 @@ ASTNodo lista_expresiones(Simbolo s, GeneradorCodigo genCod) :
   RegistroExp r;
   int argc = 0;
   boolean ok = true;
-  LinkedList < Simbolo > parametros;
+  LinkedList < Simbolo > parametros = null;
   ASTNodo aux = null, resul = null;
 }
 {
   try
   {
     // Captura de la primera expresion
-    r = expresion()
+    r = expresion(genCod)
     {
       if (s != null && !s.es_Variable_Desconocido())
       {
@@ -1029,7 +1044,7 @@ ASTNodo lista_expresiones(Simbolo s, GeneradorCodigo genCod) :
           ErrorSemantico eMS = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - El numero de parametros de" + 
           " llamada a la funcion " + s.getNombre() + 
-          " no coindice, se esperaban " + parametros.size());
+          " no coincide, se esperaban " + parametros.size());
           ok = false;
         }
         else if (r.getTipo() != parametros.get(argc - 1).getVariable())
@@ -1054,9 +1069,9 @@ ASTNodo lista_expresiones(Simbolo s, GeneradorCodigo genCod) :
         }
         else
         {
-           r.nodoAST.setTipoParam(parametros.get(num_params-1).getParametro());
+           r.nodoAST.setTipoParametro(parametros.get(argc-1).getParametro());
 		   resul = r.nodoAST;
-		   resul.setTipoParam(parametros.get(num_params-1).getParametro());
+		   resul.setTipoParametro(parametros.get(argc-1).getParametro());
         }
       }
       else
@@ -1068,7 +1083,7 @@ ASTNodo lista_expresiones(Simbolo s, GeneradorCodigo genCod) :
     (
     < tCOMA > 
     // Procesamiento de la nueva expresion
-    r = expresion()
+    r = expresion(genCod)
     {
       if (s != null && !s.es_Variable_Desconocido())
       {
@@ -1081,7 +1096,7 @@ ASTNodo lista_expresiones(Simbolo s, GeneradorCodigo genCod) :
           ErrorSemantico eMS = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - El numero de parametros de" + 
           		" llamada a la funcion " + s.getNombre() + 
-          		" no coindice, se esperaban " + parametros.size());
+          		" no coincide, se esperaban " + parametros.size());
           ok = false;
         }
         // Comprobacion de los tipos en la funcion AQUI ESTAMOS
@@ -1107,11 +1122,11 @@ ASTNodo lista_expresiones(Simbolo s, GeneradorCodigo genCod) :
         }
         else
         {
-          r.nodoAST.setTipoParam(parametros.get(num_params-1).getParametro());
+          r.nodoAST.setTipoParametro(parametros.get(argc-1).getParametro());
 		  aux = resul;
 		  resul = r.nodoAST;
-		  resul.setTipoParam(parametros.get(num_params-1).getParametro());
-		  resul.setLeft(aux);
+		  resul.setTipoParametro(parametros.get(argc-1).getParametro());
+		  resul.setIzquierda(aux);
         }
       }
       else
@@ -1126,12 +1141,13 @@ ASTNodo lista_expresiones(Simbolo s, GeneradorCodigo genCod) :
       {
         // Añadimos a Cond un nodo con los datos de la accion (etiqueta, num parametros y nivel)
 	    // Se añade siempre al inicio, dejando la primera expresion al final
-	    resul.setCond(new ASTNodo(s.getEtiqueta(), s.getDir()));
+	    resul.setCond(new ASTNodo(s.getEtiqueta(), (int)s.getDir()));
 	    resul.getCond().setNivel(s.getNivel());
 	    
 		// Comprobar que los parametros de llamada a la funcion coindicen con los de la tabla
-		if (s.getNum_params() != num_params) {
-			miniLeng.error_semantico("El número de parámetros de llamada a la función " + s.getNombre() + " no coindice, se esperaban " + parametros.size(), token, g);
+		if (parametros.size() != argc) {
+			ErrorSemantico eSM = new ErrorSemantico("El número de parámetros de llamada a la función " +
+			s.getNombre() + " no coincide, se esperaban " + parametros.size());
 			resul = null;
 		}
       }
@@ -1145,7 +1161,7 @@ ASTNodo lista_expresiones(Simbolo s, GeneradorCodigo genCod) :
 }
 
 // Regla de expresion OK
-RegistroExp expresion(GeneradroCodito genCod) :
+RegistroExp expresion(GeneradorCodigo genCod) :
 {
   // Declaracion de expresiones a analizar
   RegistroExp tpExp1 = null, tpExp2 = null;
@@ -1160,7 +1176,7 @@ RegistroExp expresion(GeneradroCodito genCod) :
   try
   {
     {
-      resul.nodoAST = new ASTNodo("op", nivel);
+      regResult.nodoAST = new ASTNodo("op", nivel);
     }
     // Obtencion de la primera expresion
     tpExp1 = expresion_simple(genCod)
@@ -1325,9 +1341,9 @@ RegistroExp expresion(GeneradroCodito genCod) :
             	" desconocido");
           }
           
-          resul.nodoAST = new ASTNodo("bool", nivel, ASTNodo.TipoNodo.CONST);
-          resul.nodoAST.setValor(((resul.valorBool) ? 1 : 0));
-		  resul.nodoAST.setTipoVar(Simbolo.TipoVariable.BOOLEANO);
+          regResult.nodoAST = new ASTNodo("bool", nivel, ASTNodo.TipoNodo.CONST);
+          regResult.nodoAST.setValor(((regResult.valorBool) ? 1 : 0));
+		  regResult.nodoAST.setTipoVar(Simbolo.Tipo_variable.BOOLEANO);
         }
         if (ok && !constantes)
         {
@@ -1335,14 +1351,14 @@ RegistroExp expresion(GeneradroCodito genCod) :
           regResult.setExpr_compuesta(true);
 
           if(!anidar){
-  	  	  	miniLeng.createSubTreeAST(resul.nodoAST, r1.nodoAST, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
-  	  	  	aux = resul.nodoAST;
+  	  	  	Compilador.createSubTreeAST(regResult.nodoAST, tpExp1.nodoAST, tpExp2.nodoAST, ASTNodo.TipoNodo.OP,op);
+  	  	  	aux = regResult.nodoAST;
   	  	  	anidar = true;
   	  	  }
   	  	  else{
-  	  	    resul.nodoAST = new ASTNodo("op", g.nivel);
-  	  	  	miniLeng.createSubTreeAST(resul.nodoAST, aux, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
-			aux = resul.nodoAST;
+  	  	    regResult.nodoAST = new ASTNodo("op", nivel);
+  	  	  	Compilador.createSubTreeAST(regResult.nodoAST, aux, tpExp2.nodoAST, ASTNodo.TipoNodo.OP,op);
+			aux = regResult.nodoAST;
   	  	  }
         }
       }
@@ -1367,7 +1383,7 @@ RegistroExp expresion(GeneradroCodito genCod) :
 }
 
 // Regla de operador_relacional OK
-TipoOperador operador_relacional():
+TipoOperador operador_relacional(GeneradorCodigo genCod):
 {
   // Declaracion de variables
   TipoOperador op = new TipoOperador();
@@ -1422,7 +1438,7 @@ TipoOperador operador_relacional():
 }
 
 // Regla operador aditivo OK
-TipoOperador operador_aditivo() :
+TipoOperador operador_aditivo(GeneradorCodigo genCod) :
 {
   // Declaracion de variables
   TipoOperador op = new TipoOperador();
@@ -1456,27 +1472,28 @@ TipoOperador operador_aditivo() :
 }
 
 // regla de expresion simple OK
-RegistroExp expresion_simple() :
+RegistroExp expresion_simple(GeneradorCodigo genCod) :
 {
   // Declaracion de variables
   RegistroExp regTerm1 = null, regTerm2 = null, regResult = null;
   TipoOperador op;
   boolean ok;
   boolean constantes = false, anidar = false;
+  ASTNodo aux = null;
 }
 {
   try
   {
     {
-      resul.nodoAST = new ASTNodo("op", nivel);
+      regResult.nodoAST = new ASTNodo("op", nivel);
     }
     // Primer termino de la expresion
-    regTerm1 = termino()
+    regTerm1 = termino(genCod)
     (
     // Operador de la expresion
-    op = operador_aditivo() 
+    op = operador_aditivo(genCod) 
     // Segundo termino de la expresion
-    regTerm2 = termino()
+    regTerm2 = termino(genCod)
     {
       // Resultado de evaluar la expresion
       regResult = new RegistroExp();
@@ -1578,7 +1595,7 @@ RegistroExp expresion_simple() :
 
 	            regResult.nodoAST = new ASTNodo("", nivel, ASTNodo.TipoNodo.CONST);
 				regResult.nodoAST.setValor(regResult.valorEnt);
-				regResult.nodoAST.setTipoVar(regResult.tipoVar);
+				regResult.nodoAST.setTipoVar(regResult.tipo);
 	        }
           }
         }
@@ -1588,14 +1605,14 @@ RegistroExp expresion_simple() :
         regResult.setExpr_compuesta(true);
         if(!anidar)
         {
-  	  	  	miniLeng.createSubTreeAST(resul.nodoAST, r1.nodoAST, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
-  	  	  	aux = resul.nodoAST;
+  	  	  	Compilador.createSubTreeAST(regResult.nodoAST, regTerm1.nodoAST, regTerm2.nodoAST, ASTNodo.TipoNodo.OP,op);
+  	  	  	aux = regResult.nodoAST;
   	  	  	anidar = true;
   	  	}
   	  	else
   	  	{
   	  	    regResult.nodoAST = new ASTNodo("op", nivel);
-  	  	  	miniLeng.createSubTreeAST(regResult.nodoAST, aux, r2.nodoAST, ASTNodo.TipoNodo.OP, op);
+  	  	  	Compilador.createSubTreeAST(regResult.nodoAST, aux, regTerm2.nodoAST, ASTNodo.TipoNodo.OP, op);
 			aux = regResult.nodoAST;
   	  	}  
       }
@@ -1621,7 +1638,7 @@ RegistroExp expresion_simple() :
 
 // LOS OPERADORES SON AND Y ESAS MIERDAS EH
 // Regla de termino OK
-RegistroExp termino() :
+RegistroExp termino(GeneradorCodigo genCod) :
 {
   // Declaracion de factores y expresiones
   RegistroExp tpFactor1 = null, tpFactor2 = null, regResult = null;
@@ -1636,15 +1653,15 @@ RegistroExp termino() :
   try
   {
     {
-      resul.nodoAST = new ASTNodo("op", nivel);
+      regResult.nodoAST = new ASTNodo("op", nivel);
     }
     // Evaluacion del primer factor
-    tpFactor1 = factor()
+    tpFactor1 = factor(genCod)
     (
     // Evaluacion del operador multiplicativo
-    op = operador_multiplicativo() 
+    op = operador_multiplicativo(genCod) 
     // Evaluacion del segundo factor
-    tpFactor2 = factor()
+    tpFactor2 = factor(genCod)
     {
       regResult = new RegistroExp();
       // El operaodr es una AND
@@ -1678,8 +1695,8 @@ RegistroExp termino() :
           	regResult.valorBool = tpFactor1.valorBool & tpFactor2.valorBool;
             regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
             regResult.nodoAST = new ASTNodo("", nivel, ASTNodo.TipoNodo.CONST);
-            regResult.nodoAST.setValor(((resul.valorBool) ? 1 : 0));
-			regResult.nodoAST.setTipoVar(Simbolo.TipoVariable.BOOLEANO);
+            regResult.nodoAST.setValor(((regResult.valorBool) ? 1 : 0));
+			regResult.nodoAST.setTipoVar(Simbolo.Tipo_variable.BOOLEANO);
           }
         }
       }
@@ -1750,9 +1767,9 @@ RegistroExp termino() :
 	        	", columna " + token.beginColumn + "  - Operador multiplicativo desconocido");					
 	            }
 
-	            regResult.nodoAST = new ASTNodo("", g.nivel, ASTNodo.TipoNodo.CONST);
-				regResult.nodoAST.setValue(regResult.valorEnt);
-				regResult.nodoAST.setTypeVar(regResult.tipoVar);
+	            regResult.nodoAST = new ASTNodo("", nivel, ASTNodo.TipoNodo.CONST);
+				regResult.nodoAST.setValor(regResult.valorEnt);
+				regResult.nodoAST.setTipoVar(regResult.tipo);
 	         }
           }
         }
@@ -1761,13 +1778,13 @@ RegistroExp termino() :
         // Es expresion compuesta
         regResult.setExpr_compuesta(true);
         if(!anidar){
-  	  	  	miniLeng.createSubTreeAST(resul.nodoAST, r1.nodoAST, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
-  	  	  	aux = resul.nodoAST;
+  	  	  	Compilador.createSubTreeAST(regResult.nodoAST, tpFactor1.nodoAST, tpFactor2.nodoAST, ASTNodo.TipoNodo.OP,op);
+  	  	  	aux = regResult.nodoAST;
   	  	  	anidar = true;
   	  	}
   	  	else{
-  	  	    regResult.nodoAST = new ASTNodo("op", g.nivel);
-  	  	  	miniLeng.createSubTreeAST(resul.nodoAST, aux, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
+  	  	    regResult.nodoAST = new ASTNodo("op", nivel);
+  	  	  	Compilador.createSubTreeAST(regResult.nodoAST, aux, tpFactor2.nodoAST, ASTNodo.TipoNodo.OP,op);
 			aux = regResult.nodoAST;
   	  	}  	 
       }
@@ -1792,7 +1809,7 @@ RegistroExp termino() :
 }
 
 // Regla de operador multiplicativo OK
-TipoOperador operador_multiplicativo() :
+TipoOperador operador_multiplicativo(GeneradorCodigo genCod) :
 {
   // Declaracion de variables
   TipoOperador op = new TipoOperador();
@@ -1838,7 +1855,7 @@ TipoOperador operador_multiplicativo() :
 }
 
 // Regla de factor OK
-RegistroExp factor() :
+RegistroExp factor(GeneradorCodigo genCod) :
 {
   // Declaracion de factores y expresiones
   RegistroExp tpFactor, tpExp;
@@ -1849,7 +1866,7 @@ RegistroExp factor() :
 {
   try
   {
-    < tNOT > tpFactor = factor()
+    < tNOT > tpFactor = factor(genCod)
     {
       // Comprobacion de si es o no booleano
       if ((tpFactor.getTipo() != Simbolo.Tipo_variable.BOOLEANO) 
@@ -1871,7 +1888,7 @@ RegistroExp factor() :
       // Devuelve el tipo de factor
       return result;
     }
-  | < tMINUS > tpFactor = factor()
+  | < tMINUS > tpFactor = factor(genCod)
     {
       // Comprobacion de si es o no booleano
       if ((tpFactor.getTipo() != Simbolo.Tipo_variable.ENTERO) 
@@ -1892,12 +1909,12 @@ RegistroExp factor() :
       // Devuelve el tipo de factor
       return result;
     }
-  | < tPARENTESIS_IZDA > tpExp = expresion() < tPARENTESIS_DCHA >
+  | < tPARENTESIS_IZDA > tpExp = expresion(genCod) < tPARENTESIS_DCHA >
     {
       // Devuelve la expresiom normal
       return tpExp;
     }
-  | t = < tENTACAR > < tPARENTESIS_IZDA > tpExp = expresion() < tPARENTESIS_DCHA >
+  | t = < tENTACAR > < tPARENTESIS_IZDA > tpExp = expresion(genCod) < tPARENTESIS_DCHA >
     {
       // Comprobacion de si es entera la expresion
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO) 
@@ -1935,9 +1952,9 @@ RegistroExp factor() :
 			else
 			{
 			  result.nodoAST = new ASTNodo("entcar", nivel, ASTNodo.TipoNodo.ENTCAR);
-	  		  result.nodoAST.setTypeVar(Simbolo.TipoVariable.CADENA);
-	  		  result.nodoAST.setRight(tpExp.nodoAST);
-      		  result.tipoVar = Simbolo.TipoVariable.CHAR;
+	  		  result.nodoAST.setTipoVar(Simbolo.Tipo_variable.CADENA);
+	  		  result.nodoAST.setDerecha(tpExp.nodoAST);
+      		  result.tipo = Simbolo.Tipo_variable.CHAR;
 			}
       		// Lo guardo en CHAR    
         	result.setTipo(Simbolo.Tipo_variable.CHAR);
@@ -1945,7 +1962,7 @@ RegistroExp factor() :
       }
       return result;
     }
-  | < tCARAENT > < tPARENTESIS_IZDA > tpExp = expresion() < tPARENTESIS_DCHA >
+  | < tCARAENT > < tPARENTESIS_IZDA > tpExp = expresion(genCod) < tPARENTESIS_DCHA >
     {
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.CHAR) 
       && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
@@ -1996,7 +2013,7 @@ RegistroExp factor() :
 		    result.setClase(s.getParametro());
 		    result.nodoAST = new ASTNodo(t.image, s.getNivel(), ASTNodo.TipoNodo.VAR);
      		result.nodoAST.setDir(s.getDir());
-     		result.nodoAST.setTypeParam(s.getParametro());
+     		result.nodoAST.setTipoParametro(s.getParametro());
 		}
 		return result;	
 	}    
@@ -2011,9 +2028,9 @@ RegistroExp factor() :
 	  // El simbolo es una constante
       result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 
-      resul.nodoAST = new ASTNodo("ent", g.nivel, ASTNodo.TipoNodo.CONST);
-   	  resul.nodoAST.setValue(resul.valorEnt);
-      resul.nodoAST.setTypeVar(Simbolo.TipoVariable.ENTERO);
+      result.nodoAST = new ASTNodo("ent", nivel, ASTNodo.TipoNodo.CONST);
+   	  result.nodoAST.setValor(result.valorEnt);
+      result.nodoAST.setTipoVar(Simbolo.Tipo_variable.ENTERO);
       
       // Devolucion del resultado
       return result;
@@ -2027,9 +2044,9 @@ RegistroExp factor() :
    	  }
    	  else {
    	    	// El simbolo es una constante
-      		result.nodoAST = new ASTNodo(t.image, g.nivel, ASTNodo.TipoNodo.CONST);
-	   		result.nodoAST.setTypeVar(Simbolo.TipoVariable.CHAR);
-	   		result.nodoAST.setValue((int)(t.image.charAt(1)));
+      		result.nodoAST = new ASTNodo(t.image, nivel, ASTNodo.TipoNodo.CONST);
+	   		result.nodoAST.setTipoVar(Simbolo.Tipo_variable.CHAR);
+	   		result.nodoAST.setValor((int)(t.image.charAt(1)));
    	  }
    	  result.setTipo(Simbolo.Tipo_variable.CHAR);
    	  return result;
@@ -2045,9 +2062,9 @@ RegistroExp factor() :
    	    	// No coger las comillas
    	    	// El simbolo es una constante
       		result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
-	   		result.nodoAST = new ASTNodo(t.image, g.nivel, ASTNodo.TipoNodo.CONST);
-	   		result.nodoAST.setTypeVar(Simbolo.TipoVariable.CHAR);
-	   		result.nodoAST.setValue((int)(t.image.charAt(1)));
+	   		result.nodoAST = new ASTNodo(t.image, nivel, ASTNodo.TipoNodo.CONST);
+	   		result.nodoAST.setTipoVar(Simbolo.Tipo_variable.CHAR);
+	   		result.nodoAST.setValor((int)(t.image.charAt(1)));
    	  }
 
    	  result.setTipo(Simbolo.Tipo_variable.CADENA);
@@ -2062,9 +2079,9 @@ RegistroExp factor() :
       // Tipo cadena de caracteres
       result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
-      resul.nodoAST = new ASTNodo("bool",g.nivel, ASTNodo.TipoNodo.CONST);
-   	  resul.nodoAST.setValue(1);
-      resul.nodoAST.setTypeVar(Simbolo.TipoVariable.ENTERO);
+      result.nodoAST = new ASTNodo("bool", nivel, ASTNodo.TipoNodo.CONST);
+   	  result.nodoAST.setValor(1);
+      result.nodoAST.setTipoVar(Simbolo.Tipo_variable.ENTERO);
       // Devolucion del resultado
       return result;
     }
@@ -2077,9 +2094,9 @@ RegistroExp factor() :
       // Tipo cadena de caracteres
       result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
-	 resul.nodoAST = new ASTNodo("bool",g.nivel, ASTNodo.TipoNodo.CONST);
-     resul.nodoAST.setValue(0);
-     resul.nodoAST.setTypeVar(Simbolo.TipoVariable.ENTERO);
+	   result.nodoAST = new ASTNodo("bool", nivel, ASTNodo.TipoNodo.CONST);
+       result.nodoAST.setValor(0);
+       result.nodoAST.setTipoVar(Simbolo.Tipo_variable.ENTERO);
      
       // Devolucion del resultado
       return result;
@@ -2097,12 +2114,13 @@ ASTNodo seleccion(GeneradorCodigo genCod):
   // Declaracion de variables
   RegistroExp tpExp;
   ASTNodo nodoSeleccion = null, sentenciasL=null, sentenciasR=null;
+  boolean ok;
 }
 {
   try
   {
     < tSI >
-    tpExp = expresion()
+    tpExp = expresion(genCod)
     {
       // Evaluacion de la condicion
       ok = tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO;
@@ -2115,7 +2133,7 @@ ASTNodo seleccion(GeneradorCodigo genCod):
       if (ok)
       {
         nodoSeleccion = new ASTNodo("if", nivel, ASTNodo.TipoNodo.IF);
-		nodoSeleccion.setCond(r.nodoAST);
+		nodoSeleccion.setCond(tpExp.nodoAST);
       }
     }
     < tENT >
@@ -2193,7 +2211,7 @@ ASTNodo declaracion_accion(GeneradorCodigo genCod) :
        genCod.OSF_s += total_variables;
        cabecera.s.setDir(genCod.OSF_s);
     }
-    declaracion_acciones() bloque_sentencias()
+    declaracion_acciones(genCod) bloque_sentencias(genCod)
     {
       // Eliminacion de variables
       tabla.eliminar_variables(nivel);
@@ -2478,7 +2496,7 @@ Simbolo.Tipo_variable tipos_variables() :
 }
 
 // Regla de declaracion OK
-void declaracion() :
+int declaracion() :
 {
   // Declaracion de variables
   Token t;
@@ -2487,6 +2505,8 @@ void declaracion() :
   // Variable para guardar el identificador del simbolo a introducir
   String identificadorActual;
   Simbolo s;
+
+  int ret = 0; // OJO
 }
 {
   try
@@ -2513,6 +2533,7 @@ void declaracion() :
 	        	", columna " + token.beginColumn + "  - Variable repetida " + identificadorActual);
         }
       }
+      return ret;
     }
   }
   catch (ParseException e)

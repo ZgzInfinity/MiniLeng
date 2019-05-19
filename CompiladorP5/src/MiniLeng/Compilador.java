@@ -35,6 +35,16 @@ public class Compilador implements CompiladorConstants {
 
   public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
+
+  public static void createSubTreeAST(ASTNodo root, ASTNodo left, ASTNodo right,
+                                                ASTNodo.TipoNodo type, TipoOperador op) {
+     // Generacion de codigo
+     root.setTipo(type);
+     root.setTipoOp(op);
+     root.setIzquierda(left);
+     root.setDerecha(right);
+  }
+
   public static void main(String args []) throws ParseException
   {
     /* nombre del fichero */
@@ -291,7 +301,7 @@ public class Compilador implements CompiladorConstants {
   Simbolo.Tipo_variable tipo = null;
   boolean ok = true;
 
-  ASTNodo = null;
+  ASTNodo nodo = null;
     try {
       jj_consume_token(tOPAS);
        // Se busca el simbolo en la tabla de simbolos
@@ -330,7 +340,7 @@ public class Compilador implements CompiladorConstants {
           tipo = s.getVariable();
        }
       // Procesamiento de la expresion
-          tpExp = expresion();
+          tpExp = expresion(genCod);
       jj_consume_token(tPUNTYCOM);
       if (ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
       {
@@ -346,7 +356,7 @@ public class Compilador implements CompiladorConstants {
                 nodo.setNivel(nivel);
                 nodo.setIzquierda(new ASTNodo(t.image, s.getNivel(), s.getDir()));
                 nodo.getIzquierda().setTipoParametro(s.getParametro());
-                nodo.setRight(r.nodoAST);
+                nodo.setDerecha(tpExp.nodoAST);
       }
       {if (true) return nodo;}
     } catch (ParseException e) {
@@ -356,12 +366,12 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de lista_asignables OK
-  static final public void lista_asignables() throws ParseException {
+  static final public ASTNodo lista_asignables(GeneradorCodigo genCod) throws ParseException {
   //Declaracion de variables
   LinkedList < String > listaIdentificadores;
   // identificador a evaluar
   String idActual;
-
+  boolean ok;
   ASTNodo aux = null, resul = new ASTNodo("rd", nivel, ASTNodo.TipoNodo.RD);
     try {
       // Retorno de la lista de identificadores
@@ -441,7 +451,7 @@ public class Compilador implements CompiladorConstants {
     try {
       jj_consume_token(tESCRIBIR);
       jj_consume_token(tPARENTESIS_IZDA);
-      resul = lista_escribibles();
+      resul = lista_escribibles(genCod);
       jj_consume_token(tPARENTESIS_DCHA);
       {if (true) return resul;}
     } catch (ParseException e) {
@@ -451,9 +461,9 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de lista_escribibles OK
-  static final public void lista_escribibles() throws ParseException {
+  static final public ASTNodo lista_escribibles(GeneradorCodigo genCod) throws ParseException {
     try {
-      escribible();
+      escribible(genCod);
       label_2:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -465,7 +475,7 @@ public class Compilador implements CompiladorConstants {
           break label_2;
         }
         jj_consume_token(tCOMA);
-        escribible();
+        escribible(genCod);
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -473,7 +483,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de lista_escribibles OK
-  static final public void escribible() throws ParseException {
+  static final public void escribible(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   Token t = null;
   Simbolo s;
@@ -496,7 +506,7 @@ public class Compilador implements CompiladorConstants {
       case tENTACAR:
         jj_consume_token(tENTACAR);
         jj_consume_token(tPARENTESIS_IZDA);
-        regExp = expresion();
+        regExp = expresion(genCod);
         jj_consume_token(tPARENTESIS_DCHA);
           entCad = true;
         break;
@@ -552,6 +562,7 @@ public class Compilador implements CompiladorConstants {
   Simbolo s = null;
   boolean args = false;
   ASTNodo resul = null, argsAST = null;
+  boolean ok = true;
     try {
               // Busqueda del simbolo en la tabla
               s = tabla.buscar_simbolo(t.image);
@@ -560,6 +571,7 @@ public class Compilador implements CompiladorConstants {
                 ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Identificador " + t.image +
                                                                                                         " desconocido en llamada a accion");
+                ok = false;
               }
               // Busqueda con exito en la tabla de simbolos
               else if (!s.es_Simbolo_Accion())
@@ -568,11 +580,13 @@ public class Compilador implements CompiladorConstants {
                  ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - No se puede realizar una llamada" +
                   " a una accion sobre el parametro " + t.image);
+
+                 ok = false;
               }
               else
               {
                 resul = new ASTNodo(s.getNombre(), nivel, ASTNodo.TipoNodo.INVOCACION);
-            resul.setCond(new ASTNodo(s.getEtiqueta(), g.OSF_s));
+            resul.setCond(new ASTNodo(s.getEtiqueta(), genCod.OSF_s));
             resul.getCond().setNivel(s.getNivel());
               }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -600,8 +614,8 @@ public class Compilador implements CompiladorConstants {
                 else if (args && ok)
                 {
                     // Invertir los argumentos para crear estructura de pila
-                        resul.setLeft(argsAST);
-                                resul.getCond().setValor(s.getDir());
+                        resul.setIzquierda(argsAST);
+                                resul.getCond().setValor((int)(long)s.getDir());
                 }
               }
               {if (true) return resul;}
@@ -616,9 +630,10 @@ public class Compilador implements CompiladorConstants {
   // Declaracion de variables
   RegistroExp tpExp;
   ASTNodo nodoWhile = null, sentencias;
+  boolean ok;
     try {
       jj_consume_token(tMQ);
-      tpExp = expresion();
+      tpExp = expresion(genCod);
       ok = tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO;
 
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO) && ok)
@@ -634,7 +649,7 @@ public class Compilador implements CompiladorConstants {
       }
       sentencias = lista_sentencias(genCod);
       jj_consume_token(tFMQ);
-                nodoWhile.setRight(sentencias);
+                nodoWhile.setDerecha(sentencias);
                 {if (true) return nodoWhile;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -661,7 +676,7 @@ public class Compilador implements CompiladorConstants {
       case tCONSTANTE_NUMERICA:
       case tIDENTIFICADOR:
       case tPARENTESIS_IZDA:
-        resul = lista_expresiones(s, gendCod);
+        resul = lista_expresiones(s, genCod);
       // Captura bien la expresion
       ok = true;
         break;
@@ -700,11 +715,11 @@ public class Compilador implements CompiladorConstants {
   RegistroExp r;
   int argc = 0;
   boolean ok = true;
-  LinkedList < Simbolo > parametros;
+  LinkedList < Simbolo > parametros = null;
   ASTNodo aux = null, resul = null;
     try {
       // Captura de la primera expresion
-          r = expresion();
+          r = expresion(genCod);
       if (s != null && !s.es_Variable_Desconocido())
       {
         // Obtencion de la lista de parametros de la accion
@@ -718,7 +733,7 @@ public class Compilador implements CompiladorConstants {
           ErrorSemantico eMS = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - El numero de parametros de" +
           " llamada a la funcion " + s.getNombre() +
-          " no coindice, se esperaban " + parametros.size());
+          " no coincide, se esperaban " + parametros.size());
           ok = false;
         }
         else if (r.getTipo() != parametros.get(argc - 1).getVariable())
@@ -743,9 +758,9 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-           r.nodoAST.setTipoParam(parametros.get(num_params-1).getParametro());
+           r.nodoAST.setTipoParametro(parametros.get(argc-1).getParametro());
                    resul = r.nodoAST;
-                   resul.setTipoParam(parametros.get(num_params-1).getParametro());
+                   resul.setTipoParametro(parametros.get(argc-1).getParametro());
         }
       }
       else
@@ -765,7 +780,7 @@ public class Compilador implements CompiladorConstants {
         }
         jj_consume_token(tCOMA);
         // Procesamiento de la nueva expresion
-            r = expresion();
+            r = expresion(genCod);
       if (s != null && !s.es_Variable_Desconocido())
       {
         // Obtencion de la lista de parametros de la accion
@@ -777,7 +792,7 @@ public class Compilador implements CompiladorConstants {
           ErrorSemantico eMS = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - El numero de parametros de" +
                         " llamada a la funcion " + s.getNombre() +
-                        " no coindice, se esperaban " + parametros.size());
+                        " no coincide, se esperaban " + parametros.size());
           ok = false;
         }
         // Comprobacion de los tipos en la funcion AQUI ESTAMOS
@@ -803,11 +818,11 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          r.nodoAST.setTipoParam(parametros.get(num_params-1).getParametro());
+          r.nodoAST.setTipoParametro(parametros.get(argc-1).getParametro());
                   aux = resul;
                   resul = r.nodoAST;
-                  resul.setTipoParam(parametros.get(num_params-1).getParametro());
-                  resul.setLeft(aux);
+                  resul.setTipoParametro(parametros.get(argc-1).getParametro());
+                  resul.setIzquierda(aux);
         }
       }
       else
@@ -820,12 +835,13 @@ public class Compilador implements CompiladorConstants {
       {
         // Añadimos a Cond un nodo con los datos de la accion (etiqueta, num parametros y nivel)
             // Se añade siempre al inicio, dejando la primera expresion al final
-            resul.setCond(new ASTNodo(s.getEtiqueta(), s.getDir()));
+            resul.setCond(new ASTNodo(s.getEtiqueta(), (int)s.getDir()));
             resul.getCond().setNivel(s.getNivel());
 
                 // Comprobar que los parametros de llamada a la funcion coindicen con los de la tabla
-                if (s.getNum_params() != num_params) {
-                        miniLeng.error_semantico("El n\u00famero de par\u00e1metros de llamada a la funci\u00f3n " + s.getNombre() + " no coindice, se esperaban " + parametros.size(), token, g);
+                if (parametros.size() != argc) {
+                        ErrorSemantico eSM = new ErrorSemantico("El n\u00famero de par\u00e1metros de llamada a la funci\u00f3n " +
+                        s.getNombre() + " no coincide, se esperaban " + parametros.size());
                         resul = null;
                 }
       }
@@ -837,7 +853,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de expresion OK
-  static final public RegistroExp expresion(GeneradroCodito genCod) throws ParseException {
+  static final public RegistroExp expresion(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de expresiones a analizar
   RegistroExp tpExp1 = null, tpExp2 = null;
   TipoOperador op;
@@ -847,7 +863,7 @@ public class Compilador implements CompiladorConstants {
 
   ASTNodo aux = null;
     try {
-      resul.nodoAST = new ASTNodo("op", nivel);
+      regResult.nodoAST = new ASTNodo("op", nivel);
       // Obtencion de la primera expresion
           tpExp1 = expresion_simple(genCod);
       label_4:
@@ -1025,9 +1041,9 @@ public class Compilador implements CompiladorConstants {
                 " desconocido");
           }
 
-          resul.nodoAST = new ASTNodo("bool", nivel, ASTNodo.TipoNodo.CONST);
-          resul.nodoAST.setValor(((resul.valorBool) ? 1 : 0));
-                  resul.nodoAST.setTipoVar(Simbolo.TipoVariable.BOOLEANO);
+          regResult.nodoAST = new ASTNodo("bool", nivel, ASTNodo.TipoNodo.CONST);
+          regResult.nodoAST.setValor(((regResult.valorBool) ? 1 : 0));
+                  regResult.nodoAST.setTipoVar(Simbolo.Tipo_variable.BOOLEANO);
         }
         if (ok && !constantes)
         {
@@ -1035,14 +1051,14 @@ public class Compilador implements CompiladorConstants {
           regResult.setExpr_compuesta(true);
 
           if(!anidar){
-                        miniLeng.createSubTreeAST(resul.nodoAST, r1.nodoAST, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
-                        aux = resul.nodoAST;
+                        Compilador.createSubTreeAST(regResult.nodoAST, tpExp1.nodoAST, tpExp2.nodoAST, ASTNodo.TipoNodo.OP,op);
+                        aux = regResult.nodoAST;
                         anidar = true;
                   }
                   else{
-                    resul.nodoAST = new ASTNodo("op", g.nivel);
-                        miniLeng.createSubTreeAST(resul.nodoAST, aux, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
-                        aux = resul.nodoAST;
+                    regResult.nodoAST = new ASTNodo("op", nivel);
+                        Compilador.createSubTreeAST(regResult.nodoAST, aux, tpExp2.nodoAST, ASTNodo.TipoNodo.OP,op);
+                        aux = regResult.nodoAST;
                   }
         }
       }
@@ -1063,7 +1079,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de operador_relacional OK
-  static final public TipoOperador operador_relacional() throws ParseException {
+  static final public TipoOperador operador_relacional(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   TipoOperador op = new TipoOperador();
     try {
@@ -1117,7 +1133,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla operador aditivo OK
-  static final public TipoOperador operador_aditivo() throws ParseException {
+  static final public TipoOperador operador_aditivo(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   TipoOperador op = new TipoOperador();
     try {
@@ -1152,16 +1168,17 @@ public class Compilador implements CompiladorConstants {
   }
 
 // regla de expresion simple OK
-  static final public RegistroExp expresion_simple() throws ParseException {
+  static final public RegistroExp expresion_simple(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   RegistroExp regTerm1 = null, regTerm2 = null, regResult = null;
   TipoOperador op;
   boolean ok;
   boolean constantes = false, anidar = false;
+  ASTNodo aux = null;
     try {
-      resul.nodoAST = new ASTNodo("op", nivel);
+      regResult.nodoAST = new ASTNodo("op", nivel);
       // Primer termino de la expresion
-          regTerm1 = termino();
+          regTerm1 = termino(genCod);
       label_5:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1175,9 +1192,9 @@ public class Compilador implements CompiladorConstants {
           break label_5;
         }
         // Operador de la expresion
-            op = operador_aditivo();
+            op = operador_aditivo(genCod);
         // Segundo termino de la expresion
-            regTerm2 = termino();
+            regTerm2 = termino(genCod);
       // Resultado de evaluar la expresion
       regResult = new RegistroExp();
       ok = true;
@@ -1278,7 +1295,7 @@ public class Compilador implements CompiladorConstants {
 
                     regResult.nodoAST = new ASTNodo("", nivel, ASTNodo.TipoNodo.CONST);
                                 regResult.nodoAST.setValor(regResult.valorEnt);
-                                regResult.nodoAST.setTipoVar(regResult.tipoVar);
+                                regResult.nodoAST.setTipoVar(regResult.tipo);
                 }
           }
         }
@@ -1288,14 +1305,14 @@ public class Compilador implements CompiladorConstants {
         regResult.setExpr_compuesta(true);
         if(!anidar)
         {
-                        miniLeng.createSubTreeAST(resul.nodoAST, r1.nodoAST, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
-                        aux = resul.nodoAST;
+                        Compilador.createSubTreeAST(regResult.nodoAST, regTerm1.nodoAST, regTerm2.nodoAST, ASTNodo.TipoNodo.OP,op);
+                        aux = regResult.nodoAST;
                         anidar = true;
                 }
                 else
                 {
                     regResult.nodoAST = new ASTNodo("op", nivel);
-                        miniLeng.createSubTreeAST(regResult.nodoAST, aux, r2.nodoAST, ASTNodo.TipoNodo.OP, op);
+                        Compilador.createSubTreeAST(regResult.nodoAST, aux, regTerm2.nodoAST, ASTNodo.TipoNodo.OP, op);
                         aux = regResult.nodoAST;
                 }
       }
@@ -1317,7 +1334,7 @@ public class Compilador implements CompiladorConstants {
 
 // LOS OPERADORES SON AND Y ESAS MIERDAS EH
 // Regla de termino OK
-  static final public RegistroExp termino() throws ParseException {
+  static final public RegistroExp termino(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de factores y expresiones
   RegistroExp tpFactor1 = null, tpFactor2 = null, regResult = null;
   // Declaracion del operador
@@ -1327,9 +1344,9 @@ public class Compilador implements CompiladorConstants {
 
   ASTNodo aux = null, ultimo = null;
     try {
-      resul.nodoAST = new ASTNodo("op", nivel);
+      regResult.nodoAST = new ASTNodo("op", nivel);
       // Evaluacion del primer factor
-          tpFactor1 = factor();
+          tpFactor1 = factor(genCod);
       label_6:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1345,9 +1362,9 @@ public class Compilador implements CompiladorConstants {
           break label_6;
         }
         // Evaluacion del operador multiplicativo
-            op = operador_multiplicativo();
+            op = operador_multiplicativo(genCod);
         // Evaluacion del segundo factor
-            tpFactor2 = factor();
+            tpFactor2 = factor(genCod);
       regResult = new RegistroExp();
       // El operaodr es una AND
       if (op.getOperadorMultiplicativo() == TipoOperador.Tipo_Operador_Multiplicativo.AND)
@@ -1380,8 +1397,8 @@ public class Compilador implements CompiladorConstants {
                 regResult.valorBool = tpFactor1.valorBool & tpFactor2.valorBool;
             regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
             regResult.nodoAST = new ASTNodo("", nivel, ASTNodo.TipoNodo.CONST);
-            regResult.nodoAST.setValor(((resul.valorBool) ? 1 : 0));
-                        regResult.nodoAST.setTipoVar(Simbolo.TipoVariable.BOOLEANO);
+            regResult.nodoAST.setValor(((regResult.valorBool) ? 1 : 0));
+                        regResult.nodoAST.setTipoVar(Simbolo.Tipo_variable.BOOLEANO);
           }
         }
       }
@@ -1452,9 +1469,9 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Operador multiplicativo desconocido");
                     }
 
-                    regResult.nodoAST = new ASTNodo("", g.nivel, ASTNodo.TipoNodo.CONST);
-                                regResult.nodoAST.setValue(regResult.valorEnt);
-                                regResult.nodoAST.setTypeVar(regResult.tipoVar);
+                    regResult.nodoAST = new ASTNodo("", nivel, ASTNodo.TipoNodo.CONST);
+                                regResult.nodoAST.setValor(regResult.valorEnt);
+                                regResult.nodoAST.setTipoVar(regResult.tipo);
                  }
           }
         }
@@ -1463,13 +1480,13 @@ public class Compilador implements CompiladorConstants {
         // Es expresion compuesta
         regResult.setExpr_compuesta(true);
         if(!anidar){
-                        miniLeng.createSubTreeAST(resul.nodoAST, r1.nodoAST, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
-                        aux = resul.nodoAST;
+                        Compilador.createSubTreeAST(regResult.nodoAST, tpFactor1.nodoAST, tpFactor2.nodoAST, ASTNodo.TipoNodo.OP,op);
+                        aux = regResult.nodoAST;
                         anidar = true;
                 }
                 else{
-                    regResult.nodoAST = new ASTNodo("op", g.nivel);
-                        miniLeng.createSubTreeAST(resul.nodoAST, aux, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
+                    regResult.nodoAST = new ASTNodo("op", nivel);
+                        Compilador.createSubTreeAST(regResult.nodoAST, aux, tpFactor2.nodoAST, ASTNodo.TipoNodo.OP,op);
                         aux = regResult.nodoAST;
                 }
       }
@@ -1490,7 +1507,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de operador multiplicativo OK
-  static final public TipoOperador operador_multiplicativo() throws ParseException {
+  static final public TipoOperador operador_multiplicativo(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   TipoOperador op = new TipoOperador();
     try {
@@ -1537,7 +1554,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de factor OK
-  static final public RegistroExp factor() throws ParseException {
+  static final public RegistroExp factor(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de factores y expresiones
   RegistroExp tpFactor, tpExp;
   RegistroExp result = new RegistroExp();
@@ -1547,7 +1564,7 @@ public class Compilador implements CompiladorConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tNOT:
         jj_consume_token(tNOT);
-        tpFactor = factor();
+        tpFactor = factor(genCod);
       // Comprobacion de si es o no booleano
       if ((tpFactor.getTipo() != Simbolo.Tipo_variable.BOOLEANO)
       && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
@@ -1570,7 +1587,7 @@ public class Compilador implements CompiladorConstants {
         break;
       case tMINUS:
         jj_consume_token(tMINUS);
-        tpFactor = factor();
+        tpFactor = factor(genCod);
       // Comprobacion de si es o no booleano
       if ((tpFactor.getTipo() != Simbolo.Tipo_variable.ENTERO)
       && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
@@ -1592,7 +1609,7 @@ public class Compilador implements CompiladorConstants {
         break;
       case tPARENTESIS_IZDA:
         jj_consume_token(tPARENTESIS_IZDA);
-        tpExp = expresion();
+        tpExp = expresion(genCod);
         jj_consume_token(tPARENTESIS_DCHA);
       // Devuelve la expresiom normal
       {if (true) return tpExp;}
@@ -1600,7 +1617,7 @@ public class Compilador implements CompiladorConstants {
       case tENTACAR:
         t = jj_consume_token(tENTACAR);
         jj_consume_token(tPARENTESIS_IZDA);
-        tpExp = expresion();
+        tpExp = expresion(genCod);
         jj_consume_token(tPARENTESIS_DCHA);
       // Comprobacion de si es entera la expresion
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
@@ -1638,9 +1655,9 @@ public class Compilador implements CompiladorConstants {
                         else
                         {
                           result.nodoAST = new ASTNodo("entcar", nivel, ASTNodo.TipoNodo.ENTCAR);
-                          result.nodoAST.setTypeVar(Simbolo.TipoVariable.CADENA);
-                          result.nodoAST.setRight(tpExp.nodoAST);
-                  result.tipoVar = Simbolo.TipoVariable.CHAR;
+                          result.nodoAST.setTipoVar(Simbolo.Tipo_variable.CADENA);
+                          result.nodoAST.setDerecha(tpExp.nodoAST);
+                  result.tipo = Simbolo.Tipo_variable.CHAR;
                         }
                 // Lo guardo en CHAR    
                 result.setTipo(Simbolo.Tipo_variable.CHAR);
@@ -1651,7 +1668,7 @@ public class Compilador implements CompiladorConstants {
       case tCARAENT:
         jj_consume_token(tCARAENT);
         jj_consume_token(tPARENTESIS_IZDA);
-        tpExp = expresion();
+        tpExp = expresion(genCod);
         jj_consume_token(tPARENTESIS_DCHA);
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.CHAR)
       && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
@@ -1702,7 +1719,7 @@ public class Compilador implements CompiladorConstants {
                     result.setClase(s.getParametro());
                     result.nodoAST = new ASTNodo(t.image, s.getNivel(), ASTNodo.TipoNodo.VAR);
                 result.nodoAST.setDir(s.getDir());
-                result.nodoAST.setTypeParam(s.getParametro());
+                result.nodoAST.setTipoParametro(s.getParametro());
                 }
                 {if (true) return result;}
         break;
@@ -1717,9 +1734,9 @@ public class Compilador implements CompiladorConstants {
           // El simbolo es una constante
       result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 
-      resul.nodoAST = new ASTNodo("ent", g.nivel, ASTNodo.TipoNodo.CONST);
-          resul.nodoAST.setValue(resul.valorEnt);
-      resul.nodoAST.setTypeVar(Simbolo.TipoVariable.ENTERO);
+      result.nodoAST = new ASTNodo("ent", nivel, ASTNodo.TipoNodo.CONST);
+          result.nodoAST.setValor(result.valorEnt);
+      result.nodoAST.setTipoVar(Simbolo.Tipo_variable.ENTERO);
 
       // Devolucion del resultado
       {if (true) return result;}
@@ -1733,9 +1750,9 @@ public class Compilador implements CompiladorConstants {
           }
           else {
                 // El simbolo es una constante
-                result.nodoAST = new ASTNodo(t.image, g.nivel, ASTNodo.TipoNodo.CONST);
-                        result.nodoAST.setTypeVar(Simbolo.TipoVariable.CHAR);
-                        result.nodoAST.setValue((int)(t.image.charAt(1)));
+                result.nodoAST = new ASTNodo(t.image, nivel, ASTNodo.TipoNodo.CONST);
+                        result.nodoAST.setTipoVar(Simbolo.Tipo_variable.CHAR);
+                        result.nodoAST.setValor((int)(t.image.charAt(1)));
           }
           result.setTipo(Simbolo.Tipo_variable.CHAR);
           {if (true) return result;}
@@ -1751,9 +1768,9 @@ public class Compilador implements CompiladorConstants {
                 // No coger las comillas
                 // El simbolo es una constante
                 result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
-                        result.nodoAST = new ASTNodo(t.image, g.nivel, ASTNodo.TipoNodo.CONST);
-                        result.nodoAST.setTypeVar(Simbolo.TipoVariable.CHAR);
-                        result.nodoAST.setValue((int)(t.image.charAt(1)));
+                        result.nodoAST = new ASTNodo(t.image, nivel, ASTNodo.TipoNodo.CONST);
+                        result.nodoAST.setTipoVar(Simbolo.Tipo_variable.CHAR);
+                        result.nodoAST.setValor((int)(t.image.charAt(1)));
           }
 
           result.setTipo(Simbolo.Tipo_variable.CADENA);
@@ -1768,9 +1785,9 @@ public class Compilador implements CompiladorConstants {
       // Tipo cadena de caracteres
       result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
-      resul.nodoAST = new ASTNodo("bool",g.nivel, ASTNodo.TipoNodo.CONST);
-          resul.nodoAST.setValue(1);
-      resul.nodoAST.setTypeVar(Simbolo.TipoVariable.ENTERO);
+      result.nodoAST = new ASTNodo("bool", nivel, ASTNodo.TipoNodo.CONST);
+          result.nodoAST.setValor(1);
+      result.nodoAST.setTipoVar(Simbolo.Tipo_variable.ENTERO);
       // Devolucion del resultado
       {if (true) return result;}
         break;
@@ -1783,9 +1800,9 @@ public class Compilador implements CompiladorConstants {
       // Tipo cadena de caracteres
       result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
-         resul.nodoAST = new ASTNodo("bool",g.nivel, ASTNodo.TipoNodo.CONST);
-     resul.nodoAST.setValue(0);
-     resul.nodoAST.setTypeVar(Simbolo.TipoVariable.ENTERO);
+           result.nodoAST = new ASTNodo("bool", nivel, ASTNodo.TipoNodo.CONST);
+       result.nodoAST.setValor(0);
+       result.nodoAST.setTipoVar(Simbolo.Tipo_variable.ENTERO);
 
       // Devolucion del resultado
       {if (true) return result;}
@@ -1806,9 +1823,10 @@ public class Compilador implements CompiladorConstants {
   // Declaracion de variables
   RegistroExp tpExp;
   ASTNodo nodoSeleccion = null, sentenciasL=null, sentenciasR=null;
+  boolean ok;
     try {
       jj_consume_token(tSI);
-      tpExp = expresion();
+      tpExp = expresion(genCod);
       // Evaluacion de la condicion
       ok = tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO;
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO) && ok)
@@ -1820,7 +1838,7 @@ public class Compilador implements CompiladorConstants {
       if (ok)
       {
         nodoSeleccion = new ASTNodo("if", nivel, ASTNodo.TipoNodo.IF);
-                nodoSeleccion.setCond(r.nodoAST);
+                nodoSeleccion.setCond(tpExp.nodoAST);
       }
       jj_consume_token(tENT);
       sentenciasL = lista_sentencias(genCod);
@@ -1894,8 +1912,8 @@ public class Compilador implements CompiladorConstants {
       total_variables = declaracion_variables(genCod);
        genCod.OSF_s += total_variables;
        cabecera.s.setDir(genCod.OSF_s);
-      declaracion_acciones();
-      bloque_sentencias();
+      declaracion_acciones(genCod);
+      bloque_sentencias(genCod);
       // Eliminacion de variables
       tabla.eliminar_variables(nivel);
       // Eliminar las acciones
@@ -2169,7 +2187,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de declaracion OK
-  static final public void declaracion() throws ParseException {
+  static final public int declaracion() throws ParseException {
   // Declaracion de variables
   Token t;
   Simbolo.Tipo_variable tp_Var;
@@ -2177,6 +2195,8 @@ public class Compilador implements CompiladorConstants {
   // Variable para guardar el identificador del simbolo a introducir
   String identificadorActual;
   Simbolo s;
+
+  int ret = 0;
     try {
       tp_Var = tipos_variables();
       lista = identificadores();
@@ -2199,9 +2219,11 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Variable repetida " + identificadorActual);
         }
       }
+      {if (true) return ret;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla para los identificadores OK

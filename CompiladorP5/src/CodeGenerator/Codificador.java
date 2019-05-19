@@ -33,7 +33,8 @@ public class Codificador {
 	public void escribir(ASTNodo tree) {
 		ASTNodo instr = tree;
 		String label1 = null, label2 = null;
-		int f, o;
+		int f;
+		long o;
 		while(instr != null) {
 			switch (instr.getTipo()) {
 			case ASG:
@@ -258,7 +259,7 @@ public class Codificador {
 				// Si es VAR : "SRF nivel dir" y "DRF"
 				// inv_func indica que es llamada a funcion, en caso de ser True se mira el tipo del parámetro
 				int f = nivel - node.getNivel();
-				int o = node.getDir();
+				long o = node.getDir();
 				writer.println("; direccion " + node.getNombre());
 				writer.println("\tSRF\t" + f + "\t" + o);
 				if (!inv_func) {
