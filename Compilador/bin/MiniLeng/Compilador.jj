@@ -570,12 +570,12 @@ void lista_asignables() :
         || s.getVariable() == Simbolo.Tipo_variable.DESCONOCIDO)
     	{
     	  // es variable o desconocido
-    	  if ((s.es_Variable_Booleano()))
+    	  if (s.es_Variable_Booleano() || s.es_Variable_Cadena())
     	  { 
            // Error semantico en la lista de asignables
            ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - Tipo invalido de variable de lectura, se espera " +
-           											"entero, cadena o caracter");
+           											"entero o caracter");
           }
         }
         else if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
@@ -1979,18 +1979,24 @@ LinkedList < LinkedList < Simbolo > > lista_parametros() :
 {
   try
   {
-    < tPARENTESIS_IZDA > lista = parametros()
-    {
-      listaGlobal.add(lista);		
-    }
-    (< tPUNTYCOM > lista = parametros()
-    {
-      listaGlobal.add(lista);
-    }
-    ) * < tPARENTESIS_DCHA >
-    {
+    < tPARENTESIS_IZDA >
+    (      lista = parametros()
+      {
+      	listaGlobal.add(lista);		
+      }
+      (< tPUNTYCOM > lista = parametros()
+      {
+        listaGlobal.add(lista);
+      }
+      ) * < tPARENTESIS_DCHA >
+      {
       return listaGlobal;
-    }
+      }
+     | < tPARENTESIS_DCHA >
+     {
+       return listaGlobal;
+     }
+   )
   }
   catch (ParseException e)
   {
