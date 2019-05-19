@@ -584,6 +584,13 @@ void lista_asignables() :
             ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - Variable " + s.getNombre() +
             										" por valor en lectura");
+        }
+        else if (s.es_Simbolo_Accion())
+        {
+           // Error semantico en la lista de asignables
+            ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+	        	", columna " + token.beginColumn + "  - Los argumentos de una funcion solo pueden ser" +
+            	" parametros o variables, encontrado " + s.getNombre() + " de tipo " + s.getTipo().toString());
         }   	
       }      
     }
@@ -880,6 +887,13 @@ void lista_expresiones(Simbolo s) :
 	        	", columna " + token.beginColumn + "  - Error al pasar un parametro por valor como referencia");
           ok = false;
         }
+        else if (parametros.get(argc - 1).es_Parametro_Referencia() && r.isExpr_compuesta())
+        {
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+	        	", columna " + token.beginColumn + "  - No se puede pasar al parametro por referencia " +
+	        	parametros.get(argc - 1).getNombre () + " una expresion compuesta");
+          ok = false;
+        }
         else
         {
           // Todo ha ido bien
@@ -920,11 +934,18 @@ void lista_expresiones(Simbolo s) :
 	        	", columna " + token.beginColumn + "  - Error al pasar un parametro por valor como referencia");
           ok = false;
         }
-      }
-      else
-      {
-        // Todo ha ido bien
-        ok = false;
+        else if (parametros.get(argc - 1).es_Parametro_Referencia() && r.isExpr_compuesta())
+        {
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+	        	", columna " + token.beginColumn + "  - No se puede pasar al parametro por referencia " +
+	        	parametros.get(argc - 1).getNombre () + " una expresion compuesta");
+          ok = false;
+        }
+        else
+        {
+          // Todo ha ido bien
+          ok = false;
+        }
       }
     }
     ) *
@@ -943,6 +964,7 @@ RegistroExp expresion() :
   TipoOperador op;
   boolean ok = true;
   RegistroExp regResult = new RegistroExp();
+  boolean constantes = false;
   // Comparador de cadenas 	
 }
 {
@@ -1011,7 +1033,7 @@ RegistroExp expresion() :
             else if (tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             	&& tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
-
+			  constantes = true;
               regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);             
               switch (op.getOperadorRelacional())
               {
@@ -1053,6 +1075,7 @@ RegistroExp expresion() :
             else if (tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             	&& tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
+              	  constantes = true;
 				  switch (op.getOperadorRelacional())
 	              {
 	                case IGUAL :
@@ -1083,6 +1106,7 @@ RegistroExp expresion() :
             else if(tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             	&& tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
+              constantes = true;
               // Son constantes
               switch (op.getOperadorRelacional())
               {
@@ -1108,6 +1132,11 @@ RegistroExp expresion() :
 	        	", columna " + token.beginColumn + "  - El operador relacional es" + 
             	" desconocido");
           }
+        }
+        if (ok && !constantes)
+        {
+          // Es expresion compuesta
+          regResult.setExpr_compuesta(true);
         }
       }
     }
@@ -1226,6 +1255,7 @@ RegistroExp expresion_simple() :
   RegistroExp regTerm1 = null, regTerm2 = null, regResult = null;
   TipoOperador op;
   boolean ok;
+  boolean constantes = false;
 }
 {
   try
@@ -1271,6 +1301,7 @@ RegistroExp expresion_simple() :
             if (regTerm1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             	&& regTerm2.getSimbolo() != Simbolo.Tipo_simbolo.CONST)
             {
+                constantes = true;
               	regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
             	regResult.valorBool = regTerm1.valorBool | regTerm2.valorBool;
             }
@@ -1316,6 +1347,7 @@ RegistroExp expresion_simple() :
             if (regTerm1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             	&& regTerm2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
+                constantes = true;
               	regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 	            switch (op.getOperadorAditivo())
 	            {
@@ -1332,6 +1364,10 @@ RegistroExp expresion_simple() :
 	        }
           }
         }
+      }
+      if (ok && !constantes)
+      {
+        regResult.setExpr_compuesta(true);
       }
     }
     ) *
@@ -1362,6 +1398,7 @@ RegistroExp termino() :
   // Declaracion del operador
   TipoOperador op;
   boolean ok;
+  boolean constantes = false;;
 }
 {
   try
@@ -1397,11 +1434,15 @@ RegistroExp termino() :
         }
         else
         {
-          // El resultado es desconocido
           regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
           
-          // Hacer operacion AND
-          regResult.valorBool = tpFactor1.valorBool & tpFactor2.valorBool;
+          if (tpFactor1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
+          	 && tpFactor2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
+          { 
+			// Hacer operacion AND
+          	regResult.valorBool = tpFactor1.valorBool & tpFactor2.valorBool;
+            regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
+          }
         }
       }
       else
@@ -1433,6 +1474,7 @@ RegistroExp termino() :
             if (tpFactor1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             	&& tpFactor2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
+				constantes = true;          
               	// El resultado tambien es constante
               	regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
               	
@@ -1472,6 +1514,10 @@ RegistroExp termino() :
 	         }
           }
         }
+      }
+      if (ok && !constantes) {
+        // Es expresion compuesta
+        regResult.setExpr_compuesta(true);
       }
     }
     ) *

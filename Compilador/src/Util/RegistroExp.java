@@ -9,7 +9,9 @@ public class RegistroExp {
 	// Valor booleano de la expresion
 	public boolean valorBool;
 	
-	
+	// Expresion compuesta
+	public boolean	expr_compuesta;
+
 	// Valor de la cadena de caracteres
 	public String valorString;
 	
@@ -74,6 +76,17 @@ public class RegistroExp {
 		this.valorBool = valorBool;
 	}
 
+	
+	public boolean isExpr_compuesta() {
+		return expr_compuesta;
+	}
+
+
+
+	public void setExpr_compuesta(boolean expr_compuesta) {
+		this.expr_compuesta = expr_compuesta;
+	}
+	
 	
 	
 	/*

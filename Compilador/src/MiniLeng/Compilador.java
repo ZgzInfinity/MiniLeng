@@ -311,6 +311,13 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Variable " + s.getNombre() +
                                                                                         " por valor en lectura");
         }
+        else if (s.es_Simbolo_Accion())
+        {
+           // Error semantico en la lista de asignables
+            ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Los argumentos de una funcion solo pueden ser" +
+                " parametros o variables, encontrado " + s.getNombre() + " de tipo " + s.getTipo().toString());
+        }
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -594,6 +601,13 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Error al pasar un parametro por valor como referencia");
           ok = false;
         }
+        else if (parametros.get(argc - 1).es_Parametro_Referencia() && r.isExpr_compuesta())
+        {
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - No se puede pasar al parametro por referencia " +
+                        parametros.get(argc - 1).getNombre () + " una expresion compuesta");
+          ok = false;
+        }
         else
         {
           // Todo ha ido bien
@@ -641,11 +655,18 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Error al pasar un parametro por valor como referencia");
           ok = false;
         }
-      }
-      else
-      {
-        // Todo ha ido bien
-        ok = false;
+        else if (parametros.get(argc - 1).es_Parametro_Referencia() && r.isExpr_compuesta())
+        {
+          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - No se puede pasar al parametro por referencia " +
+                        parametros.get(argc - 1).getNombre () + " una expresion compuesta");
+          ok = false;
+        }
+        else
+        {
+          // Todo ha ido bien
+          ok = false;
+        }
       }
       }
     } catch (ParseException e) {
@@ -660,6 +681,7 @@ public class Compilador implements CompiladorConstants {
   TipoOperador op;
   boolean ok = true;
   RegistroExp regResult = new RegistroExp();
+  boolean constantes = false;
     try {
       // Obtencion de la primera expresion
           tpExp1 = expresion_simple();
@@ -738,7 +760,7 @@ public class Compilador implements CompiladorConstants {
             else if (tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
                 && tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
-
+                          constantes = true;
               regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
               switch (op.getOperadorRelacional())
               {
@@ -780,6 +802,7 @@ public class Compilador implements CompiladorConstants {
             else if (tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
                 && tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
+                  constantes = true;
                                   switch (op.getOperadorRelacional())
                       {
                         case IGUAL :
@@ -810,6 +833,7 @@ public class Compilador implements CompiladorConstants {
             else if(tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
                 && tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
+              constantes = true;
               // Son constantes
               switch (op.getOperadorRelacional())
               {
@@ -835,6 +859,11 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - El operador relacional es" +
                 " desconocido");
           }
+        }
+        if (ok && !constantes)
+        {
+          // Es expresion compuesta
+          regResult.setExpr_compuesta(true);
         }
       }
       }
@@ -948,6 +977,7 @@ public class Compilador implements CompiladorConstants {
   RegistroExp regTerm1 = null, regTerm2 = null, regResult = null;
   TipoOperador op;
   boolean ok;
+  boolean constantes = false;
     try {
       // Primer termino de la expresion
           regTerm1 = termino();
@@ -1000,6 +1030,7 @@ public class Compilador implements CompiladorConstants {
             if (regTerm1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
                 && regTerm2.getSimbolo() != Simbolo.Tipo_simbolo.CONST)
             {
+                constantes = true;
                 regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
                 regResult.valorBool = regTerm1.valorBool | regTerm2.valorBool;
             }
@@ -1045,6 +1076,7 @@ public class Compilador implements CompiladorConstants {
             if (regTerm1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
                 && regTerm2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
+                constantes = true;
                 regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
                     switch (op.getOperadorAditivo())
                     {
@@ -1061,6 +1093,10 @@ public class Compilador implements CompiladorConstants {
                 }
           }
         }
+      }
+      if (ok && !constantes)
+      {
+        regResult.setExpr_compuesta(true);
       }
       }
       // Comprobar que la expresion simple es compuesta
@@ -1086,6 +1122,7 @@ public class Compilador implements CompiladorConstants {
   // Declaracion del operador
   TipoOperador op;
   boolean ok;
+  boolean constantes = false;;
     try {
       // Evaluacion del primer factor
           tpFactor1 = factor();
@@ -1130,11 +1167,15 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // El resultado es desconocido
           regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
-          // Hacer operacion AND
-          regResult.valorBool = tpFactor1.valorBool & tpFactor2.valorBool;
+          if (tpFactor1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
+                 && tpFactor2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
+          {
+                        // Hacer operacion AND
+                regResult.valorBool = tpFactor1.valorBool & tpFactor2.valorBool;
+            regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
+          }
         }
       }
       else
@@ -1166,6 +1207,7 @@ public class Compilador implements CompiladorConstants {
             if (tpFactor1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
                 && tpFactor2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
+                                constantes = true;
                 // El resultado tambien es constante
                 regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 
@@ -1205,6 +1247,10 @@ public class Compilador implements CompiladorConstants {
                  }
           }
         }
+      }
+      if (ok && !constantes) {
+        // Es expresion compuesta
+        regResult.setExpr_compuesta(true);
       }
       }
       // Comprobar que es expresion compuesta
