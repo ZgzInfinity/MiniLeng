@@ -19,6 +19,9 @@ import Exceptions.ErrorLexico;
 import Exceptions.ErrorSemantico;
 import Exceptions.ErrorSintactico;
 
+import CodeGenerator.GeneradorCodigo;
+import CodeGenerator.ASTNodo;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -54,9 +57,14 @@ public class Compilador implements CompiladorConstants {
     {
       /* Crear el parser con respecto al fichero */
       Compilador parser = new Compilador(new java.io.FileInputStream(path));
+
       // Inicializacion de la tabla de simbolos
       tabla.inicializar_tabla();
-      int res = Compilador.programa();
+
+      // Inicializador del generador de codigo
+      GeneradorCodigo genCod = new GeneradorCodigo();
+
+      int res = Compilador.programa(genCod);
       if (args [0].equals("-v"))
       {
         /* Mostrar total de tokens */
@@ -85,22 +93,52 @@ public class Compilador implements CompiladorConstants {
 /* Construccion del analizador sintactico */
 
 // Regla de programa
-  static final public int programa() throws ParseException {
+  static final public int programa(GeneradorCodigo genCod) throws ParseException {
   Token tSim, t;
   Simbolo s;
   Simbolo.Tipo_simbolo tp_Sim;
+  int total_variables = 0;
+  ASTNodo acciones = null, sentencias = null;
     try {
       jj_consume_token(tPROGRAMA);
       // Guardado del nombre del programa
           t = jj_consume_token(tIDENTIFICADOR);
+      // Guardar nombre del programa
+      genCod.setNombre_prog(t.image);
+
+      // Iniciar direccion de pila
+      genCod.setDireccionInicial();
+      jj_consume_token(tPUNTYCOM);
+      total_variables = declaracion_variables(genCod);
       // Insertar en la tabla de simbolos el token del programa
       // no se comprueba porque es el primero
-      s = tabla.introducir_programa(t.image, dir);
-      jj_consume_token(tPUNTYCOM);
-      declaracion_variables();
-      declaracion_acciones();
-      bloque_sentencias();
+      s = tabla.introducir_programa(t.image, 2 + total_variables);
+      genCod.setOSF_s(2 + total_variables);
+      acciones = declaracion_acciones(genCod);
+      sentencias = bloque_sentencias(genCod);
       jj_consume_token(0);
+      // Comprobar que el programa esta bien estructurado
+      if (genCod.getErroresLex() == 0 && genCod.getErroresSem() == 0 && genCod.getErroresSint() == 0) {
+
+            // Generar código del inicio del programa
+            genCod.codigo.escribir(";Programa " + t.image + ".");
+            genCod.codigo.escribir("\u005ctENP L0");
+
+                // Generar código de las acciones
+                genCod.codigo.escribir("\u005cn;Acciones");
+                genCod.codigo.escribir(acciones);
+
+            // Generar código del programa principal		
+            genCod.codigo.escribir("\u005cn;Comienzo del programa " + t.image + ".\u005cn");
+            genCod.codigo.escribir("L0:");
+                genCod.codigo.escribir(sentencias);
+
+                // Fin del programa
+            genCod.codigo.escribir("\u005cn;Fin de programa " + t.image + ".\u005cn");
+            genCod.codigo.escribir("\u005ctLVP");
+            genCod.codigo.cerrar();
+          }
+          // El programa funciona correctamente y devuelve 0
       {if (true) return 0;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -110,29 +148,42 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de bloque_sentencias OK
-  static final public void bloque_sentencias() throws ParseException {
+  static final public ASTNodo bloque_sentencias(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   Token t;
+  ASTNodo result = null;
     try {
       jj_consume_token(tPRINCIPIO);
-      lista_sentencias();
+      result = lista_sentencias(genCod);
       t = jj_consume_token(tFIN);
       // Ocultar los parametros del nivel actual
       tabla.ocultar_parametros(nivel);
-      // Detectado el fin de un bloque de sentencias
-      // Mostrar el contenido de la tabla Hash
 
+      {if (true) return result;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de lista_sentencias OK EN DUDA
-  static final public void lista_sentencias() throws ParseException {
+  static final public ASTNodo lista_sentencias(GeneradorCodigo genCod) throws ParseException {
+  ASTNodo resul = new ASTNodo();
+  ASTNodo aux = null;
+  LinkedList<ASTNodo> sentencias = new LinkedList<ASTNodo>();
+  boolean ok = true;
     try {
       label_1:
       while (true) {
-        sentencia();
+        aux = sentencia(genCod);
+            if (aux == null)
+            {
+              ok = false;
+            }
+            else
+            {
+              sentencias.add(aux);
+            }
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case tSI:
         case tMQ:
@@ -146,31 +197,52 @@ public class Compilador implements CompiladorConstants {
           break label_1;
         }
       }
+        if (ok)
+        {
+           aux = resul;
+           for(ASTNodo sentencia : sentencias) {
+                                aux.setSiguiente(sentencia);
+                                aux=sentencia;
+               }
+               resul = resul.getSiguiente();
+        }
+        else
+        {
+            resul = null;
+        }
+        {if (true) return resul;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de sentencia OK
-  static final public void sentencia() throws ParseException {
+  static final public ASTNodo sentencia(GeneradorCodigo genCod) throws ParseException {
+  ASTNodo resultado = null;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tLEER:
-        leer();
+        resultado = leer(genCod);
         jj_consume_token(tPUNTYCOM);
+        {if (true) return resultado;}
         break;
       case tESCRIBIR:
-        escribir();
+        resultado = escribir(genCod);
         jj_consume_token(tPUNTYCOM);
+        {if (true) return resultado;}
         break;
       case tIDENTIFICADOR:
-        asig_invoc();
+        resultado = asig_invoc(genCod);
+        {if (true) return resultado;}
         break;
       case tSI:
-        seleccion();
+        resultado = seleccion(genCod);
+        {if (true) return resultado;}
         break;
       case tMQ:
-        mientras_que();
+        resultado = mientras_que(genCod);
+        {if (true) return resultado;}
         break;
       default:
         jj_la1[1] = jj_gen;
@@ -180,21 +252,25 @@ public class Compilador implements CompiladorConstants {
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
-  static final public void asig_invoc() throws ParseException {
+  static final public ASTNodo asig_invoc(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   Token t;
+  ASTNodo result = new ASTNodo();
     try {
       // Pasar el token capturado como identificador a la invocacion de la accion
           t = jj_consume_token(tIDENTIFICADOR);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tOPAS:
-        asignacion(t);
+        result = asignacion(t, genCod);
+         {if (true) return result;}
         break;
       case tPUNTYCOM:
       case tPARENTESIS_IZDA:
-        invocacion_accion(t);
+        result = invocacion_accion(t, genCod);
+                {if (true) return result;}
         break;
       default:
         jj_la1[2] = jj_gen;
@@ -204,15 +280,18 @@ public class Compilador implements CompiladorConstants {
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de asignacion OK
-  static final public void asignacion(Token t) throws ParseException {
+  static final public ASTNodo asignacion(Token t, GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   RegistroExp tpExp;
   Simbolo s;
   Simbolo.Tipo_variable tipo = null;
   boolean ok = true;
+
+  ASTNodo = null;
     try {
       jj_consume_token(tOPAS);
        // Se busca el simbolo en la tabla de simbolos
@@ -259,9 +338,21 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Tipos incompatibles en la asignacion: " +
                 "no se puede convetir " + tpExp.getTipo().toString() + " a " + tipo.toString());
       }
+      else if (ok)
+      {
+        // Insertar nodo ASG en AST (Left: variable, Right: expresion)
+                nodo = new ASTNodo();
+                nodo.setTipo(ASTNodo.TipoNodo.ASG);
+                nodo.setNivel(nivel);
+                nodo.setIzquierda(new ASTNodo(t.image, s.getNivel(), s.getDir()));
+                nodo.getIzquierda().setTipoParametro(s.getParametro());
+                nodo.setRight(r.nodoAST);
+      }
+      {if (true) return nodo;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de lista_asignables OK
@@ -270,6 +361,8 @@ public class Compilador implements CompiladorConstants {
   LinkedList < String > listaIdentificadores;
   // identificador a evaluar
   String idActual;
+
+  ASTNodo aux = null, resul = new ASTNodo("rd", nivel, ASTNodo.TipoNodo.RD);
     try {
       // Retorno de la lista de identificadores
           listaIdentificadores = identificadores();
@@ -318,6 +411,9 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Los argumentos de una funcion solo pueden ser" +
                 " parametros o variables, encontrado " + s.getNombre() + " de tipo " + s.getTipo().toString());
         }
+        else {
+          ok = true;
+        }
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -325,27 +421,33 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de leer OK
-  static final public void leer() throws ParseException {
+  static final public ASTNodo leer(GeneradorCodigo genCod) throws ParseException {
+  ASTNodo nodo_leer = null;
     try {
       jj_consume_token(tLEER);
       jj_consume_token(tPARENTESIS_IZDA);
-      lista_asignables();
+      nodo_leer = lista_asignables(genCod);
       jj_consume_token(tPARENTESIS_DCHA);
+      {if (true) return nodo_leer;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de escribir OK
-  static final public void escribir() throws ParseException {
+  static final public ASTNodo escribir(GeneradorCodigo genCod) throws ParseException {
+  ASTNodo resul = null;
     try {
       jj_consume_token(tESCRIBIR);
       jj_consume_token(tPARENTESIS_IZDA);
-      lista_escribibles();
+      resul = lista_escribibles();
       jj_consume_token(tPARENTESIS_DCHA);
+      {if (true) return resul;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de lista_escribibles OK
@@ -445,10 +547,11 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de invocacion accion OK
-  static final public void invocacion_accion(Token t) throws ParseException {
+  static final public ASTNodo invocacion_accion(Token t, GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   Simbolo s = null;
   boolean args = false;
+  ASTNodo resul = null, argsAST = null;
     try {
               // Busqueda del simbolo en la tabla
               s = tabla.buscar_simbolo(t.image);
@@ -466,9 +569,15 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - No se puede realizar una llamada" +
                   " a una accion sobre el parametro " + t.image);
               }
+              else
+              {
+                resul = new ASTNodo(s.getNombre(), nivel, ASTNodo.TipoNodo.INVOCACION);
+            resul.setCond(new ASTNodo(s.getEtiqueta(), g.OSF_s));
+            resul.getCond().setNivel(s.getNivel());
+              }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZDA:
-        argumentos(s);
+        argsAST = argumentos(s, genCod);
               args = true;
         break;
       default:
@@ -488,37 +597,56 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + " -  Se esperaban " + argc +
                         " parametros al invocar a la accion " + s.getNombre());
                 }
+                else if (args && ok)
+                {
+                    // Invertir los argumentos para crear estructura de pila
+                        resul.setLeft(argsAST);
+                                resul.getCond().setValor(s.getDir());
+                }
               }
+              {if (true) return resul;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 //Regla de mientras que OK
-  static final public void mientras_que() throws ParseException {
+  static final public ASTNodo mientras_que(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   RegistroExp tpExp;
+  ASTNodo nodoWhile = null, sentencias;
     try {
       jj_consume_token(tMQ);
       tpExp = expresion();
-      if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-      && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+      ok = tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO;
+
+      if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO) && ok)
       {
         // Error en la condicion del mientras que
         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + " - La condicion de mientras_que debe ser booleana");
       }
-      lista_sentencias();
+      if (ok)
+      {
+        nodoWhile = new ASTNodo("while", nivel, ASTNodo.TipoNodo.WHILE);
+                nodoWhile.setCond(tpExp.nodoAST);
+      }
+      sentencias = lista_sentencias(genCod);
       jj_consume_token(tFMQ);
+                nodoWhile.setRight(sentencias);
+                {if (true) return nodoWhile;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla para los argumentos OK
-  static final public void argumentos(Simbolo s) throws ParseException {
+  static final public ASTNodo argumentos(Simbolo s, GeneradorCodigo genCod) throws ParseException {
   //Declaracion de variables
   boolean ok = false;
+  ASTNodo resul = null;
     try {
       jj_consume_token(tPARENTESIS_IZDA);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -533,7 +661,7 @@ public class Compilador implements CompiladorConstants {
       case tCONSTANTE_NUMERICA:
       case tIDENTIFICADOR:
       case tPARENTESIS_IZDA:
-        lista_expresiones(s);
+        resul = lista_expresiones(s, gendCod);
       // Captura bien la expresion
       ok = true;
         break;
@@ -555,20 +683,25 @@ public class Compilador implements CompiladorConstants {
                         ErrorSemantico ESM = new ErrorSemantico("linea " + token.beginLine +
                         " - Se esperaban " + argc + " parametros al invocar a la accion " +
                         s.getNombre());
+
+                        resul = null;
                 }
+                {if (true) return resul;}
         }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de lista de expresiones
-  static final public void lista_expresiones(Simbolo s) throws ParseException {
+  static final public ASTNodo lista_expresiones(Simbolo s, GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   RegistroExp r;
   int argc = 0;
   boolean ok = true;
   LinkedList < Simbolo > parametros;
+  ASTNodo aux = null, resul = null;
     try {
       // Captura de la primera expresion
           r = expresion();
@@ -610,9 +743,15 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // Todo ha ido bien
-          ok = false;
+           r.nodoAST.setTipoParam(parametros.get(num_params-1).getParametro());
+                   resul = r.nodoAST;
+                   resul.setTipoParam(parametros.get(num_params-1).getParametro());
         }
+      }
+      else
+      {
+        // Todo ha ido bien
+        ok = false;
       }
       label_3:
       while (true) {
@@ -664,27 +803,53 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // Todo ha ido bien
-          ok = false;
+          r.nodoAST.setTipoParam(parametros.get(num_params-1).getParametro());
+                  aux = resul;
+                  resul = r.nodoAST;
+                  resul.setTipoParam(parametros.get(num_params-1).getParametro());
+                  resul.setLeft(aux);
         }
       }
+      else
+      {
+         // Todo ha ido bien
+         ok = false;
       }
+      }
+      if (ok && s != null)
+      {
+        // Añadimos a Cond un nodo con los datos de la accion (etiqueta, num parametros y nivel)
+            // Se añade siempre al inicio, dejando la primera expresion al final
+            resul.setCond(new ASTNodo(s.getEtiqueta(), s.getDir()));
+            resul.getCond().setNivel(s.getNivel());
+
+                // Comprobar que los parametros de llamada a la funcion coindicen con los de la tabla
+                if (s.getNum_params() != num_params) {
+                        miniLeng.error_semantico("El n\u00famero de par\u00e1metros de llamada a la funci\u00f3n " + s.getNombre() + " no coindice, se esperaban " + parametros.size(), token, g);
+                        resul = null;
+                }
+      }
+      {if (true) return resul;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de expresion OK
-  static final public RegistroExp expresion() throws ParseException {
+  static final public RegistroExp expresion(GeneradroCodito genCod) throws ParseException {
   // Declaracion de expresiones a analizar
   RegistroExp tpExp1 = null, tpExp2 = null;
   TipoOperador op;
   boolean ok = true;
   RegistroExp regResult = new RegistroExp();
-  boolean constantes = false;
+  boolean constantes = false, anidar = false;
+
+  ASTNodo aux = null;
     try {
+      resul.nodoAST = new ASTNodo("op", nivel);
       // Obtencion de la primera expresion
-          tpExp1 = expresion_simple();
+          tpExp1 = expresion_simple(genCod);
       label_4:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -700,9 +865,9 @@ public class Compilador implements CompiladorConstants {
           jj_la1[8] = jj_gen;
           break label_4;
         }
-        op = operador_relacional();
+        op = operador_relacional(genCod);
         // Obtencion de la segunda expresion
-            tpExp2 = expresion_simple();
+            tpExp2 = expresion_simple(genCod);
       // Evaluacion de la expresion
       // Resultado de evaluar la expresion
       regResult = new RegistroExp();
@@ -859,11 +1024,26 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - El operador relacional es" +
                 " desconocido");
           }
+
+          resul.nodoAST = new ASTNodo("bool", nivel, ASTNodo.TipoNodo.CONST);
+          resul.nodoAST.setValor(((resul.valorBool) ? 1 : 0));
+                  resul.nodoAST.setTipoVar(Simbolo.TipoVariable.BOOLEANO);
         }
         if (ok && !constantes)
         {
           // Es expresion compuesta
           regResult.setExpr_compuesta(true);
+
+          if(!anidar){
+                        miniLeng.createSubTreeAST(resul.nodoAST, r1.nodoAST, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
+                        aux = resul.nodoAST;
+                        anidar = true;
+                  }
+                  else{
+                    resul.nodoAST = new ASTNodo("op", g.nivel);
+                        miniLeng.createSubTreeAST(resul.nodoAST, aux, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
+                        aux = resul.nodoAST;
+                  }
         }
       }
       }
@@ -977,8 +1157,9 @@ public class Compilador implements CompiladorConstants {
   RegistroExp regTerm1 = null, regTerm2 = null, regResult = null;
   TipoOperador op;
   boolean ok;
-  boolean constantes = false;
+  boolean constantes = false, anidar = false;
     try {
+      resul.nodoAST = new ASTNodo("op", nivel);
       // Primer termino de la expresion
           regTerm1 = termino();
       label_5:
@@ -1033,6 +1214,10 @@ public class Compilador implements CompiladorConstants {
                 constantes = true;
                 regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
                 regResult.valorBool = regTerm1.valorBool | regTerm2.valorBool;
+
+                regResult.nodoAST = new ASTNodo("bool", nivel, ASTNodo.TipoNodo.CONST);
+                regResult.nodoAST.setValor(((regResult.valorBool) ? 1 : 0));
+                                regResult.nodoAST.setTipoVar(Simbolo.Tipo_variable.BOOLEANO);
             }
           }
         }
@@ -1090,6 +1275,10 @@ public class Compilador implements CompiladorConstants {
                       ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Operador aditivo desconocido");
                     }
+
+                    regResult.nodoAST = new ASTNodo("", nivel, ASTNodo.TipoNodo.CONST);
+                                regResult.nodoAST.setValor(regResult.valorEnt);
+                                regResult.nodoAST.setTipoVar(regResult.tipoVar);
                 }
           }
         }
@@ -1097,6 +1286,18 @@ public class Compilador implements CompiladorConstants {
       if (ok && !constantes)
       {
         regResult.setExpr_compuesta(true);
+        if(!anidar)
+        {
+                        miniLeng.createSubTreeAST(resul.nodoAST, r1.nodoAST, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
+                        aux = resul.nodoAST;
+                        anidar = true;
+                }
+                else
+                {
+                    regResult.nodoAST = new ASTNodo("op", nivel);
+                        miniLeng.createSubTreeAST(regResult.nodoAST, aux, r2.nodoAST, ASTNodo.TipoNodo.OP, op);
+                        aux = regResult.nodoAST;
+                }
       }
       }
       // Comprobar que la expresion simple es compuesta
@@ -1122,8 +1323,11 @@ public class Compilador implements CompiladorConstants {
   // Declaracion del operador
   TipoOperador op;
   boolean ok;
-  boolean constantes = false;;
+  boolean constantes = false, anidar = false;
+
+  ASTNodo aux = null, ultimo = null;
     try {
+      resul.nodoAST = new ASTNodo("op", nivel);
       // Evaluacion del primer factor
           tpFactor1 = factor();
       label_6:
@@ -1175,6 +1379,9 @@ public class Compilador implements CompiladorConstants {
                         // Hacer operacion AND
                 regResult.valorBool = tpFactor1.valorBool & tpFactor2.valorBool;
             regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
+            regResult.nodoAST = new ASTNodo("", nivel, ASTNodo.TipoNodo.CONST);
+            regResult.nodoAST.setValor(((resul.valorBool) ? 1 : 0));
+                        regResult.nodoAST.setTipoVar(Simbolo.TipoVariable.BOOLEANO);
           }
         }
       }
@@ -1244,6 +1451,10 @@ public class Compilador implements CompiladorConstants {
                       ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Operador multiplicativo desconocido");
                     }
+
+                    regResult.nodoAST = new ASTNodo("", g.nivel, ASTNodo.TipoNodo.CONST);
+                                regResult.nodoAST.setValue(regResult.valorEnt);
+                                regResult.nodoAST.setTypeVar(regResult.tipoVar);
                  }
           }
         }
@@ -1251,6 +1462,16 @@ public class Compilador implements CompiladorConstants {
       if (ok && !constantes) {
         // Es expresion compuesta
         regResult.setExpr_compuesta(true);
+        if(!anidar){
+                        miniLeng.createSubTreeAST(resul.nodoAST, r1.nodoAST, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
+                        aux = resul.nodoAST;
+                        anidar = true;
+                }
+                else{
+                    regResult.nodoAST = new ASTNodo("op", g.nivel);
+                        miniLeng.createSubTreeAST(resul.nodoAST, aux, r2.nodoAST, ASTNodo.TipoNodo.OP,op);
+                        aux = regResult.nodoAST;
+                }
       }
       }
       // Comprobar que es expresion compuesta
@@ -1341,6 +1562,8 @@ public class Compilador implements CompiladorConstants {
       else
       {
         result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+        result.nodoAST = tpFactor.nodoAST;
+        result.nodoAST.setNegar_valor(true);
       }
       // Devuelve el tipo de factor
       {if (true) return result;}
@@ -1362,6 +1585,7 @@ public class Compilador implements CompiladorConstants {
       else
       {
         result.setTipo(Simbolo.Tipo_variable.ENTERO);
+        result.nodoAST = tpFactor.nodoAST;
       }
       // Devuelve el tipo de factor
       {if (true) return result;}
@@ -1413,7 +1637,10 @@ public class Compilador implements CompiladorConstants {
                         }
                         else
                         {
-                          // GENERADOR DE CODIGO
+                          result.nodoAST = new ASTNodo("entcar", nivel, ASTNodo.TipoNodo.ENTCAR);
+                          result.nodoAST.setTypeVar(Simbolo.TipoVariable.CADENA);
+                          result.nodoAST.setRight(tpExp.nodoAST);
+                  result.tipoVar = Simbolo.TipoVariable.CHAR;
                         }
                 // Lo guardo en CHAR    
                 result.setTipo(Simbolo.Tipo_variable.CHAR);
@@ -1444,11 +1671,8 @@ public class Compilador implements CompiladorConstants {
                 char cadena = tpExp.valorString.charAt(0);
                 result.setValorEnt((int)cadena);
         }
-        else
-        {
-          // No es constante
-        }
         result.setTipo(Simbolo.Tipo_variable.ENTERO);
+        result.nodoAST = tpExp.nodoAST;
       }
       {if (true) return result;}
         break;
@@ -1476,6 +1700,9 @@ public class Compilador implements CompiladorConstants {
                 {
                     result.setTipo(s.getVariable());
                     result.setClase(s.getParametro());
+                    result.nodoAST = new ASTNodo(t.image, s.getNivel(), ASTNodo.TipoNodo.VAR);
+                result.nodoAST.setDir(s.getDir());
+                result.nodoAST.setTypeParam(s.getParametro());
                 }
                 {if (true) return result;}
         break;
@@ -1490,6 +1717,10 @@ public class Compilador implements CompiladorConstants {
           // El simbolo es una constante
       result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 
+      resul.nodoAST = new ASTNodo("ent", g.nivel, ASTNodo.TipoNodo.CONST);
+          resul.nodoAST.setValue(resul.valorEnt);
+      resul.nodoAST.setTypeVar(Simbolo.TipoVariable.ENTERO);
+
       // Devolucion del resultado
       {if (true) return result;}
         break;
@@ -1502,8 +1733,9 @@ public class Compilador implements CompiladorConstants {
           }
           else {
                 // El simbolo es una constante
-                result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
-                        result.valorString = String.valueOf(t.image.charAt(1));
+                result.nodoAST = new ASTNodo(t.image, g.nivel, ASTNodo.TipoNodo.CONST);
+                        result.nodoAST.setTypeVar(Simbolo.TipoVariable.CHAR);
+                        result.nodoAST.setValue((int)(t.image.charAt(1)));
           }
           result.setTipo(Simbolo.Tipo_variable.CHAR);
           {if (true) return result;}
@@ -1519,8 +1751,11 @@ public class Compilador implements CompiladorConstants {
                 // No coger las comillas
                 // El simbolo es una constante
                 result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
-                        result.valorString = String.valueOf(t.image.charAt(1));
+                        result.nodoAST = new ASTNodo(t.image, g.nivel, ASTNodo.TipoNodo.CONST);
+                        result.nodoAST.setTypeVar(Simbolo.TipoVariable.CHAR);
+                        result.nodoAST.setValue((int)(t.image.charAt(1)));
           }
+
           result.setTipo(Simbolo.Tipo_variable.CADENA);
           {if (true) return result;}
         break;
@@ -1532,6 +1767,10 @@ public class Compilador implements CompiladorConstants {
       result.setValorBool(true);
       // Tipo cadena de caracteres
       result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+
+      resul.nodoAST = new ASTNodo("bool",g.nivel, ASTNodo.TipoNodo.CONST);
+          resul.nodoAST.setValue(1);
+      resul.nodoAST.setTypeVar(Simbolo.TipoVariable.ENTERO);
       // Devolucion del resultado
       {if (true) return result;}
         break;
@@ -1543,6 +1782,11 @@ public class Compilador implements CompiladorConstants {
       result.setValorBool(false);
       // Tipo cadena de caracteres
       result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+
+         resul.nodoAST = new ASTNodo("bool",g.nivel, ASTNodo.TipoNodo.CONST);
+     resul.nodoAST.setValue(0);
+     resul.nodoAST.setTypeVar(Simbolo.TipoVariable.ENTERO);
+
       // Devolucion del resultado
       {if (true) return result;}
         break;
@@ -1558,39 +1802,55 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de seelccion OK
-  static final public void seleccion() throws ParseException {
+  static final public ASTNodo seleccion(GeneradorCodigo genCod) throws ParseException {
   // Declaracion de variables
   RegistroExp tpExp;
+  ASTNodo nodoSeleccion = null, sentenciasL=null, sentenciasR=null;
     try {
       jj_consume_token(tSI);
       tpExp = expresion();
       // Evaluacion de la condicion
-      if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
-      && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
+      ok = tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO;
+      if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO) && ok)
       {
         // Se esperaba una condicion booleana
         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - La condicion en la seleccion debe ser un booleano");
       }
+      if (ok)
+      {
+        nodoSeleccion = new ASTNodo("if", nivel, ASTNodo.TipoNodo.IF);
+                nodoSeleccion.setCond(r.nodoAST);
+      }
       jj_consume_token(tENT);
-      lista_sentencias();
+      sentenciasL = lista_sentencias(genCod);
+      if(ok)
+      {
+                nodoSeleccion.setIzquierda(sentenciasL);
+          }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tSI_NO:
         jj_consume_token(tSI_NO);
-        lista_sentencias();
+        sentenciasR = lista_sentencias(genCod);
         break;
       default:
         jj_la1[15] = jj_gen;
         ;
       }
       jj_consume_token(tFSI);
+           if (ok) {
+                nodoSeleccion.setDerecha(sentenciasR);
+           }
+           {if (true) return nodoSeleccion;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de declaracion_acciones OK
-  static final public void declaracion_acciones() throws ParseException {
+  static final public ASTNodo declaracion_acciones(GeneradorCodigo genCod) throws ParseException {
+  ASTNodo accion = null, resultado = null, aux = null;
     try {
       label_7:
       while (true) {
@@ -1602,19 +1862,38 @@ public class Compilador implements CompiladorConstants {
           jj_la1[16] = jj_gen;
           break label_7;
         }
-        declaracion_accion();
+        accion = declaracion_accion(genCod);
+        if (resultado == null)
+        {
+          resultado = accion;
+        }
+        else
+        {
+          aux = resultado;
+          while(aux.getSiguiente() != null){
+                        aux = aux.getSiguiente();
+                  }
+                  aux.setSiguiente(accion);
+        }
       }
+        {if (true) return resultado;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de declaracion_Accion OK
-  static final public void declaracion_accion() throws ParseException {
+  static final public ASTNodo declaracion_accion(GeneradorCodigo genCod) throws ParseException {
+  int total_variables = 0;
+  ASTNodo acciones = null, sentencias = null;
+  RegistroExp cabecera = null;
     try {
-      cabecera_accion();
+      cabecera = cabecera_accion(genCod);
       jj_consume_token(tPUNTYCOM);
-      declaracion_variables();
+      total_variables = declaracion_variables(genCod);
+       genCod.OSF_s += total_variables;
+       cabecera.s.setDir(genCod.OSF_s);
       declaracion_acciones();
       bloque_sentencias();
       // Eliminacion de variables
@@ -1625,19 +1904,32 @@ public class Compilador implements CompiladorConstants {
       tabla.eliminar_parametros_ocultos(nivel);
       // Decrementar el nivel porque se cierra un bloque       
       nivel--;
+
+      genCod.OSF_s -= total_variables;
+
+      if (cabecera.nodoAST != null)
+      {
+        cabecera.nodoAST.setSiguiente(acciones);
+        cabecera.nodoAST.setDerecha(sentencias);
+      }
+      {if (true) return cabecera.nodoAST;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de cabecera_accion OK
-  static final public void cabecera_accion() throws ParseException {
+  static final public RegistroExp cabecera_accion(GeneradorCodigo genCod) throws ParseException {
   Token tId;
   Simbolo s = null;
   Simbolo.Tipo_simbolo tp_Sim;
   boolean ok = false;
   // Lista de parametros de la accion
   LinkedList < LinkedList < Simbolo > > listaDeParametros = new LinkedList < LinkedList < Simbolo > > ();
+
+  ASTNodo resultado = null, parametros = null;
+  RegistroExp reg_resul = new RegistroExp();
     try {
       jj_consume_token(tACCION);
       tId = jj_consume_token(tIDENTIFICADOR);
@@ -1658,6 +1950,7 @@ public class Compilador implements CompiladorConstants {
         }
       // Incrementar el nivel actual
       nivel++;
+      genCod.setDireccionInicial();
       // Procesamiento de los parametros
           listaDeParametros = parametros_formales(tId);
       // Limpiar parametros de la posible acc
@@ -1798,8 +2091,9 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de declaracion variables OK
-  static final public void declaracion_variables() throws ParseException {
-  // Declaracion de variables 
+  static final public int declaracion_variables(GeneradorCodigo genCod) throws ParseException {
+  // Declaracion de variables
+  int ret = 0, aux = 0;
   Token t;
     try {
       label_9:
@@ -1814,12 +2108,15 @@ public class Compilador implements CompiladorConstants {
           jj_la1[20] = jj_gen;
           break label_9;
         }
-        declaracion();
-        t = jj_consume_token(tPUNTYCOM);
+        aux = declaracion();
+        jj_consume_token(tPUNTYCOM);
+      ret += aux;
       }
+      {if (true) return ret;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla para los tipos de variables OK

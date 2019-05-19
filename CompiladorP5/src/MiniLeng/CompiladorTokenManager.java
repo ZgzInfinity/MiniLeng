@@ -14,6 +14,8 @@ import Util.TipoOperador.Tipo_Operador_Relacional;
 import Exceptions.ErrorLexico;
 import Exceptions.ErrorSemantico;
 import Exceptions.ErrorSintactico;
+import CodeGenerator.GeneradorCodigo;
+import CodeGenerator.ASTNodo;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
