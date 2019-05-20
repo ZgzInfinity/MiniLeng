@@ -1,5 +1,8 @@
 package CodeGenerator;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+
 public class GeneradorCodigo {
 	
 		// Inicio de direccion de pila
@@ -167,6 +170,15 @@ public class GeneradorCodigo {
 		 */
 		public void setDireccionInicial(){
 			this.dir = INICIAL;
+		}
+		
+		
+		/*
+		 * Pre:
+		 * Post: Crea un fichero de texto de nombre <<nombre.vscode>>
+		 */
+		public void generarCodigoPrograma(String name) throws FileNotFoundException, UnsupportedEncodingException {
+			codigo = new Codificador(name);
 		}
 		
 }

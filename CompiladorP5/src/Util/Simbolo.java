@@ -2,6 +2,9 @@ package Util;
 
 import java.util.LinkedList;
 
+import CodeGenerator.ASTNodo;
+import CodeGenerator.GeneradorCodigo;
+
 // Clase para implmentar el tipo de dato Simbolo
 public class Simbolo {
 	
@@ -301,12 +304,38 @@ public class Simbolo {
 	 * Pre: <<listaDeParametros>> es una lista de parametros asociados a una accion
 	 * Post: Ha asignado a la lista de parametros de la accion la lista <<listaDeParametros>>
 	 */
-	public void anyadirParametrosAccion(LinkedList<Simbolo> listaDeParametros){
+	public LinkedList<ASTNodo> anyadirParametrosAccion(LinkedList<Simbolo> listaDeParametros, GeneradorCodigo genCod){
 		// Calculo del numero de parametros de la accion
 		int dimension = listaDeParametros.size();
+		Simbolo s;
+		
+		// Lista de nodos ASTNodo
+		LinkedList<ASTNodo> nodosParametros = new LinkedList<ASTNodo>();
+		ASTNodo aux = new ASTNodo();
+		
+		long direccion;
+		
 		for (int i = 0; i < dimension; i++) {
-			this.lista_parametros.add(listaDeParametros.get(i));
+			// Extraccion del simbolo
+			s = listaDeParametros.get(i);
+			
+			// Crear nuevo ASTNodo a incorporar en la lista
+	        aux = new ASTNodo(s.getNombre(),s.getNivel(), s.getVariable());
+	        aux.setTipoParametro(s.getParametro());
+	        aux.setDir(genCod.dir);
+	            	        
+	        // Sumo a dir del simbolo para hacer la llamada OSF
+			direccion = this.getDir() + ((s.getParametro() == Simbolo.Clase_parametro.REF) ? 1 : 2);
+	        this.setDir(direccion);
+	        
+	        // Anyadir nodoAST parametro a la lista 
+	        nodosParametros.add(aux);
+	        
+			this.lista_parametros.add(s);
 		}
+		
+		// Devolucion de la lista de parametros
+		return nodosParametros;
 	}
 	
 	

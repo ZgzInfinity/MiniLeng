@@ -36,6 +36,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+
 public class Compilador
 {
   // IniCio del nivel de declaraciones anidadas
@@ -375,7 +378,7 @@ TOKEN : /* OPERADORES SEPARADDORES */
 /* Construccion del analizador sintactico */
 
 // Regla de programa
-int programa(GeneradorCodigo genCod) :
+int programa(GeneradorCodigo genCod) throws ParseException, FileNotFoundException, UnsupportedEncodingException:
 {
   Token tSim, t;
   Simbolo s;
@@ -396,6 +399,9 @@ int programa(GeneradorCodigo genCod) :
 
       // Iniciar direccion de pila
       genCod.setDireccionInicial();
+
+	  // Crear fichero vscode
+      genCod.generarCodigoPrograma(t.image);
     }
     // Lectura del resto de datos
     < tPUNTYCOM >
@@ -674,6 +680,8 @@ ASTNodo lista_asignables(GeneradorCodigo genCod) :
     // Retorno de la lista de identificadores
     listaIdentificadores = identificadores()
     {
+      aux = resul;
+      
       // Tamaño de la lista de identificadores
       int dimension = listaIdentificadores.size();
       // Simbolo a evaluar
@@ -721,8 +729,12 @@ ASTNodo lista_asignables(GeneradorCodigo genCod) :
         }
         else {
           ok = true;
+          aux.setDerecha(new ASTNodo(idActual, s.getNivel(), s.getVariable()));
+		  aux.getDerecha().setDir(s.getDir());
+		  aux.getDerecha().setTipoParametro(s.getParametro());
         }	
-      }      
+      }
+      return resul;     
     }
   }
   catch (ParseException e)
@@ -773,11 +785,18 @@ ASTNodo escribir(GeneradorCodigo genCod) :
 // Regla de lista_escribibles OK
 ASTNodo lista_escribibles(GeneradorCodigo genCod) :
 {
+  ASTNodo resul = new ASTNodo();
 }
 {
   try
   {
-    escribible(genCod) (< tCOMA > escribible(genCod)) *
+    escribible(genCod, resul)
+    (
+      < tCOMA > escribible(genCod, resul)
+    ) *
+    {
+      return resul;
+    }
   }
   catch (ParseException e)
   {
@@ -786,7 +805,7 @@ ASTNodo lista_escribibles(GeneradorCodigo genCod) :
 }
 
 // Regla de lista_escribibles OK
-void escribible(GeneradorCodigo genCod) :
+ASTNodo escribible(GeneradorCodigo genCod, ASTNodo resul) :
 {
   // Declaracion de variables
   Token t = null;
@@ -794,6 +813,7 @@ void escribible(GeneradorCodigo genCod) :
   RegistroExp regExp = null;
   RegistroExp result = new RegistroExp();
   boolean constCad = false, entCad = false;
+  ASTNodo aux = new ASTNodo();
 }
 {
   try
@@ -814,10 +834,19 @@ void escribible(GeneradorCodigo genCod) :
   	}
 	)
 	{
+	  aux = resul;
+
+	  while (aux.getDerecha() != null)
+	  {
+	    aux = aux.getDerecha();
+	  }
 	  if (constCad)
 	  {
 	    // La expresion es una cadena
-	    result.setTipo(Simbolo.Tipo_variable.CADENA);
+	    aux.setDerecha(new ASTNodo(t.image, nivel, Simbolo.Tipo_variable.CADENA));
+		aux.getDerecha().setTipo(ASTNodo.TipoNodo.CONST);
+	    aux.setTipoVar(Simbolo.Tipo_variable.CADENA);
+	    
 	  }
 	  else if (entCad)
 	  {
@@ -830,7 +859,10 @@ void escribible(GeneradorCodigo genCod) :
 	    }
 	    else
 	    {
-	    	result.setTipo(Simbolo.Tipo_variable.ENTERO);
+	        aux.setDerecha(new ASTNodo("entcar", nivel, ASTNodo.TipoNodo.ENTCAR));
+	        aux.getDerecha().setTipoVar(Simbolo.Tipo_variable.ENTERO);
+			aux.getDerecha().setIzquierda(regExp.nodoAST);
+	    	aux.setTipoVar(Simbolo.Tipo_variable.ENTERO);
 	    }
 	  }
 	  else
@@ -848,8 +880,15 @@ void escribible(GeneradorCodigo genCod) :
 	         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - Variable " + t.image + " no valida para escritura");
 	      }
-	      // Controlar despues los BOOLEANOS
+	      else
+	      {
+	        aux.setNivel(nivel);
+	        aux.setDerecha(new ASTNodo(t.image, s.getNivel(), s.getVariable()));
+			aux.getDerecha().setTipoParametro(s.getParametro());
+			aux.getDerecha().setDir(s.getDir());
+	      }
 	   }
+	   return resul;
 	 }
   }
   catch (ParseException e)
@@ -2278,18 +2317,42 @@ RegistroExp cabecera_accion(GeneradorCodigo genCod) :
       genCod.setDireccionInicial();
     }
     // Procesamiento de los parametros
-    listaDeParametros = parametros_formales(tId)
+    listaDeParametros = parametros_formales(genCod)
     {
       // Limpiar parametros de la posible acc
       if (ok)
       {
+        LinkedList<ASTNodo> listaPar = null;
+        ASTNodo resul = null, aux = null;
+        aux = resul;
+        
         for (int i = 0; i < listaDeParametros.size(); i++)
         {
           // Añadir la lista de parametros al simbolo
-          s.anyadirParametrosAccion(listaDeParametros.get(i));
+          listaPar = s.anyadirParametrosAccion(listaDeParametros.get(i), genCod);
+
+		  if (listaPar != null)
+		  { 
+	          // Se han añadido todos los parametros
+	          for (int j = 0; j < listaPar.size(); j ++)
+	          {
+	            // Coloca a la izquierda al nodoAST de la lista
+	            aux.setIzquierda(listaPar.get(j));
+	            // Desplaza a la izquierda
+	            aux = aux.getIzquierda();
+	          }
+	       }
         }
+        
         // Limpiar parametros de la posible accion anterior
       	tabla.limpiarListaParametros();
+      	
+		// Nodo resul desplazado para coger el primer parametro
+      	resul = resul.getIzquierda();
+
+      	reg_resul.s = s;
+      	reg_resul.nodoAST = resul;
+      	return reg_resul;
       }
     }
   }
@@ -2300,7 +2363,7 @@ RegistroExp cabecera_accion(GeneradorCodigo genCod) :
 }
 
 // Regla de parametros formales OK
-LinkedList < LinkedList < Simbolo > > parametros_formales(Token t) :
+LinkedList < LinkedList < Simbolo > > parametros_formales(GeneradorCodigo genCod) :
 {
   // Lista global de listas de identificadores
   LinkedList < LinkedList < Simbolo > > parametros = new LinkedList < LinkedList < Simbolo > > ();
@@ -2404,14 +2467,14 @@ LinkedList < Simbolo > parametros() :
         if (s != null)
         {
            // Añadir parametro a la lista de parametros
-        	lista.add(s);	
+        	lista.add(s);
         }
         else
         {
           // Comprobar que la variable esta en la tabla de simbolos
           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - Parametro repetido " + identificadorActual);
-        }
+		}
       }
       return lista;
     }
@@ -2506,7 +2569,7 @@ int declaracion() :
   String identificadorActual;
   Simbolo s;
 
-  int ret = 0; // OJO
+  int ret = 0; 
 }
 {
   try
@@ -2532,6 +2595,7 @@ int declaracion() :
           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - Variable repetida " + identificadorActual);
         }
+        ret++;
       }
       return ret;
     }

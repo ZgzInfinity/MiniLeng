@@ -26,6 +26,9 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
+
 public class Compilador implements CompiladorConstants {
   // IniCio del nivel de declaraciones anidadas
   public static int nivel = 0;
@@ -103,7 +106,7 @@ public class Compilador implements CompiladorConstants {
 /* Construccion del analizador sintactico */
 
 // Regla de programa
-  static final public int programa(GeneradorCodigo genCod) throws ParseException {
+  static final public int programa(GeneradorCodigo genCod) throws ParseException, ParseException, FileNotFoundException, UnsupportedEncodingException {
   Token tSim, t;
   Simbolo s;
   Simbolo.Tipo_simbolo tp_Sim;
@@ -118,6 +121,9 @@ public class Compilador implements CompiladorConstants {
 
       // Iniciar direccion de pila
       genCod.setDireccionInicial();
+
+          // Crear fichero vscode
+      genCod.generarCodigoPrograma(t.image);
       jj_consume_token(tPUNTYCOM);
       total_variables = declaracion_variables(genCod);
       // Insertar en la tabla de simbolos el token del programa
@@ -376,6 +382,8 @@ public class Compilador implements CompiladorConstants {
     try {
       // Retorno de la lista de identificadores
           listaIdentificadores = identificadores();
+      aux = resul;
+
       // Tamaño de la lista de identificadores
       int dimension = listaIdentificadores.size();
       // Simbolo a evaluar
@@ -423,11 +431,16 @@ public class Compilador implements CompiladorConstants {
         }
         else {
           ok = true;
+          aux.setDerecha(new ASTNodo(idActual, s.getNivel(), s.getVariable()));
+                  aux.getDerecha().setDir(s.getDir());
+                  aux.getDerecha().setTipoParametro(s.getParametro());
         }
       }
+      {if (true) return resul;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de leer OK
@@ -462,8 +475,9 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de lista_escribibles OK
   static final public ASTNodo lista_escribibles(GeneradorCodigo genCod) throws ParseException {
+  ASTNodo resul = new ASTNodo();
     try {
-      escribible(genCod);
+      escribible(genCod, resul);
       label_2:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -475,21 +489,24 @@ public class Compilador implements CompiladorConstants {
           break label_2;
         }
         jj_consume_token(tCOMA);
-        escribible(genCod);
+        escribible(genCod, resul);
       }
+      {if (true) return resul;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de lista_escribibles OK
-  static final public void escribible(GeneradorCodigo genCod) throws ParseException {
+  static final public ASTNodo escribible(GeneradorCodigo genCod, ASTNodo resul) throws ParseException {
   // Declaracion de variables
   Token t = null;
   Simbolo s;
   RegistroExp regExp = null;
   RegistroExp result = new RegistroExp();
   boolean constCad = false, entCad = false;
+  ASTNodo aux = new ASTNodo();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tCONSTCHAR:
@@ -515,10 +532,19 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
+          aux = resul;
+
+          while (aux.getDerecha() != null)
+          {
+            aux = aux.getDerecha();
+          }
           if (constCad)
           {
             // La expresion es una cadena
-            result.setTipo(Simbolo.Tipo_variable.CADENA);
+            aux.setDerecha(new ASTNodo(t.image, nivel, Simbolo.Tipo_variable.CADENA));
+                aux.getDerecha().setTipo(ASTNodo.TipoNodo.CONST);
+            aux.setTipoVar(Simbolo.Tipo_variable.CADENA);
+
           }
           else if (entCad)
           {
@@ -531,7 +557,10 @@ public class Compilador implements CompiladorConstants {
             }
             else
             {
-                result.setTipo(Simbolo.Tipo_variable.ENTERO);
+                aux.setDerecha(new ASTNodo("entcar", nivel, ASTNodo.TipoNodo.ENTCAR));
+                aux.getDerecha().setTipoVar(Simbolo.Tipo_variable.ENTERO);
+                        aux.getDerecha().setIzquierda(regExp.nodoAST);
+                aux.setTipoVar(Simbolo.Tipo_variable.ENTERO);
             }
           }
           else
@@ -549,11 +578,19 @@ public class Compilador implements CompiladorConstants {
                  ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Variable " + t.image + " no valida para escritura");
               }
-              // Controlar despues los BOOLEANOS
+              else
+              {
+                aux.setNivel(nivel);
+                aux.setDerecha(new ASTNodo(t.image, s.getNivel(), s.getVariable()));
+                        aux.getDerecha().setTipoParametro(s.getParametro());
+                        aux.getDerecha().setDir(s.getDir());
+              }
            }
+           {if (true) return resul;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de invocacion accion OK
@@ -1970,25 +2007,50 @@ public class Compilador implements CompiladorConstants {
       nivel++;
       genCod.setDireccionInicial();
       // Procesamiento de los parametros
-          listaDeParametros = parametros_formales(tId);
+          listaDeParametros = parametros_formales(genCod);
       // Limpiar parametros de la posible acc
       if (ok)
       {
+        LinkedList<ASTNodo> listaPar = null;
+        ASTNodo resul = null, aux = null;
+        aux = resul;
+
         for (int i = 0; i < listaDeParametros.size(); i++)
         {
           // Añadir la lista de parametros al simbolo
-          s.anyadirParametrosAccion(listaDeParametros.get(i));
+          listaPar = s.anyadirParametrosAccion(listaDeParametros.get(i), genCod);
+
+                  if (listaPar != null)
+                  {
+                  // Se han añadido todos los parametros
+                  for (int j = 0; j < listaPar.size(); j ++)
+                  {
+                    // Coloca a la izquierda al nodoAST de la lista
+                    aux.setIzquierda(listaPar.get(j));
+                    // Desplaza a la izquierda
+                    aux = aux.getIzquierda();
+                  }
+               }
         }
+
         // Limpiar parametros de la posible accion anterior
         tabla.limpiarListaParametros();
+
+                // Nodo resul desplazado para coger el primer parametro
+        resul = resul.getIzquierda();
+
+        reg_resul.s = s;
+        reg_resul.nodoAST = resul;
+        {if (true) return reg_resul;}
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de parametros formales OK
-  static final public LinkedList < LinkedList < Simbolo > > parametros_formales(Token t) throws ParseException {
+  static final public LinkedList < LinkedList < Simbolo > > parametros_formales(GeneradorCodigo genCod) throws ParseException {
   // Lista global de listas de identificadores
   LinkedList < LinkedList < Simbolo > > parametros = new LinkedList < LinkedList < Simbolo > > ();
     try {
@@ -2099,7 +2161,7 @@ public class Compilador implements CompiladorConstants {
           // Comprobar que la variable esta en la tabla de simbolos
           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Parametro repetido " + identificadorActual);
-        }
+                }
       }
       {if (true) return lista;}
     } catch (ParseException e) {
@@ -2218,6 +2280,7 @@ public class Compilador implements CompiladorConstants {
           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Variable repetida " + identificadorActual);
         }
+        ret++;
       }
       {if (true) return ret;}
     } catch (ParseException e) {

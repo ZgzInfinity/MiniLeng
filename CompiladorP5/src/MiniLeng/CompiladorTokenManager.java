@@ -19,6 +19,8 @@ import CodeGenerator.ASTNodo;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.io.FileNotFoundException;
+import java.io.UnsupportedEncodingException;
 
 /** Token Manager. */
 public class CompiladorTokenManager implements CompiladorConstants
