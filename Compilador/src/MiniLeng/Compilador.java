@@ -22,6 +22,8 @@ import Exceptions.ErrorSintactico;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 public class Compilador implements CompiladorConstants {
   // IniCio del nivel de declaraciones anidadas
@@ -32,11 +34,12 @@ public class Compilador implements CompiladorConstants {
 
   public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
-  public static void main(String args []) throws ParseException
+  public static void main(String args []) throws ParseException, IOException
   {
     /* nombre del fichero */
     String nombreArchivo;
     String path = "C:\u005c\u005cUsers\u005c\u005cGord\u005c\u005cDesktop\u005c\u005cprogramas\u005c\u005c";
+
     if (args [0].equals("-v"))
     {
       System.out.println("Compilacion en modo verbose");
@@ -47,8 +50,17 @@ public class Compilador implements CompiladorConstants {
       System.out.println("Compilacion sin modo verbose");
       nombreArchivo = args [0];
     }
+
+        // Ruta del fochero de escritura
+    FileWriter ficheroCode = new FileWriter("C:\u005c\u005cUsers\u005c\u005cGord\u005c\u005cDesktop\u005c\u005cprogramas\u005c\u005c" + nombreArchivo + ".scode");
+        PrintWriter pw = new PrintWriter(ficheroCode);
+
+        pw.println("HOLA QUE TAL ESTAS");
+
+
+
     /* Completar la ruta del path */
-    path += nombreArchivo;
+    path += nombreArchivo + ".ml";
     System.out.println("LEYENDO FICHERO " + nombreArchivo + "\u005cn");
     try
     {
@@ -64,7 +76,11 @@ public class Compilador implements CompiladorConstants {
         /* Mostrar total de identificadores */
         TablaHash.mostrarIdentificadores();
       }
+
       System.out.println("El fichero introducido es correcto");
+
+          // Cierre asociado al flujo del fichero escritura
+      ficheroCode.close();
     }
     catch (Exception e)
     {

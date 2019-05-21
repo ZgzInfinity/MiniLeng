@@ -1,7 +1,5 @@
 package Util;
 
-
-
 public class RegistroExp {
 	// Valor entero de la exresion
 	public int valorEnt;
@@ -24,7 +22,7 @@ public class RegistroExp {
 	// Tipo de simbolo
 	public Simbolo.Tipo_simbolo simbolo;
 
-
+	public Simbolo s;
 
 	public Simbolo.Tipo_simbolo getSimbolo() {
 		return simbolo;

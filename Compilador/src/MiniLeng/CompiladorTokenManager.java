@@ -17,6 +17,8 @@ import Exceptions.ErrorSintactico;
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 
 /** Token Manager. */
 public class CompiladorTokenManager implements CompiladorConstants

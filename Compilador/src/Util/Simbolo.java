@@ -2,6 +2,7 @@ package Util;
 
 import java.util.LinkedList;
 
+
 // Clase para implmentar el tipo de dato Simbolo
 public class Simbolo {
 	
@@ -118,7 +119,11 @@ public class Simbolo {
 	// Representacion de la direccion del simbolo
 	private long dir;
 	
+	// Etiqueta del nodo
+	String etiqueta;
 	
+
+
 	// CONSTRUCTOR DEL DATO SIMBOLO
 	public Simbolo (Tipo_simbolo tipo, Tipo_variable variable, Clase_parametro parametro,
 							String nombre, int nivel, long dir) {
@@ -198,6 +203,17 @@ public class Simbolo {
 	public void setDir(long dir) {
 		this.dir = dir;
 	}
+	
+	
+	public String getEtiqueta() {
+		return etiqueta;
+	}
+
+
+	public void setEtiqueta(String etiqueta) {
+		this.etiqueta = etiqueta;
+	}
+
 	
 	
 	/* METODOS AUXILIARES PARA SIMBOLOS EN ANALISIS SEMANTICO */
@@ -289,8 +305,15 @@ public class Simbolo {
 	public void anyadirParametrosAccion(LinkedList<Simbolo> listaDeParametros){
 		// Calculo del numero de parametros de la accion
 		int dimension = listaDeParametros.size();
+		Simbolo s;
+
+		long direccion;
+		
 		for (int i = 0; i < dimension; i++) {
-			this.lista_parametros.add(listaDeParametros.get(i));
+			// Extraccion del simbolo
+			s = listaDeParametros.get(i);
+			
+			this.lista_parametros.add(s);
 		}
 	}
 	
