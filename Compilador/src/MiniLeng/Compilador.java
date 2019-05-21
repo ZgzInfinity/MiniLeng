@@ -120,11 +120,11 @@ public class Compilador implements CompiladorConstants {
       pw.println("\u005ct ENP " + etiq.getEtiqueta());
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
-      declaracion_acciones();
+      declaracion_acciones(t);
        // Mostrar el comienzo del programa con la etiqueta inicial
        pw.println("; Comienzo del programa " + t.image);
        pw.println(etiq.getEtiqueta() + " :");
-      bloque_sentencias();
+      bloque_sentencias(t);
        // Fin del fichero
        pw.println("; Fin del programa " + t.image + ".");
        pw.println("\u005ct LVP");
@@ -138,18 +138,17 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de bloque_sentencias OK
-  static final public void bloque_sentencias() throws ParseException {
-  // Declaracion de variables
-  Token t;
+  static final public void bloque_sentencias(Token t) throws ParseException {
     try {
       jj_consume_token(tPRINCIPIO);
       lista_sentencias();
-      t = jj_consume_token(tFIN);
+      jj_consume_token(tFIN);
       // Ocultar los parametros del nivel actual
       tabla.ocultar_parametros(nivel);
-      // Detectado el fin de un bloque de sentencias
-      // Mostrar el contenido de la tabla Hash
 
+      // Detectado el fin de un bloque de sentencias
+      pw.println("; Fin de la acci\u00f3n / funcion " + t.image + ".");
+      pw.println("\u005ct CSF");
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -257,14 +256,23 @@ public class Compilador implements CompiladorConstants {
          tipo = Simbolo.Tipo_variable.DESCONOCIDO;
          ok = false;
        }
-       else if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
+       else if (s.es_Simbolo_Parametro())
        {
-          ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+         if (s.es_Parametro_Valor())
+         {
+            // El parametro es por valor
+                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Prohibido asignar a " + s.getNombre() +
-          ", es un parametro pasado como valor");
-          // Tipo de simbolo desconocido
-          tipo = Simbolo.Tipo_variable.DESCONOCIDO;
-          ok = false;
+                ", es un parametro pasado como valor");
+                // Tipo de simbolo desconocido
+                tipo = Simbolo.Tipo_variable.DESCONOCIDO;
+                ok = false;
+             }
+             else
+             {
+               // El parametro a asignar es por referencia
+               pw.println("; Direccion del parametro por referencia " + s.getNombre() + ".");
+             }
        }
        else if (s.es_Simbolo_Accion())
        {
@@ -276,6 +284,7 @@ public class Compilador implements CompiladorConstants {
        }
        else
        {
+          pw.println("; Direccion de la variable " + s.getNombre() + ".");
           tipo = s.getVariable();
        }
       // Procesamiento de la expresion
@@ -337,13 +346,32 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Tipo invalido de variable de lectura, se espera " +
                                                                                                 "entero o caracter");
           }
+          else
+          {
+            // Lectura de variables      
+            pw.println("; Leer variable " + s.getNombre());
+            // Mostrar datos de la variable o parametro
+            pw.println("\u005ct SRF 0 " + s.getDir());
+            pw.println("\u005ct RD " + (i + 1));
+          }
         }
-        else if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
+        else if (s.es_Simbolo_Parametro())
         {
+          if (s.es_Parametro_Valor())
+          {
             // Error semantico en la lista de asignables
             ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Variable " + s.getNombre() +
                                                                                         " por valor en lectura");
+          }
+          else
+          {
+            // Lectura de parametro por referencia      
+            pw.println("; Leer parametro por referencia " + s.getNombre());
+            // Mostrar datos de la variable o parametro
+            pw.println("\u005ct SRF 0 " + s.getDir());
+            pw.println("\u005ct RD " + (i + 1));
+          }
         }
         else if (s.es_Simbolo_Accion())
         {
@@ -351,23 +379,6 @@ public class Compilador implements CompiladorConstants {
             ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Los argumentos de una funcion solo pueden ser" +
                 " parametros o variables, encontrado " + s.getNombre() + " de tipo " + s.getTipo().toString());
-        }
-        else
-        {
-          // VER POR QUE NO ESCIRBE UNA MUERDA
-
-          // La operacion de lectura es correcta
-          if (s.es_Simbolo_Parametro())
-          {
-            pw.println("; Leer parametro " + s.getNombre());
-          }
-          else if (s.es_Simbolo_Variable())
-          {
-            pw.println("; Leer variable " + s.getNombre());
-          }
-          // Mostrar datos de la variable o parametro
-          pw.println("\u005ct SRF 0 " + s.getDir());
-          pw.println("\u005ct RD " + (i + 1));
         }
       }
     } catch (ParseException e) {
@@ -460,6 +471,18 @@ public class Compilador implements CompiladorConstants {
           {
             // La expresion es una cadena
             pw.println("; cadena '" + t.image + "'.");
+
+            // Obtencion de la cadena y la longitud 
+            String cadena = t.image;
+            int tamanyo = cadena.length();
+
+            // Escribir el codigo asccii de cada caracter de la cadena
+            for (int i = 1; i < tamanyo - 1; i++)
+            {
+               pw.println("\u005ct STC " + (int)cadena.charAt(i));
+               pw.println("\u005ct WRT 0");
+            }
+
             result.setTipo(Simbolo.Tipo_variable.CADENA);
           }
           else if (entCad)
@@ -473,8 +496,7 @@ public class Compilador implements CompiladorConstants {
             }
             else
             {
-                // QUE VA MAL
-                // pw.println("; Caracter " + t.image + " con valor ascii " + t.image.charAt(1));
+                pw.println("\u005ct WRT 0");
                 result.setTipo(Simbolo.Tipo_variable.ENTERO);
             }
           }
@@ -496,7 +518,7 @@ public class Compilador implements CompiladorConstants {
               else
               {
                 // Correcto el identificador 
-                pw.println("; Escritura de simbolo " + s.getNombre());
+                pw.println("\u005ct WBR 1");
               }
            }
     } catch (ParseException e) {
@@ -1359,7 +1381,7 @@ public class Compilador implements CompiladorConstants {
       case tMULTIPLY:
         jj_consume_token(tMULTIPLY);
       // El operador es una multiplicacion
-      pw.println("\u005ct MUL");
+      pw.println("\u005ct TMS");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MULTIPLICACION);
       {if (true) return op;}
         break;
@@ -1413,6 +1435,8 @@ public class Compilador implements CompiladorConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tNOT:
         jj_consume_token(tNOT);
+      // Operador de negacion
+      pw.println("\u005ct NGB");
         tpFactor = factor();
       // Comprobacion de si es o no booleano
       if ((tpFactor.getTipo() != Simbolo.Tipo_variable.BOOLEANO)
@@ -1434,6 +1458,8 @@ public class Compilador implements CompiladorConstants {
         break;
       case tMINUS:
         jj_consume_token(tMINUS);
+      // Operador de negacion
+      pw.println("\u005ct NGBI");
         tpFactor = factor();
       // Comprobacion de si es o no booleano
       if ((tpFactor.getTipo() != Simbolo.Tipo_variable.ENTERO)
@@ -1688,6 +1714,7 @@ public class Compilador implements CompiladorConstants {
         pw.println("\u005ct JMF " + etiqSINO.getEtiqueta());
       }
       jj_consume_token(tENT);
+      pw.println(";ENT.");
       lista_sentencias();
       etiqFIN = new Etiqueta();
       pw.println("\u005ct JMP " + etiqFIN.getEtiqueta());
@@ -1711,7 +1738,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de declaracion_acciones OK
-  static final public void declaracion_acciones() throws ParseException {
+  static final public void declaracion_acciones(Token t) throws ParseException {
     try {
       label_7:
       while (true) {
@@ -1723,7 +1750,7 @@ public class Compilador implements CompiladorConstants {
           jj_la1[16] = jj_gen;
           break label_7;
         }
-        declaracion_accion();
+        declaracion_accion(t);
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -1731,13 +1758,13 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de declaracion_Accion OK
-  static final public void declaracion_accion() throws ParseException {
+  static final public void declaracion_accion(Token t) throws ParseException {
     try {
       cabecera_accion();
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
-      declaracion_acciones();
-      bloque_sentencias();
+      declaracion_acciones(t);
+      bloque_sentencias(t);
       // Eliminacion de variables
       tabla.eliminar_variables(nivel);
       // Eliminar las acciones
