@@ -19,6 +19,7 @@ import Util.Simbolo.Clase_parametro;
 import Util.Tabla_Simbolos;
 import Util.TablaHash;
 import Util.RegistroExp;
+import Util.Etiqueta;
 
 import Util.TipoOperador;
 import Util.TipoOperador.Tipo_Operador_Aditivo;
@@ -40,8 +41,10 @@ public class Compilador
   // IniCio del nivel de declaraciones anidadas
   public static int nivel = 0;
 
-  // Variable de direccion por defecto a 0
+  // Variable de direccion 
   public static long dir = 0;
+  
+  public static PrintWriter pw;
 
   public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
@@ -63,13 +66,9 @@ public class Compilador
     }
 
 	// Ruta del fochero de escritura
-    FileWriter ficheroCode = new FileWriter("C:\\Users\\Gord\\Desktop\\programas\\" + nombreArchivo + ".scode");
-	PrintWriter pw = new PrintWriter(ficheroCode);
+    FileWriter ficheroCode = new FileWriter("C:\\Users\\Gord\\Desktop\\programas\\" + nombreArchivo + ".code");
+	pw = new PrintWriter(ficheroCode);
 
-	pw.println("HOLA QUE TAL ESTAS");
-
-	
-    
     /* Completar la ruta del path */
     path += nombreArchivo + ".ml";
     System.out.println("LEYENDO FICHERO " + nombreArchivo + "\n");
@@ -390,9 +389,29 @@ int programa() :
       // Insertar en la tabla de simbolos el token del programa
       // no se comprueba porque es el primero
       s = tabla.introducir_programa(t.image, dir);
+
+      // Escritura del nombre del programa en el fichero
+      pw.println("; Programa " + t.image + ".");
+
+	  // Etiqueta inicial del programa
+      Etiqueta etiq = new Etiqueta();
+      pw.println("\t ENP " + etiq.getEtiqueta());
     }
     // Lectura del resto de datos
-    < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias() < EOF >
+    < tPUNTYCOM >
+     declaracion_variables() declaracion_acciones()
+     {
+       // Mostrar el comienzo del programa con la etiqueta inicial
+       pw.println("; Comienzo del programa " + t.image);
+       pw.println(etiq.getEtiqueta() + " :");
+     }
+     bloque_sentencias()
+     {
+       // Fin del fichero
+       pw.println("; Fin del programa " + t.image + ".");
+       pw.println("\t LVP");
+     }
+      < EOF >    
     {
       return 0;
     }
@@ -541,6 +560,12 @@ void asignacion(Token t) :
 	        	", columna " + token.beginColumn + "  - Tipos incompatibles en la asignacion: " +
         	"no se puede convetir " + tpExp.getTipo().toString() + " a " + tipo.toString());
       }
+      else
+      {
+        // Asignacion evaluada correctamente
+        pw.println("; Asignacion.");
+        pw.println("\t ASG");
+      } 
     }
   }
   catch (ParseException e)
@@ -607,6 +632,23 @@ void lista_asignables() :
             ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - Los argumentos de una funcion solo pueden ser" +
             	" parametros o variables, encontrado " + s.getNombre() + " de tipo " + s.getTipo().toString());
+        }
+        else
+        {
+          // VER POR QUE NO ESCIRBE UNA MUERDA
+          
+          // La operacion de lectura es correcta
+          if (s.es_Simbolo_Parametro())
+          {
+            pw.println("; Leer parametro " + s.getNombre());
+          }
+          else if (s.es_Simbolo_Variable())
+          {
+            pw.println("; Leer variable " + s.getNombre());
+          }
+          // Mostrar datos de la variable o parametro
+          pw.println("\t SRF 0 " + s.getDir());
+          pw.println("\t RD " + (i + 1));
         }   	
       }      
     }
@@ -625,6 +667,9 @@ void leer() :
   try
   {
     < tLEER >
+    {
+      pw.println("; Lectura");
+    }
     < tPARENTESIS_IZDA > lista_asignables() < tPARENTESIS_DCHA >
   }
   catch (ParseException e)
@@ -640,7 +685,11 @@ void escribir() :
 {
   try
   {
-    < tESCRIBIR > < tPARENTESIS_IZDA > lista_escribibles() < tPARENTESIS_DCHA >
+    < tESCRIBIR >
+    {
+      pw.println("; Escritura");
+    }
+    < tPARENTESIS_IZDA > lista_escribibles() < tPARENTESIS_DCHA >
   }
   catch (ParseException e)
   {
@@ -695,6 +744,7 @@ void escribible() :
 	  if (constCad)
 	  {
 	    // La expresion es una cadena
+	    pw.println("; cadena '" + t.image + "'.");
 	    result.setTipo(Simbolo.Tipo_variable.CADENA);
 	  }
 	  else if (entCad)
@@ -708,6 +758,8 @@ void escribible() :
 	    }
 	    else
 	    {
+	        // QUE VA MAL
+	        // pw.println("; Caracter " + t.image + " con valor ascii " + t.image.charAt(1));
 	    	result.setTipo(Simbolo.Tipo_variable.ENTERO);
 	    }
 	  }
@@ -726,7 +778,11 @@ void escribible() :
 	         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - Variable " + t.image + " no valida para escritura");
 	      }
-	      // Controlar despues los BOOLEANOS
+	      else
+	      {
+	        // Correcto el identificador 
+	        pw.println("; Escritura de simbolo " + s.getNombre());
+	      }
 	   }
 	 }
   }
@@ -797,11 +853,19 @@ void mientras_que() :
 {
   // Declaracion de variables
   RegistroExp tpExp;
+  Etiqueta etiqMQ, etiqFIN;
 }
 {
   try
   {
-    < tMQ > tpExp = expresion()
+    < tMQ >
+    {
+      // Mostrar etiqueta de inicio de bucle
+      etiqMQ = new Etiqueta();
+      pw.println(etiqMQ.getEtiqueta() + " :");
+      pw.println("; MQ.");
+    }
+    tpExp = expresion()
     {
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO) 
       && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
@@ -810,9 +874,20 @@ void mientras_que() :
         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + " - La condicion de mientras_que debe ser booleana");
       }
+      else
+      {
+        // La condicion del bucle es correcta
+        etiqFIN = new Etiqueta();
+        pw.println("\t JMF " + etiqFIN.getEtiqueta());
+      }
     }
     lista_sentencias() 
     < tFMQ >
+    {
+      // Fin de la iteracion del bucle
+      pw.println("; Fin de la iteración. Saltar a la cabecera del bucle.");
+      pw.println("\t JMP " + etiqMQ.getEtiqueta());
+    }
   }
   catch (ParseException e)
   {
@@ -1184,42 +1259,45 @@ TipoOperador operador_relacional():
 {
   try
   {
-    {
-      
-    }
     < tIGUAL >
     {
       // Es el operador =
+      pw.println("\t EQ");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.IGUAL);
       return op;
     }
   | < tMENOR >
     {
       // Es el operador <
+      pw.println("\t LT");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR);
       return op;
     }
   | < tMEI >
     {
       // Es el operador <=
+      pw.println("\t LTE");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR_IGUAL);
       return op;
     }
   | < tNI >
     {
       // Es el operador <>
+      pw.println("\t NEQ");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.NO_IGUAL);
       return op;
     }
   | < tMAI >
     {
       // Es el operador >=
+      pw.println("\t GTE");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR_IGUAL);
       return op;
     }
   | < tMAYOR >
     {
       // Es el operador >
+      pw.println("\t GT");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR);
       return op;
     }
@@ -1242,18 +1320,21 @@ TipoOperador operador_aditivo() :
     < tPLUS >
     {
       // El operador es una suma
+      pw.println("\t PLUS");
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.SUMA);
       return op;
     }
   | < tMINUS >
     {
       // El operaodr es una resta
+      pw.println("\t SBT");
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.RESTA);
       return op;
     }
   | < tOR >
     {
       // El operador es un OR
+      pw.println("\t OR");
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.OR);
       return op;
     }
@@ -1567,30 +1648,35 @@ TipoOperador operador_multiplicativo() :
     < tMULTIPLY >
     {
       // El operador es una multiplicacion
+      pw.println("\t MUL");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MULTIPLICACION);
       return op;
     }
   | < tDIVIDE >
     {
       // El operador es un cociente (opcion 1)
+      pw.println("\t DIV");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       return op;
     }
   | < tDIV >
     {
       // El operador es un cociente (opcion 2)
+      pw.println("\t DIV");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       return op;
     }
   | < tMOD >
     {
       // El operador es un modulo o residuo
+      pw.println("\t MOD");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MOD);
       return op;
     }
   | < tAND >
     {
       // El operador es una AND logica
+      pw.println("\t AND");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.AND);
       return op;
     }
@@ -1755,6 +1841,11 @@ RegistroExp factor() :
 		{
 		    result.setTipo(s.getVariable());
 		    result.setClase(s.getParametro());
+		    
+		    // El identificador es correcto
+		    pw.println("; Acceso a la variable " + s.getNombre());
+		    pw.println("\t SRF   0  " + s.getDir());
+		    pw.println("\t DRF");
 		}
 		return result;	
 	}    
@@ -1768,6 +1859,9 @@ RegistroExp factor() :
 
 	  // El simbolo es una constante
       result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
+
+	  // Escritura de la constante en el fichero
+	  pw.println("\t STC " + t.image);
       
       // Devolucion del resultado
       return result;
@@ -1784,6 +1878,10 @@ RegistroExp factor() :
       		result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 	   		result.valorString = String.valueOf(t.image.charAt(1));
    	  }
+
+   	  // Escribir constante en el fichero
+   	  pw.println("\t STC" + t.image);
+   	  
    	  result.setTipo(Simbolo.Tipo_variable.CHAR);
    	  return result;
     }
@@ -1800,6 +1898,10 @@ RegistroExp factor() :
       		result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 	   		result.valorString = String.valueOf(t.image.charAt(1));
    	  }
+
+   	  // Escribir constante en el fichero
+   	  pw.println("\t STC" + t.image);
+   	  
    	  result.setTipo(Simbolo.Tipo_variable.CADENA);
    	  return result;
     }
@@ -1811,6 +1913,8 @@ RegistroExp factor() :
       result.setValorBool(true);
       // Tipo cadena de caracteres
       result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+      // Escribir constante en el fichero
+      pw.println("\t STC 1");
       // Devolucion del resultado
       return result;
     }
@@ -1822,6 +1926,8 @@ RegistroExp factor() :
       result.setValorBool(false);
       // Tipo cadena de caracteres
       result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+      // Escribir constante en el fichero
+      pw.println("\t STC 0");
       // Devolucion del resultado
       return result;
     }
@@ -1837,6 +1943,7 @@ void seleccion() :
 {
   // Declaracion de variables
   RegistroExp tpExp;
+  Etiqueta etiqSINO = null, etiqFIN;
 }
 {
   try
@@ -1852,9 +1959,33 @@ void seleccion() :
         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
 	        	", columna " + token.beginColumn + "  - La condicion en la seleccion debe ser un booleano");
       }
+      else
+      {
+        // La condicion es correcta
+        etiqSINO = new Etiqueta();
+        pw.println(";IF.");
+        pw.println("\t JMF " + etiqSINO.getEtiqueta());
+      }
     }
     < tENT >
-    lista_sentencias() (< tSI_NO > lista_sentencias()) ? < tFSI >
+    lista_sentencias()
+    {
+      etiqFIN = new Etiqueta();
+      pw.println("\t JMP " + etiqFIN.getEtiqueta());
+      pw.println(etiqSINO.getEtiqueta());
+    }
+    (
+      < tSI_NO >
+      {
+        pw.println(";ELSE.");
+      }
+      lista_sentencias()
+    )?
+    < tFSI >
+    {
+      pw.println("; Fin del bloque de seleccion");
+      pw.println(etiqFIN.getEtiqueta());
+    }
   }
   catch (ParseException e)
   {
@@ -1911,6 +2042,8 @@ void cabecera_accion() :
   boolean ok = false;
   // Lista de parametros de la accion
   LinkedList < LinkedList < Simbolo > > listaDeParametros = new LinkedList < LinkedList < Simbolo > > ();
+
+  final long DIRECCION_INICIAL = 3;
 }
 {
   try
@@ -1936,6 +2069,8 @@ void cabecera_accion() :
         }
       // Incrementar el nivel actual
       nivel++;
+      // Incio del marco de la pila
+      dir = DIRECCION_INICIAL;
     }
     // Procesamiento de los parametros
     listaDeParametros = parametros_formales(tId)
@@ -2084,15 +2219,24 @@ LinkedList < Simbolo > parametros() :
 }
 
 // Regla de declaracion variables OK
-void declaracion_variables() :
+int declaracion_variables() :
 {
   // Declaracion de variables 
   Token t;
+  int total = 0, aux = 0;
 }
 {
   try
   {
-    ((declaracion()) t = < tPUNTYCOM >) *
+    (
+     aux = declaracion() t = < tPUNTYCOM >
+     {
+     	total += aux;
+     }
+     ) *
+     {
+       return total;
+     }
   }
   catch (ParseException e)
   {
@@ -2148,7 +2292,7 @@ Simbolo.Tipo_variable tipos_variables() :
 }
 
 // Regla de declaracion OK
-void declaracion() :
+int declaracion() :
 {
   // Declaracion de variables
   Token t;
@@ -2176,6 +2320,9 @@ void declaracion() :
         // introducir el nuevo simbolo
         s = tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
 
+		// Incremento de la variable de direccion
+		dir++;
+
 		// Comprobar que la variable esta en la tabla de simbolos
         if (s == null)
         {
@@ -2183,6 +2330,8 @@ void declaracion() :
 	        	", columna " + token.beginColumn + "  - Variable repetida " + identificadorActual);
         }
       }
+      // Devuelvo el numero de identificadores leidos;
+      return lista.size();
     }
   }
   catch (ParseException e)

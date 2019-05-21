@@ -7,6 +7,7 @@ import Util.Simbolo.Clase_parametro;
 import Util.Tabla_Simbolos;
 import Util.TablaHash;
 import Util.RegistroExp;
+import Util.Etiqueta;
 import Util.TipoOperador;
 import Util.TipoOperador.Tipo_Operador_Aditivo;
 import Util.TipoOperador.Tipo_Operador_Multiplicativo;
