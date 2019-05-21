@@ -30,12 +30,23 @@ public class Compilador implements CompiladorConstants {
   // IniCio del nivel de declaraciones anidadas
   public static int nivel = 0;
 
+  static final int DIRECCION_INICIAL = 3;
+
   // Variable de direccion 
-  public static long dir = 0;
+  public static long dir = DIRECCION_INICIAL;
 
   public static PrintWriter pw;
 
   public static Tabla_Simbolos tabla = new Tabla_Simbolos();
+
+
+  public static void iniciar_pila() {
+      dir = DIRECCION_INICIAL;
+  }
+
+  public static void incrementar_pila() {
+    dir++;
+  }
 
   public static void main(String args []) throws ParseException, IOException
   {
@@ -272,6 +283,7 @@ public class Compilador implements CompiladorConstants {
              {
                // El parametro a asignar es por referencia
                pw.println("; Direccion del parametro por referencia " + s.getNombre() + ".");
+               pw.println("\u005ct SRF   0   " + s.getDir());
              }
        }
        else if (s.es_Simbolo_Accion())
@@ -285,6 +297,7 @@ public class Compilador implements CompiladorConstants {
        else
        {
           pw.println("; Direccion de la variable " + s.getNombre() + ".");
+          pw.println("\u005ct SRF   0   " + s.getDir());
           tipo = s.getVariable();
        }
       // Procesamiento de la expresion
@@ -1786,8 +1799,6 @@ public class Compilador implements CompiladorConstants {
   boolean ok = false;
   // Lista de parametros de la accion
   LinkedList < LinkedList < Simbolo > > listaDeParametros = new LinkedList < LinkedList < Simbolo > > ();
-
-  final long DIRECCION_INICIAL = 3;
     try {
       jj_consume_token(tACCION);
       tId = jj_consume_token(tIDENTIFICADOR);
@@ -1809,7 +1820,7 @@ public class Compilador implements CompiladorConstants {
       // Incrementar el nivel actual
       nivel++;
       // Incio del marco de la pila
-      dir = DIRECCION_INICIAL;
+      iniciar_pila();
       // Procesamiento de los parametros
           listaDeParametros = parametros_formales(tId);
       // Limpiar parametros de la posible acc
@@ -2052,7 +2063,7 @@ public class Compilador implements CompiladorConstants {
         s = tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
 
                 // Incremento de la variable de direccion
-                dir++;
+                incrementar_pila();
 
                 // Comprobar que la variable esta en la tabla de simbolos
         if (s == null)
