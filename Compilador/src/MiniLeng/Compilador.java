@@ -882,21 +882,27 @@ public class Compilador implements CompiladorConstants {
               switch (op.getOperadorRelacional())
               {
                 case MAYOR :
+                pw.println("\u005ct GT");
                 regResult.valorBool = tpExp1.valorEnt > tpExp2.valorEnt;
                 break;
                 case MAYOR_IGUAL :
+                pw.println("\u005ct GTE");
                 regResult.valorBool = tpExp1.valorEnt >= tpExp2.valorEnt;
                 break;
                 case IGUAL :
+                pw.println("\u005ct EQ");
                 regResult.valorBool = tpExp1.valorEnt == tpExp2.valorEnt;
                 break;
                 case NO_IGUAL :
+                pw.println("\u005ct NEQ");
                 regResult.valorBool = tpExp1.valorEnt != tpExp2.valorEnt;
                 break;
                 case MENOR_IGUAL :
+                pw.println("\u005ct LTE");
                 regResult.valorBool = tpExp1.valorEnt <= tpExp2.valorEnt;
                 break;
                 case MENOR :
+                pw.println("\u005ct LT");
                 regResult.valorBool = tpExp1.valorEnt < tpExp2.valorEnt;
                 break;
                 default :
@@ -923,9 +929,11 @@ public class Compilador implements CompiladorConstants {
                                   switch (op.getOperadorRelacional())
                       {
                         case IGUAL :
+                        pw.println("\u005ct EQ");
                         regResult.valorBool = tpExp1.valorString.equals(tpExp2.valorString);
                         break;
                         case NO_IGUAL :
+                        pw.println("\u005ct NEQ");
                         regResult.valorBool = !tpExp1.valorString.equals(tpExp2.valorString);
                         break;
                         default :
@@ -956,8 +964,10 @@ public class Compilador implements CompiladorConstants {
               {
                 case IGUAL :
                 regResult.valorBool = tpExp1.valorBool == tpExp2.valorBool;
+                pw.println("\u005ct EQ");
                 break;
                 case NO_IGUAL :
+                pw.println("\u005ct NEQ");
                 regResult.valorBool = tpExp1.valorBool != tpExp2.valorBool;
                 break;
                 default :
@@ -1008,42 +1018,36 @@ public class Compilador implements CompiladorConstants {
       case tIGUAL:
         jj_consume_token(tIGUAL);
       // Es el operador =
-      pw.println("\u005ct EQ");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.IGUAL);
       {if (true) return op;}
         break;
       case tMENOR:
         jj_consume_token(tMENOR);
       // Es el operador <
-      pw.println("\u005ct LT");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR);
       {if (true) return op;}
         break;
       case tMEI:
         jj_consume_token(tMEI);
       // Es el operador <=
-      pw.println("\u005ct LTE");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR_IGUAL);
       {if (true) return op;}
         break;
       case tNI:
         jj_consume_token(tNI);
       // Es el operador <>
-      pw.println("\u005ct NEQ");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.NO_IGUAL);
       {if (true) return op;}
         break;
       case tMAI:
         jj_consume_token(tMAI);
       // Es el operador >=
-      pw.println("\u005ct GTE");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR_IGUAL);
       {if (true) return op;}
         break;
       case tMAYOR:
         jj_consume_token(tMAYOR);
       // Es el operador >
-      pw.println("\u005ct GT");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR);
       {if (true) return op;}
         break;
@@ -1067,21 +1071,18 @@ public class Compilador implements CompiladorConstants {
       case tPLUS:
         jj_consume_token(tPLUS);
       // El operador es una suma
-      pw.println("\u005ct PLUS");
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.SUMA);
       {if (true) return op;}
         break;
       case tMINUS:
         jj_consume_token(tMINUS);
       // El operaodr es una resta
-      pw.println("\u005ct SBT");
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.RESTA);
       {if (true) return op;}
         break;
       case tOR:
         jj_consume_token(tOR);
       // El operador es un OR
-      pw.println("\u005ct OR");
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.OR);
       {if (true) return op;}
         break;
@@ -1151,6 +1152,9 @@ public class Compilador implements CompiladorConstants {
             // Son los dos booleanos
             regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
+                        // Imprimir signo OR
+                        pw.println("\u005ct OR");
+
                         // Si son constantes calculamos la expresion
             if (regTerm1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
                 && regTerm2.getSimbolo() != Simbolo.Tipo_simbolo.CONST)
@@ -1206,9 +1210,11 @@ public class Compilador implements CompiladorConstants {
                     switch (op.getOperadorAditivo())
                     {
                       case SUMA :
+                      pw.println("\u005ct PLUS");
                       regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
                       break;
                       case RESTA :
+                      pw.println("\u005ct TSB");
                       regResult.valorEnt = regTerm1.valorEnt - regTerm2.valorEnt;
                       break;
                       default :
@@ -1294,6 +1300,9 @@ public class Compilador implements CompiladorConstants {
         {
           regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
+                  // Operador AND
+          pw.println("\u005ct AND");
+
           if (tpFactor1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
                  && tpFactor2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
           {
@@ -1339,9 +1348,11 @@ public class Compilador implements CompiladorConstants {
                     switch (op.getOperadorMultiplicativo())
                     {
                       case MULTIPLICACION :
+                      pw.println("\u005ct TMS");
                       regResult.valorEnt = tpFactor1.valorEnt * tpFactor2.valorEnt;
                       break;
                       case DIVISION :
+                      pw.println("\u005ct DIV");
                       if (tpFactor2.valorEnt == 0)
                       {
                         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -1354,6 +1365,7 @@ public class Compilador implements CompiladorConstants {
                       }
                       break;
                       case MOD :
+                      pw.println("\u005ct MOD");
                       if (tpFactor2.valorEnt == 0)
                       {
                         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -1402,35 +1414,30 @@ public class Compilador implements CompiladorConstants {
       case tMULTIPLY:
         jj_consume_token(tMULTIPLY);
       // El operador es una multiplicacion
-      pw.println("\u005ct TMS");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MULTIPLICACION);
       {if (true) return op;}
         break;
       case tDIVIDE:
         jj_consume_token(tDIVIDE);
       // El operador es un cociente (opcion 1)
-      pw.println("\u005ct DIV");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       {if (true) return op;}
         break;
       case tDIV:
         jj_consume_token(tDIV);
       // El operador es un cociente (opcion 2)
-      pw.println("\u005ct DIV");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       {if (true) return op;}
         break;
       case tMOD:
         jj_consume_token(tMOD);
       // El operador es un modulo o residuo
-      pw.println("\u005ct MOD");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MOD);
       {if (true) return op;}
         break;
       case tAND:
         jj_consume_token(tAND);
       // El operador es una AND logica
-      pw.println("\u005ct AND");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.AND);
       {if (true) return op;}
         break;

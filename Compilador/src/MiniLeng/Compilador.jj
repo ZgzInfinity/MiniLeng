@@ -1172,21 +1172,27 @@ RegistroExp expresion() :
               switch (op.getOperadorRelacional())
               {
                 case MAYOR :
+                pw.println("\t GT");
                 regResult.valorBool = tpExp1.valorEnt > tpExp2.valorEnt;
                 break;
                 case MAYOR_IGUAL :
+                pw.println("\t GTE");
                 regResult.valorBool = tpExp1.valorEnt >= tpExp2.valorEnt;
                 break;
-                case IGUAL : 
+                case IGUAL :
+                pw.println("\t EQ"); 
                 regResult.valorBool = tpExp1.valorEnt == tpExp2.valorEnt;
                 break;
                 case NO_IGUAL :
+                pw.println("\t NEQ");
                 regResult.valorBool = tpExp1.valorEnt != tpExp2.valorEnt;
                 break;
-                case MENOR_IGUAL : 
+                case MENOR_IGUAL :
+                pw.println("\t LTE");
                 regResult.valorBool = tpExp1.valorEnt <= tpExp2.valorEnt;
                 break;
-                case MENOR : 
+                case MENOR :
+                pw.println("\t LT");
                 regResult.valorBool = tpExp1.valorEnt < tpExp2.valorEnt;
                 break;
                 default : 
@@ -1213,9 +1219,11 @@ RegistroExp expresion() :
 				  switch (op.getOperadorRelacional())
 	              {
 	                case IGUAL :
+	                pw.println("\t EQ");
 	                regResult.valorBool = tpExp1.valorString.equals(tpExp2.valorString);
 	                break;
-	                case NO_IGUAL :                                        
+	                case NO_IGUAL :
+	                pw.println("\t NEQ");                                       
 	                regResult.valorBool = !tpExp1.valorString.equals(tpExp2.valorString);
 	                break;
 	                default :           
@@ -1246,8 +1254,10 @@ RegistroExp expresion() :
               {
                 case IGUAL : 
                 regResult.valorBool = tpExp1.valorBool == tpExp2.valorBool;
+                pw.println("\t EQ");
                 break;
-                case NO_IGUAL : 
+                case NO_IGUAL :
+                pw.println("\t NEQ");
                 regResult.valorBool = tpExp1.valorBool != tpExp2.valorBool;
                 break;
                 default : 
@@ -1305,42 +1315,36 @@ TipoOperador operador_relacional():
     < tIGUAL >
     {
       // Es el operador =
-      pw.println("\t EQ");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.IGUAL);
       return op;
     }
   | < tMENOR >
     {
       // Es el operador <
-      pw.println("\t LT");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR);
       return op;
     }
   | < tMEI >
     {
       // Es el operador <=
-      pw.println("\t LTE");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR_IGUAL);
       return op;
     }
   | < tNI >
     {
       // Es el operador <>
-      pw.println("\t NEQ");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.NO_IGUAL);
       return op;
     }
   | < tMAI >
     {
       // Es el operador >=
-      pw.println("\t GTE");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR_IGUAL);
       return op;
     }
   | < tMAYOR >
     {
       // Es el operador >
-      pw.println("\t GT");
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR);
       return op;
     }
@@ -1363,21 +1367,18 @@ TipoOperador operador_aditivo() :
     < tPLUS >
     {
       // El operador es una suma
-      pw.println("\t PLUS");
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.SUMA);
       return op;
     }
   | < tMINUS >
     {
       // El operaodr es una resta
-      pw.println("\t SBT");
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.RESTA);
       return op;
     }
   | < tOR >
     {
       // El operador es un OR
-      pw.println("\t OR");
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.OR);
       return op;
     }
@@ -1437,6 +1438,9 @@ RegistroExp expresion_simple() :
             // Son los dos booleanos
             regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
 
+			// Imprimir signo OR
+			pw.println("\t OR");
+			
 			// Si son constantes calculamos la expresion
             if (regTerm1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             	&& regTerm2.getSimbolo() != Simbolo.Tipo_simbolo.CONST)
@@ -1491,10 +1495,12 @@ RegistroExp expresion_simple() :
               	regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
 	            switch (op.getOperadorAditivo())
 	            {
-	              case SUMA :	             
+	              case SUMA :
+	              pw.println("\t PLUS");             
 	              regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
 	              break;
-	              case RESTA : 
+	              case RESTA :
+	              pw.println("\t TSB"); 
 	              regResult.valorEnt = regTerm1.valorEnt - regTerm2.valorEnt;
 	              break;
 	              default : 
@@ -1575,6 +1581,9 @@ RegistroExp termino() :
         else
         {
           regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
+
+		  // Operador AND
+          pw.println("\t AND");
           
           if (tpFactor1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
           	 && tpFactor2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
@@ -1620,10 +1629,12 @@ RegistroExp termino() :
               	
 	            switch (op.getOperadorMultiplicativo())
 	            {
-	              case MULTIPLICACION : 
+	              case MULTIPLICACION :
+	              pw.println("\t TMS");
 	              regResult.valorEnt = tpFactor1.valorEnt * tpFactor2.valorEnt;
 	              break;
-	              case DIVISION : 
+	              case DIVISION :
+	              pw.println("\t DIV");
 	              if (tpFactor2.valorEnt == 0)
 	              {
 	                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -1635,7 +1646,8 @@ RegistroExp termino() :
 	                regResult.valorEnt = tpFactor1.valorEnt / tpFactor2.valorEnt;
 	              }
 	              break;
-	              case MOD : 
+	              case MOD :
+	              pw.println("\t MOD"); 
 	              if (tpFactor2.valorEnt == 0)
 	              {
 	                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -1691,35 +1703,30 @@ TipoOperador operador_multiplicativo() :
     < tMULTIPLY >
     {
       // El operador es una multiplicacion
-      pw.println("\t TMS");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MULTIPLICACION);
       return op;
     }
   | < tDIVIDE >
     {
       // El operador es un cociente (opcion 1)
-      pw.println("\t DIV");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       return op;
     }
   | < tDIV >
     {
       // El operador es un cociente (opcion 2)
-      pw.println("\t DIV");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       return op;
     }
   | < tMOD >
     {
       // El operador es un modulo o residuo
-      pw.println("\t MOD");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MOD);
       return op;
     }
   | < tAND >
     {
       // El operador es una AND logica
-      pw.println("\t AND");
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.AND);
       return op;
     }
