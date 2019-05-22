@@ -135,6 +135,7 @@ public class Simbolo {
 			this.visible = true;
 			this.dir = dir;
 			this.lista_parametros = new LinkedList<Simbolo>();
+			this.etiqueta = "";
 	}
 	
 	

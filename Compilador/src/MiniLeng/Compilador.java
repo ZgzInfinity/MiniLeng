@@ -39,6 +39,7 @@ public class Compilador implements CompiladorConstants {
 
   public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
+  public static Etiqueta etiq = new Etiqueta();
 
   public static void iniciar_pila() {
       dir = DIRECCION_INICIAL;
@@ -127,14 +128,15 @@ public class Compilador implements CompiladorConstants {
       pw.println("; Programa " + t.image + ".");
 
           // Etiqueta inicial del programa
-      Etiqueta etiq = new Etiqueta();
-      pw.println("\u005ct ENP " + etiq.getEtiqueta());
+      String etiquetaProg = etiq.nueva_etiqueta();
+
+      pw.println("\u005ct ENP " + etiquetaProg);
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
       declaracion_acciones(t);
        // Mostrar el comienzo del programa con la etiqueta inicial
        pw.println("; Comienzo del programa " + t.image);
-       pw.println(etiq.getEtiqueta() + " :");
+       pw.println(etiquetaProg + " :");
       bloque_sentencias(t);
        // Fin del fichero
        pw.println("; Fin del programa " + t.image + ".");
@@ -561,6 +563,11 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - No se puede realizar una llamada" +
                   " a una accion sobre el parametro " + t.image);
               }
+              else
+              {
+                pw.println("; Invocacion a accion " + s.getNombre() + ".");
+                pw.println("\u005ct OSF 0 4 " + s.getEtiqueta());
+              }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZDA:
         argumentos(s);
@@ -593,12 +600,12 @@ public class Compilador implements CompiladorConstants {
   static final public void mientras_que() throws ParseException {
   // Declaracion de variables
   RegistroExp tpExp;
-  Etiqueta etiqMQ, etiqFIN;
+  String etiqMQ, etiqFIN;
     try {
       jj_consume_token(tMQ);
       // Mostrar etiqueta de inicio de bucle
-      etiqMQ = new Etiqueta();
-      pw.println(etiqMQ.getEtiqueta() + " :");
+      etiqMQ = etiq.nueva_etiqueta();
+      pw.println(etiqMQ + " :");
       pw.println("; MQ.");
       tpExp = expresion();
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
@@ -611,14 +618,14 @@ public class Compilador implements CompiladorConstants {
       else
       {
         // La condicion del bucle es correcta
-        etiqFIN = new Etiqueta();
-        pw.println("\u005ct JMF " + etiqFIN.getEtiqueta());
+        etiqFIN = etiq.nueva_etiqueta();
+        pw.println("\u005ct JMF " + etiqFIN);
       }
       lista_sentencias();
       jj_consume_token(tFMQ);
       // Fin de la iteracion del bucle
       pw.println("; Fin de la iteraci\u00f3n. Saltar a la cabecera del bucle.");
-      pw.println("\u005ct JMP " + etiqMQ.getEtiqueta());
+      pw.println("\u005ct JMP " + etiqMQ);
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -1707,7 +1714,7 @@ public class Compilador implements CompiladorConstants {
   static final public void seleccion() throws ParseException {
   // Declaracion de variables
   RegistroExp tpExp;
-  Etiqueta etiqSINO = null, etiqFIN;
+  String etiqSINO = null, etiqFIN;
     try {
       jj_consume_token(tSI);
       tpExp = expresion();
@@ -1722,16 +1729,16 @@ public class Compilador implements CompiladorConstants {
       else
       {
         // La condicion es correcta
-        etiqSINO = new Etiqueta();
+        etiqSINO = etiq.nueva_etiqueta();
         pw.println(";IF.");
-        pw.println("\u005ct JMF " + etiqSINO.getEtiqueta());
+        pw.println("\u005ct JMF " + etiqSINO);
       }
       jj_consume_token(tENT);
       pw.println(";ENT.");
       lista_sentencias();
-      etiqFIN = new Etiqueta();
-      pw.println("\u005ct JMP " + etiqFIN.getEtiqueta());
-      pw.println(etiqSINO.getEtiqueta());
+      etiqFIN = etiq.nueva_etiqueta();
+      pw.println("\u005ct JMP " + etiqFIN);
+      pw.println(etiqSINO);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tSI_NO:
         jj_consume_token(tSI_NO);
@@ -1744,7 +1751,7 @@ public class Compilador implements CompiladorConstants {
       }
       jj_consume_token(tFSI);
       pw.println("; Fin del bloque de seleccion");
-      pw.println(etiqFIN.getEtiqueta());
+      pw.println(etiqFIN);
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -1810,6 +1817,13 @@ public class Compilador implements CompiladorConstants {
                 // Introducir accion en la tabla de simbolos
                 s = tabla.introducir_accion(tId.image, nivel, dir);
                 ok = true;
+
+                        // Crear etiqueta para la accion
+                String etiqAccion = etiq.nueva_etiqueta();
+                s.setEtiqueta(etiqAccion);
+
+                        pw.println(etiqAccion + ":");
+                        pw.println("; Comienzo de la accion " + tId.image + ".");
         }
         else
         {
@@ -1817,10 +1831,12 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Accion " + s.getNombre() + " duplicada");
             ok = false;
         }
-      // Incrementar el nivel actual
-      nivel++;
-      // Incio del marco de la pila
-      iniciar_pila();
+
+        // Incrementar el nivel actual
+        nivel++;
+
+        // Incio del marco de la pila
+        iniciar_pila();
       // Procesamiento de los parametros
           listaDeParametros = parametros_formales(tId);
       // Limpiar parametros de la posible acc

@@ -50,6 +50,7 @@ public class Compilador
 
   public static Tabla_Simbolos tabla = new Tabla_Simbolos();
 
+  public static Etiqueta etiq = new Etiqueta();
 
   public static void iniciar_pila() {
       dir = DIRECCION_INICIAL;
@@ -405,8 +406,9 @@ int programa() :
       pw.println("; Programa " + t.image + ".");
 
 	  // Etiqueta inicial del programa
-      Etiqueta etiq = new Etiqueta();
-      pw.println("\t ENP " + etiq.getEtiqueta());
+      String etiquetaProg = etiq.nueva_etiqueta();
+      
+      pw.println("\t ENP " + etiquetaProg);
     }
     // Lectura del resto de datos
     < tPUNTYCOM >
@@ -414,7 +416,7 @@ int programa() :
      {
        // Mostrar el comienzo del programa con la etiqueta inicial
        pw.println("; Comienzo del programa " + t.image);
-       pw.println(etiq.getEtiqueta() + " :");
+       pw.println(etiquetaProg + " :");
      }
      bloque_sentencias(t)
      {
@@ -855,6 +857,11 @@ void invocacion_accion(Token t) :
 	        	", columna " + token.beginColumn + "  - No se puede realizar una llamada" + 
 	          " a una accion sobre el parametro " + t.image);
 	      }
+	      else
+	      {
+	        pw.println("; Invocacion a accion " + s.getNombre() + ".");
+	        pw.println("\t OSF 0 4 " + s.getEtiqueta());
+	      }
 	     }
 	     // Continuacion de evaluacion de la expresion
 	     (argumentos(s)
@@ -889,7 +896,7 @@ void mientras_que() :
 {
   // Declaracion de variables
   RegistroExp tpExp;
-  Etiqueta etiqMQ, etiqFIN;
+  String etiqMQ, etiqFIN;
 }
 {
   try
@@ -897,8 +904,8 @@ void mientras_que() :
     < tMQ >
     {
       // Mostrar etiqueta de inicio de bucle
-      etiqMQ = new Etiqueta();
-      pw.println(etiqMQ.getEtiqueta() + " :");
+      etiqMQ = etiq.nueva_etiqueta();
+      pw.println(etiqMQ + " :");
       pw.println("; MQ.");
     }
     tpExp = expresion()
@@ -913,8 +920,8 @@ void mientras_que() :
       else
       {
         // La condicion del bucle es correcta
-        etiqFIN = new Etiqueta();
-        pw.println("\t JMF " + etiqFIN.getEtiqueta());
+        etiqFIN = etiq.nueva_etiqueta();
+        pw.println("\t JMF " + etiqFIN);
       }
     }
     lista_sentencias() 
@@ -922,7 +929,7 @@ void mientras_que() :
     {
       // Fin de la iteracion del bucle
       pw.println("; Fin de la iteración. Saltar a la cabecera del bucle.");
-      pw.println("\t JMP " + etiqMQ.getEtiqueta());
+      pw.println("\t JMP " + etiqMQ);
     }
   }
   catch (ParseException e)
@@ -1989,7 +1996,7 @@ void seleccion() :
 {
   // Declaracion de variables
   RegistroExp tpExp;
-  Etiqueta etiqSINO = null, etiqFIN;
+  String etiqSINO = null, etiqFIN;
 }
 {
   try
@@ -2008,9 +2015,9 @@ void seleccion() :
       else
       {
         // La condicion es correcta
-        etiqSINO = new Etiqueta();
+        etiqSINO = etiq.nueva_etiqueta();
         pw.println(";IF.");
-        pw.println("\t JMF " + etiqSINO.getEtiqueta());
+        pw.println("\t JMF " + etiqSINO);
       }
     }
     < tENT >
@@ -2019,9 +2026,9 @@ void seleccion() :
     }
     lista_sentencias()
     {
-      etiqFIN = new Etiqueta();
-      pw.println("\t JMP " + etiqFIN.getEtiqueta());
-      pw.println(etiqSINO.getEtiqueta());
+      etiqFIN = etiq.nueva_etiqueta();
+      pw.println("\t JMP " + etiqFIN);
+      pw.println(etiqSINO);
     }
     (
       < tSI_NO >
@@ -2033,7 +2040,7 @@ void seleccion() :
     < tFSI >
     {
       pw.println("; Fin del bloque de seleccion");
-      pw.println(etiqFIN.getEtiqueta());
+      pw.println(etiqFIN);
     }
   }
   catch (ParseException e)
@@ -2108,7 +2115,14 @@ void cabecera_accion() :
      	{
      	  	// Introducir accion en la tabla de simbolos
      	  	s = tabla.introducir_accion(tId.image, nivel, dir);
-        	ok = true;	
+        	ok = true;
+
+			// Crear etiqueta para la accion
+        	String etiqAccion = etiq.nueva_etiqueta();
+        	s.setEtiqueta(etiqAccion);
+
+			pw.println(etiqAccion + ":");
+			pw.println("; Comienzo de la accion " + tId.image + ".");
         }
         else
         {
@@ -2116,10 +2130,12 @@ void cabecera_accion() :
 	        	", columna " + token.beginColumn + "  - Accion " + s.getNombre() + " duplicada");
             ok = false;
         }
-      // Incrementar el nivel actual
-      nivel++;
-      // Incio del marco de la pila
-      iniciar_pila();
+
+        // Incrementar el nivel actual
+        nivel++;
+        
+        // Incio del marco de la pila
+        iniciar_pila();
     }
     // Procesamiento de los parametros
     listaDeParametros = parametros_formales(tId)
