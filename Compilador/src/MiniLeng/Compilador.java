@@ -284,6 +284,7 @@ public class Compilador implements CompiladorConstants {
              else
              {
                // El parametro a asignar es por referencia
+               tipo = s.getVariable();
                pw.println("; Direccion del parametro por referencia " + s.getNombre() + ".");
                pw.println("\u005ct SRF   0   " + s.getDir());
              }
@@ -1185,7 +1186,7 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // La expresion final es entera
+          // La expresion final es entera          
           regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
           if (ErrorSemantico.hayDesbordamientoEntero(regTerm1.getValorEnt())
           || ErrorSemantico.hayDesbordamientoEntero(regTerm2.getValorEnt()))
@@ -1961,6 +1962,12 @@ public class Compilador implements CompiladorConstants {
         {
            // Añadir parametro a la lista de parametros
                 lista.add(s);
+
+                // Generar codigo de los parametros
+                pw.println("; rec. parametro " + s.getNombre() + " de tipo " + s.getVariable().toString() +
+                        " pasado por " + s.getParametro().toString());
+                pw.println("\u005ct SRF 0   " + s.getDir());
+                pw.println("\u005ct ASGI");
         }
         else
         {

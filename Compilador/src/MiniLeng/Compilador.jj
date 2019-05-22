@@ -542,7 +542,7 @@ void asignacion(Token t) :
          ok = false;
        }
        else if (s.es_Simbolo_Parametro())
-       {
+       {         
          if (s.es_Parametro_Valor())
          {
             // El parametro es por valor
@@ -556,8 +556,9 @@ void asignacion(Token t) :
 	     else
 	     {
 	       // El parametro a asignar es por referencia
+	       tipo = s.getVariable();
 	       pw.println("; Direccion del parametro por referencia " + s.getNombre() + ".");
-	       pw.println("\t SRF   0   " + s.getDir());
+	       pw.println("\t SRF   0   " + s.getDir());	       
 	     }
        }
        else if (s.es_Simbolo_Accion())
@@ -573,12 +574,11 @@ void asignacion(Token t) :
           pw.println("; Direccion de la variable " + s.getNombre() + ".");
           pw.println("\t SRF   0   " + s.getDir());
           tipo = s.getVariable();
-       }      
+       }
     }
     // Procesamiento de la expresion
     tpExp = expresion() < tPUNTYCOM >
     {
-      
       if (ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
       {
         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -590,7 +590,7 @@ void asignacion(Token t) :
         // Asignacion evaluada correctamente
         pw.println("; Asignacion.");
         pw.println("\t ASG");
-      } 
+      }
     }
   }
   catch (ParseException e)
@@ -1452,7 +1452,7 @@ RegistroExp expresion_simple() :
       else
       {
         // Comprobar que son los dos enteros
-        
+
         ok = regTerm1.getTipo() == Simbolo.Tipo_variable.ENTERO
         && regTerm2.getTipo() == Simbolo.Tipo_variable.ENTERO;
         if (!ok)
@@ -1472,7 +1472,7 @@ RegistroExp expresion_simple() :
         }
         else
         {
-          // La expresion final es entera
+          // La expresion final es entera          
           regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
           if (ErrorSemantico.hayDesbordamientoEntero(regTerm1.getValorEnt()) 
           || ErrorSemantico.hayDesbordamientoEntero(regTerm2.getValorEnt()))
@@ -2107,7 +2107,7 @@ void cabecera_accion() :
     // Apilar la nueva definicion de accion si no existe   
     < tACCION > 
     tId = < tIDENTIFICADOR >
-    {
+    {        
         // Buscar el simbolo en la tabla de simbolos
      	s = tabla.buscar_simbolo(tId.image);
      	
@@ -2265,7 +2265,13 @@ LinkedList < Simbolo > parametros() :
         if (s != null)
         {
            // Añadir parametro a la lista de parametros
-        	lista.add(s);	
+        	lista.add(s);
+
+        	// Generar codigo de los parametros
+        	pw.println("; rec. parametro " + s.getNombre() + " de tipo " + s.getVariable().toString() +
+        		" pasado por " + s.getParametro().toString());
+        	pw.println("\t SRF 0   " + s.getDir());
+        	pw.println("\t ASGI");
         }
         else
         {
