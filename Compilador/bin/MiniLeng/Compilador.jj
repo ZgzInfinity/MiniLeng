@@ -403,7 +403,7 @@ int programa() :
       s = tabla.introducir_programa(t.image, dir);
 
       // Escritura del nombre del programa en el fichero
-      pw.println("; Programa " + t.image + ".");
+      pw.println("; Programa " + t.image.toUpperCase() + ".");
 
 	  // Etiqueta inicial del programa
       String etiquetaProg = etiq.nueva_etiqueta();
@@ -412,16 +412,16 @@ int programa() :
     }
     // Lectura del resto de datos
     < tPUNTYCOM >
-     declaracion_variables() declaracion_acciones(s)
+     declaracion_variables() declaracion_acciones()
      {
        // Mostrar el comienzo del programa con la etiqueta inicial
        pw.println("; Comienzo del programa " + t.image);
        pw.println(etiquetaProg + ":");
      }
-     bloque_sentencias(s)
+     bloque_sentencias()
      {
        // Fin del fichero
-       pw.println("; Fin del programa " + t.image + ".");
+       pw.println("; Fin del programa " + t.image.toUpperCase() + ".");
        pw.println("\t LVP");
      }
       < EOF >    
@@ -437,7 +437,7 @@ int programa() :
 }
 
 // Regla de bloque_sentencias OK
-void bloque_sentencias(Simbolo s) :
+void bloque_sentencias() :
 {
 }
 {
@@ -447,13 +447,6 @@ void bloque_sentencias(Simbolo s) :
     {
       // Ocultar los parametros del nivel actual
       tabla.ocultar_parametros(nivel);
-
-      if (!s.es_Simbolo_Programa())
-      { 
-      	// Detectado el fin de un bloque de sentencias de una accion
-      	pw.println("; Fin de la accion / funcion " + s.getNombre() + ".");
-      	pw.println("\t CSF"); 
-      }
     }
   }
   catch (ParseException e)
@@ -2204,13 +2197,13 @@ void seleccion() :
 }
 
 // Regla de declaracion_acciones OK
-void declaracion_acciones(Simbolo s) :
+void declaracion_acciones() :
 {
 }
 {
   try
   {
-    (declaracion_accion(s)) *
+    (declaracion_accion()) *
   }
   catch (ParseException e)
   {
@@ -2219,14 +2212,19 @@ void declaracion_acciones(Simbolo s) :
 }
 
 // Regla de declaracion_Accion OK
-void declaracion_accion(Simbolo s) :
+void declaracion_accion() :
 {
+  Token t;
 }
 {
   try
   {
-    cabecera_accion() < tPUNTYCOM > declaracion_variables() declaracion_acciones(s) bloque_sentencias(s)
-    {
+    t = cabecera_accion() < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias()
+    {    
+      // Detectado el fin de un bloque de sentencias de una accion
+      pw.println("; Fin de la accion / funcion " + t.image.toUpperCase() + ".");
+      pw.println("\t CSF"); 
+
       // Eliminacion de variables
       tabla.eliminar_variables(nivel);
       // Eliminar las acciones
@@ -2244,9 +2242,9 @@ void declaracion_accion(Simbolo s) :
 }
 
 // Regla de cabecera_accion OK
-void cabecera_accion() :
+Token cabecera_accion() :
 {
-  Token tId;
+  Token tId = null;;
   Simbolo s = null;
   Simbolo.Tipo_simbolo tp_Sim;
   boolean ok = false;
@@ -2305,7 +2303,8 @@ void cabecera_accion() :
         }
         // Limpiar parametros de la posible accion anterior
       	tabla.limpiarListaParametros();
-      }
+      } 
+      return tId;
     }
   }
   catch (ParseException e)
@@ -2440,7 +2439,7 @@ LinkedList < Simbolo > parametros() :
 	    s = lista.get(i);
 
 	    // Generar codigo de los parametros
-        pw.println("; rec. parametro " + s.getNombre() + " de tipo " + s.getVariable().toString() +
+        pw.println("; rec. parametro " + s.getNombre().toUpperCase() + " de tipo " + s.getVariable().toString() +
         	" pasado por " + s.getParametro().toString());
         pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
         pw.println("\t ASGI");

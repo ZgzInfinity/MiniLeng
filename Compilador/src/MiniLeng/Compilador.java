@@ -125,7 +125,7 @@ public class Compilador implements CompiladorConstants {
       s = tabla.introducir_programa(t.image, dir);
 
       // Escritura del nombre del programa en el fichero
-      pw.println("; Programa " + t.image + ".");
+      pw.println("; Programa " + t.image.toUpperCase() + ".");
 
           // Etiqueta inicial del programa
       String etiquetaProg = etiq.nueva_etiqueta();
@@ -133,13 +133,13 @@ public class Compilador implements CompiladorConstants {
       pw.println("\u005ct ENP  " + etiquetaProg);
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
-      declaracion_acciones(s);
+      declaracion_acciones();
        // Mostrar el comienzo del programa con la etiqueta inicial
        pw.println("; Comienzo del programa " + t.image);
        pw.println(etiquetaProg + ":");
-      bloque_sentencias(s);
+      bloque_sentencias();
        // Fin del fichero
-       pw.println("; Fin del programa " + t.image + ".");
+       pw.println("; Fin del programa " + t.image.toUpperCase() + ".");
        pw.println("\u005ct LVP");
       jj_consume_token(0);
       {if (true) return 0;}
@@ -151,20 +151,13 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de bloque_sentencias OK
-  static final public void bloque_sentencias(Simbolo s) throws ParseException {
+  static final public void bloque_sentencias() throws ParseException {
     try {
       jj_consume_token(tPRINCIPIO);
       lista_sentencias();
       jj_consume_token(tFIN);
       // Ocultar los parametros del nivel actual
       tabla.ocultar_parametros(nivel);
-
-      if (!s.es_Simbolo_Programa())
-      {
-        // Detectado el fin de un bloque de sentencias de una accion
-        pw.println("; Fin de la accion / funcion " + s.getNombre() + ".");
-        pw.println("\u005ct CSF");
-      }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -1916,7 +1909,7 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de declaracion_acciones OK
-  static final public void declaracion_acciones(Simbolo s) throws ParseException {
+  static final public void declaracion_acciones() throws ParseException {
     try {
       label_7:
       while (true) {
@@ -1928,7 +1921,7 @@ public class Compilador implements CompiladorConstants {
           jj_la1[16] = jj_gen;
           break label_7;
         }
-        declaracion_accion(s);
+        declaracion_accion();
       }
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
@@ -1936,13 +1929,18 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de declaracion_Accion OK
-  static final public void declaracion_accion(Simbolo s) throws ParseException {
+  static final public void declaracion_accion() throws ParseException {
+  Token t;
     try {
-      cabecera_accion();
+      t = cabecera_accion();
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
-      declaracion_acciones(s);
-      bloque_sentencias(s);
+      declaracion_acciones();
+      bloque_sentencias();
+      // Detectado el fin de un bloque de sentencias de una accion
+      pw.println("; Fin de la accion / funcion " + t.image.toUpperCase() + ".");
+      pw.println("\u005ct CSF");
+
       // Eliminacion de variables
       tabla.eliminar_variables(nivel);
       // Eliminar las acciones
@@ -1957,8 +1955,8 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de cabecera_accion OK
-  static final public void cabecera_accion() throws ParseException {
-  Token tId;
+  static final public Token cabecera_accion() throws ParseException {
+  Token tId = null;;
   Simbolo s = null;
   Simbolo.Tipo_simbolo tp_Sim;
   boolean ok = false;
@@ -2009,9 +2007,11 @@ public class Compilador implements CompiladorConstants {
         // Limpiar parametros de la posible accion anterior
         tabla.limpiarListaParametros();
       }
+      {if (true) return tId;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
+    throw new Error("Missing return statement in function");
   }
 
 // Regla de parametros formales OK
@@ -2139,7 +2139,7 @@ public class Compilador implements CompiladorConstants {
             s = lista.get(i);
 
             // Generar codigo de los parametros
-        pw.println("; rec. parametro " + s.getNombre() + " de tipo " + s.getVariable().toString() +
+        pw.println("; rec. parametro " + s.getNombre().toUpperCase() + " de tipo " + s.getVariable().toString() +
                 " pasado por " + s.getParametro().toString());
         pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
         pw.println("\u005ct ASGI");
