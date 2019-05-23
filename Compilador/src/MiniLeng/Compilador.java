@@ -290,6 +290,8 @@ public class Compilador implements CompiladorConstants {
                tipo = s.getVariable();
                pw.println("; Direccion del parametro por referencia " + s.getNombre().toUpperCase() + ".");
                pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
+               pw.println("\u005ct DRF");
+               pw.println("\u005ct DRF");
              }
        }
        else if (s.es_Simbolo_Accion())
@@ -389,7 +391,8 @@ public class Compilador implements CompiladorConstants {
             pw.println("; Leer parametro por referencia " + s.getNombre());
             // Mostrar datos de la variable o parametro
             pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-            pw.println("\u005ct RD   1");
+            pw.println("\u005ct DRF");
+            pw.println("\u005ct RD    1");
           }
         }
         else if (s.es_Simbolo_Accion())
@@ -537,9 +540,17 @@ public class Compilador implements CompiladorConstants {
               else
               {
                 // Correcto el identificador
+
                 pw.println("; Acceso a la variable " + s.getNombre().toUpperCase());
                 pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
                 pw.println("\u005ct DRF");
+
+                // Si es parametro
+                if (s.es_Simbolo_Parametro())
+                {
+                  pw.println("\u005ct DRF");
+                }
+
                 pw.println("\u005ct WRT   1");
               }
            }
@@ -1756,6 +1767,11 @@ public class Compilador implements CompiladorConstants {
                     pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
                     pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
                     pw.println("\u005ct DRF");
+
+                    if (s.es_Simbolo_Parametro())
+                    {
+                      pw.println("\u005ct DRF");
+                    }
                 }
                 {if (true) return result;}
         break;
@@ -2104,12 +2120,6 @@ public class Compilador implements CompiladorConstants {
         {
            // Añadir parametro a la lista de parametros
                 lista.add(s);
-
-                // Generar codigo de los parametros
-                pw.println("; rec. parametro " + s.getNombre() + " de tipo " + s.getVariable().toString() +
-                        " pasado por " + s.getParametro().toString());
-                pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-                pw.println("\u005ct ASGI");
         }
         else
         {
@@ -2118,6 +2128,25 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Parametro repetido " + identificadorActual);
         }
       }
+
+      // Calculo de longitud de nueva lista sin parametros repetidos
+          dimension = lista.size();
+
+          // Recuperacion de los parametros en orden inverso
+          for (int i = dimension - 1; i >= 0; i--)
+          {
+            // Obtener simbolo inverso
+            s = lista.get(i);
+
+            // Generar codigo de los parametros
+        pw.println("; rec. parametro " + s.getNombre() + " de tipo " + s.getVariable().toString() +
+                " pasado por " + s.getParametro().toString());
+        pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
+        pw.println("\u005ct ASGI");
+          }
+
+      String etiqPar = etiq.nueva_etiqueta();
+      pw.println(etiqPar + ":");
       {if (true) return lista;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
