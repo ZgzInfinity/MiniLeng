@@ -136,7 +136,7 @@ public class Compilador implements CompiladorConstants {
       declaracion_acciones(s);
        // Mostrar el comienzo del programa con la etiqueta inicial
        pw.println("; Comienzo del programa " + t.image);
-       pw.println(etiquetaProg + " :");
+       pw.println(etiquetaProg + ":");
       bloque_sentencias(s);
        // Fin del fichero
        pw.println("; Fin del programa " + t.image + ".");
@@ -572,7 +572,7 @@ public class Compilador implements CompiladorConstants {
               }
               else
               {
-                pw.println("; Invocacion a accion " + s.getNombre() + ".");
+                pw.println("; Invocacion a " + s.getNombre() + ".");
                 pw.println("\u005ct OSF   " + s.getDir() + "  " + (nivel - s.getNivel()) + " " + s.getEtiqueta());
               }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
