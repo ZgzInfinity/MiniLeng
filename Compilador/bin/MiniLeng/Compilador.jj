@@ -1199,6 +1199,33 @@ RegistroExp expresion() :
                 break;
               }
             }
+            // Los operadores no son constantes
+            else
+            {
+              switch (op.getOperadorRelacional())
+              {
+                case MAYOR :
+                pw.println("\t GT");
+                break;
+                case MAYOR_IGUAL :
+                pw.println("\t GTE");               
+                break;
+                case IGUAL :
+                pw.println("\t EQ");              
+                break;
+                case NO_IGUAL :
+                pw.println("\t NEQ");               
+                break;
+                case MENOR_IGUAL :
+                pw.println("\t LTE");             
+                break;
+                case MENOR :
+                pw.println("\t LT");            
+                break;
+                default : 
+                break;
+              }
+            }
             break;
             case CHAR:
             // Cmprobar que la segunda expresion es una cadena
@@ -1218,6 +1245,8 @@ RegistroExp expresion() :
               	  constantes = true;
 				  switch (op.getOperadorRelacional())
 	              {
+	                // Para los caracteres estan definidos todos los caracteres
+	                // se pueden obtener los resultados cuando son constantes
 	                case IGUAL :
 	                pw.println("\t EQ");
 	                regResult.valorBool = tpExp1.valorString.equals(tpExp2.valorString);
@@ -1225,6 +1254,20 @@ RegistroExp expresion() :
 	                case NO_IGUAL :
 	                pw.println("\t NEQ");                                       
 	                regResult.valorBool = !tpExp1.valorString.equals(tpExp2.valorString);
+	                case MAYOR_IGUAL :
+	                pw.println("\t GTE");
+	                regResult.valorBool = tpExp1.valorString.charAt(0) >=  tpExp2.valorString.charAt(0);
+	                break;
+	                case MAYOR :
+	                pw.println("\t GT");                                       
+	                regResult.valorBool = tpExp1.valorString.charAt(0) > tpExp2.valorString.charAt(0);
+	                case MENOR :
+	                pw.println("\t LTE");
+	                regResult.valorBool = tpExp1.valorString.charAt(0) <=  tpExp2.valorString.charAt(0);
+	                break;
+	                case MENOR_IGUAL :
+	                pw.println("\t LT");                                       
+	                regResult.valorBool = tpExp1.valorString.charAt(0) <=  tpExp2.valorString.charAt(0);
 	                break;
 	                default :           
 	                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -1232,6 +1275,35 @@ RegistroExp expresion() :
 	                	" utilizar el operador relacional " + op.getOperadorRelacional().toString() +
 	                	" sobre caracteres");
 	              }             
+            }
+            else
+            {
+              // Los operandos no son constantes
+              switch (op.getOperadorRelacional()){
+	                case IGUAL :
+	                pw.println("\t EQ");	           
+	                break;
+	                case NO_IGUAL :
+	                pw.println("\t NEQ");                                       
+	                break;
+	                case MAYOR :
+	                pw.println("\t GT");	           
+	                break;
+	                case MAYOR_IGUAL :
+	                pw.println("\t GTE");                                       
+	                break;
+	                case MENOR :
+	                pw.println("\t LT");	           
+	                break;
+	                case MENOR_IGUAL :
+	                pw.println("\t LTE");                                       
+	                break;
+	                default :           
+	                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+	        			", columna " + token.beginColumn + "  - No se puede" + 
+	                	" utilizar el operador relacional " + op.getOperadorRelacional().toString() +
+	                	" sobre caracteres");
+	          }      
             }
             break;
             case BOOLEANO : 
@@ -1266,6 +1338,24 @@ RegistroExp expresion() :
                 	" utilizar el operador " + op.getOperadorRelacional().toString() +
                 	" sobre una booleano");
               }
+            }
+            // Los operandos no son constantes
+            else
+            {
+              switch (op.getOperadorRelacional())
+	              {
+	                case IGUAL :
+	                pw.println("\t EQ");
+	                break;
+	                case NO_IGUAL :
+	                pw.println("\t NEQ");                                       	               
+	                break;
+	                default :           
+	                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+	        			", columna " + token.beginColumn + "  - No se puede" + 
+	                	" utilizar el operador relacional " + op.getOperadorRelacional().toString() +
+	                	" sobre caracteres");
+	              }      
             }
             break;
             case DESCONOCIDO : 
@@ -1508,6 +1598,22 @@ RegistroExp expresion_simple() :
 	        	", columna " + token.beginColumn + "  - Operador aditivo desconocido");
 	            }
 	        }
+	        // Los operandos no son constantes
+	        else
+	        {
+	          switch (op.getOperadorAditivo())
+	          {
+	              case SUMA :
+	              pw.println("\t PLUS");            	             
+	              break;
+	              case RESTA :
+	              pw.println("\t TSB"); 	             
+	              break;
+	              default : 
+	              ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+	        	", columna " + token.beginColumn + "  - Operador aditivo desconocido");
+	          }
+	        }
           }
         }
       }
@@ -1651,7 +1757,7 @@ RegistroExp termino() :
 	              if (tpFactor2.valorEnt == 0)
 	              {
 	                ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
-	        	", columna " + token.beginColumn + "  - Modulo por 0");					
+	        	  ", columna " + token.beginColumn + "  - Modulo por 0");					
 	                regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);		
 	              }
 	              else
@@ -1661,8 +1767,26 @@ RegistroExp termino() :
 	              break;
 	              default : 
 	              ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
-	        	", columna " + token.beginColumn + "  - Operador multiplicativo desconocido");					
+	        	  ", columna " + token.beginColumn + "  - Operador multiplicativo desconocido");					
 	            }
+	         }
+	         else
+	         {
+	           // Los operadores no son constantes
+	           switch (op.getOperadorMultiplicativo())
+	           {
+		           case MULTIPLICACION :
+		           pw.println("\t TMS");
+		           break;
+		           case DIVISION :
+		           pw.println("\t DIV");
+		           case MOD:
+		           pw.println("\t MOD");
+		           break;
+		           default : 
+		           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+		        	", columna " + token.beginColumn + "  - Operador multiplicativo desconocido");					
+	           }
 	         }
           }
         }

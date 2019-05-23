@@ -909,6 +909,33 @@ public class Compilador implements CompiladorConstants {
                 break;
               }
             }
+            // Los operadores no son constantes
+            else
+            {
+              switch (op.getOperadorRelacional())
+              {
+                case MAYOR :
+                pw.println("\u005ct GT");
+                break;
+                case MAYOR_IGUAL :
+                pw.println("\u005ct GTE");
+                break;
+                case IGUAL :
+                pw.println("\u005ct EQ");
+                break;
+                case NO_IGUAL :
+                pw.println("\u005ct NEQ");
+                break;
+                case MENOR_IGUAL :
+                pw.println("\u005ct LTE");
+                break;
+                case MENOR :
+                pw.println("\u005ct LT");
+                break;
+                default :
+                break;
+              }
+            }
             break;
             case CHAR:
             // Cmprobar que la segunda expresion es una cadena
@@ -928,6 +955,8 @@ public class Compilador implements CompiladorConstants {
                   constantes = true;
                                   switch (op.getOperadorRelacional())
                       {
+                        // Para los caracteres estan definidos todos los caracteres
+                        // se pueden obtener los resultados cuando son constantes
                         case IGUAL :
                         pw.println("\u005ct EQ");
                         regResult.valorBool = tpExp1.valorString.equals(tpExp2.valorString);
@@ -935,6 +964,20 @@ public class Compilador implements CompiladorConstants {
                         case NO_IGUAL :
                         pw.println("\u005ct NEQ");
                         regResult.valorBool = !tpExp1.valorString.equals(tpExp2.valorString);
+                        case MAYOR_IGUAL :
+                        pw.println("\u005ct GTE");
+                        regResult.valorBool = tpExp1.valorString.charAt(0) >=  tpExp2.valorString.charAt(0);
+                        break;
+                        case MAYOR :
+                        pw.println("\u005ct GT");
+                        regResult.valorBool = tpExp1.valorString.charAt(0) > tpExp2.valorString.charAt(0);
+                        case MENOR :
+                        pw.println("\u005ct LTE");
+                        regResult.valorBool = tpExp1.valorString.charAt(0) <=  tpExp2.valorString.charAt(0);
+                        break;
+                        case MENOR_IGUAL :
+                        pw.println("\u005ct LT");
+                        regResult.valorBool = tpExp1.valorString.charAt(0) <=  tpExp2.valorString.charAt(0);
                         break;
                         default :
                         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
@@ -942,6 +985,35 @@ public class Compilador implements CompiladorConstants {
                                 " utilizar el operador relacional " + op.getOperadorRelacional().toString() +
                                 " sobre caracteres");
                       }
+            }
+            else
+            {
+              // Los operandos no son constantes
+              switch (op.getOperadorRelacional()){
+                        case IGUAL :
+                        pw.println("\u005ct EQ");
+                        break;
+                        case NO_IGUAL :
+                        pw.println("\u005ct NEQ");
+                        break;
+                        case MAYOR :
+                        pw.println("\u005ct GT");
+                        break;
+                        case MAYOR_IGUAL :
+                        pw.println("\u005ct GTE");
+                        break;
+                        case MENOR :
+                        pw.println("\u005ct LT");
+                        break;
+                        case MENOR_IGUAL :
+                        pw.println("\u005ct LTE");
+                        break;
+                        default :
+                        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                                        ", columna " + token.beginColumn + "  - No se puede" +
+                                " utilizar el operador relacional " + op.getOperadorRelacional().toString() +
+                                " sobre caracteres");
+                  }
             }
             break;
             case BOOLEANO :
@@ -976,6 +1048,24 @@ public class Compilador implements CompiladorConstants {
                         " utilizar el operador " + op.getOperadorRelacional().toString() +
                         " sobre una booleano");
               }
+            }
+            // Los operandos no son constantes
+            else
+            {
+              switch (op.getOperadorRelacional())
+                      {
+                        case IGUAL :
+                        pw.println("\u005ct EQ");
+                        break;
+                        case NO_IGUAL :
+                        pw.println("\u005ct NEQ");
+                        break;
+                        default :
+                        ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                                        ", columna " + token.beginColumn + "  - No se puede" +
+                                " utilizar el operador relacional " + op.getOperadorRelacional().toString() +
+                                " sobre caracteres");
+                      }
             }
             break;
             case DESCONOCIDO :
@@ -1222,6 +1312,22 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Operador aditivo desconocido");
                     }
                 }
+                // Los operandos no son constantes
+                else
+                {
+                  switch (op.getOperadorAditivo())
+                  {
+                      case SUMA :
+                      pw.println("\u005ct PLUS");
+                      break;
+                      case RESTA :
+                      pw.println("\u005ct TSB");
+                      break;
+                      default :
+                      ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                        ", columna " + token.beginColumn + "  - Operador aditivo desconocido");
+                  }
+                }
           }
         }
       }
@@ -1369,7 +1475,7 @@ public class Compilador implements CompiladorConstants {
                       if (tpFactor2.valorEnt == 0)
                       {
                         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
-                        ", columna " + token.beginColumn + "  - Modulo por 0");
+                          ", columna " + token.beginColumn + "  - Modulo por 0");
                         regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
                       }
                       else
@@ -1379,8 +1485,26 @@ public class Compilador implements CompiladorConstants {
                       break;
                       default :
                       ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
-                        ", columna " + token.beginColumn + "  - Operador multiplicativo desconocido");
+                          ", columna " + token.beginColumn + "  - Operador multiplicativo desconocido");
                     }
+                 }
+                 else
+                 {
+                   // Los operadores no son constantes
+                   switch (op.getOperadorMultiplicativo())
+                   {
+                           case MULTIPLICACION :
+                           pw.println("\u005ct TMS");
+                           break;
+                           case DIVISION :
+                           pw.println("\u005ct DIV");
+                           case MOD:
+                           pw.println("\u005ct MOD");
+                           break;
+                           default :
+                           ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
+                                ", columna " + token.beginColumn + "  - Operador multiplicativo desconocido");
+                   }
                  }
           }
         }
