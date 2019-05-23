@@ -308,8 +308,6 @@ public class Simbolo {
 		int dimension = listaDeParametros.size();
 		Simbolo s;
 
-		long direccion;
-		
 		for (int i = 0; i < dimension; i++) {
 			// Extraccion del simbolo
 			s = listaDeParametros.get(i);
