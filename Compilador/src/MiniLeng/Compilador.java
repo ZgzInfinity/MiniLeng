@@ -70,8 +70,11 @@ public class Compilador implements CompiladorConstants {
     }
 
         // Ruta del fochero de escritura
-    FileWriter ficheroCode = new FileWriter("C:\u005c\u005cUsers\u005c\u005cGord\u005c\u005cDesktop\u005c\u005cprogramas\u005c\u005c" + nombreArchivo + ".code");
+
+    File ficheroSalida = new File("C:\u005c\u005cUsers\u005c\u005cGord\u005c\u005cDesktop\u005c\u005cprogramas\u005c\u005c" + nombreArchivo + ".code");
+    FileWriter ficheroCode = new FileWriter(ficheroSalida);
         pw = new PrintWriter(ficheroCode);
+
 
     /* Completar la ruta del path */
     path += nombreArchivo + ".ml";
@@ -91,12 +94,34 @@ public class Compilador implements CompiladorConstants {
         TablaHash.mostrarIdentificadores();
       }
 
-      System.out.println("El fichero introducido es correcto");
-
-          // Cierre asociado al flujo del fichero escritura
+      // Cierre del flujo de escritura
       ficheroCode.close();
 
+          // Balance de errores 
+      int erroresLexicos = ErrorLexico.getNumErroresLexicos();
+      int erroresSintacticos = ErrorSintactico.getNumErroresSintacticos();
+      int erroresSemanticos = ErrorSemantico.getNumErroresSemanticos();
 
+          // Comprobar que el fichero esta libre de errores lexicos, sintacticos o semanticos
+      if ( erroresLexicos > 0 || erroresSintacticos > 0 || erroresSemanticos > 0)
+      {
+         System.out.println("Compilacion finalizada con errores");
+                 System.out.println("==================================");
+         System.out.println("Detectados " + erroresLexicos + " errores lexicos");
+         System.out.println("Detectados " + erroresSintacticos + " errores sintacticos");
+         System.out.println("Detectados " + erroresSemanticos + " errores semanticos");
+
+         // Borrado del fichero .code creado
+         ficheroSalida.delete();
+      }
+      else
+      {
+         System.out.println("Compilacion finalizada sin errores");
+         System.out.println("==================================");
+         System.out.println("El fichero " + nombreArchivo + " es correcto");
+      }
+
+      // Comprobar que la ejecucion ha ido correctamente
     }
     catch (Exception e)
     {
