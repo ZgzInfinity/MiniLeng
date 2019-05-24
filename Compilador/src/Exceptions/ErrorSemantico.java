@@ -1,5 +1,8 @@
 package Exceptions;
 
+/*
+ * Gestion de errores semanticos del compilador
+ */
 public class ErrorSemantico extends Exception {
 
 	// Control del desbordamiento de enteros a caracteres 
@@ -10,15 +13,21 @@ public class ErrorSemantico extends Exception {
 	static final int COTA_MINIMA_ENTERO = -32678;
 	static final int COTA_MAXIMA_ENTERO = 32678;
 		
+	// Contador de errores semanticos
+	static int numErroresSemanticos = 0;
 	
 	
-	// Error semantico personalizado del compilador
-	public ErrorSemantico() {
-		     
-	}
-	
-	// Error semantico personalizado del compilador
-	public ErrorSemantico(String msg) {
+	/*
+	 * Pre: ---
+	 * Post: Ha detectado un error semantico mostrandolo por pantalla 
+	 * 		 e incrementando el numero de errores semanticos
+	 */
+	public static void deteccionErrorSemantico(String msg) {
+		
+		 // Incremento de los errores semanticos
+		 numErroresSemanticos++;
+		
+		 // Mostrar por pantalla el error del mensaje
 	     System.out.println("ERROR SEMANTICO : " + msg);
 	}
 
@@ -29,7 +38,7 @@ public class ErrorSemantico extends Exception {
 	 * 		 no esta entre COTA_MINIMA y COTA_MAXIMA
 	 */
 	public static boolean hayDesbordamientoEntacar(int valor) {
-		return valor < COTA_MINIMA_ENTERO || valor > COTA_MAXIMA_ENTERO;
+		return valor < COTA_MINIMA || valor > COTA_MAXIMA;
 	}
 	
 	
@@ -39,6 +48,17 @@ public class ErrorSemantico extends Exception {
 	 * 		 no esta entre COTA_MINIMA_ENTERO y COTA_MAXIMA_ENTERO
 	 */
 	public static boolean hayDesbordamientoEntero(int valor) {
-		return valor < -32678 || valor > 32768;
+		return valor < COTA_MINIMA_ENTERO || valor > COTA_MAXIMA_ENTERO;
 	}
+
+
+	/*
+	 * Pre: ---
+	 * Post: Devuelve el numero de errores semanticos
+	 */
+	public static int getNumErroresSemanticos() {
+		return numErroresSemanticos;
+	}
+
+
 }
