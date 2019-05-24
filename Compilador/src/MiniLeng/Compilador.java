@@ -135,7 +135,7 @@ public class Compilador implements CompiladorConstants {
       declaracion_variables();
       declaracion_acciones();
        // Mostrar el comienzo del programa con la etiqueta inicial
-       pw.println("; Comienzo del programa " + t.image);
+       pw.println("; Comienzo del programa " + t.image.toUpperCase());
        pw.println(etiquetaProg + ":");
       bloque_sentencias();
        // Fin del fichero
@@ -299,7 +299,6 @@ public class Compilador implements CompiladorConstants {
        {
           pw.println("; Direccion de la variable " + s.getNombre().toUpperCase() + ".");
           pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-          pw.println("\u005ct DRF");
           tipo = s.getVariable();
        }
       // Procesamiento de la expresion
@@ -367,7 +366,7 @@ public class Compilador implements CompiladorConstants {
             pw.println("; Leer variable " + s.getNombre());
             // Mostrar datos de la variable o parametro
             pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-            pw.println("\u005ct RD   1");
+            pw.println("\u005ct RD    1");
           }
         }
         else if (s.es_Simbolo_Parametro())
@@ -385,6 +384,7 @@ public class Compilador implements CompiladorConstants {
             pw.println("; Leer parametro por referencia " + s.getNombre());
             // Mostrar datos de la variable o parametro
             pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
+            pw.println("\u005ct DRF");
             pw.println("\u005ct DRF");
             pw.println("\u005ct RD    1");
           }
@@ -578,7 +578,7 @@ public class Compilador implements CompiladorConstants {
               }
               else
               {
-                pw.println("; Invocacion a " + s.getNombre() + ".");
+                pw.println("; Invocacion a " + s.getNombre().toUpperCase() + ".");
               }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZDA:
@@ -1378,7 +1378,7 @@ public class Compilador implements CompiladorConstants {
   // Declaracion del operador
   TipoOperador op;
   boolean ok;
-  boolean constantes = false;;
+  boolean constantes = false;
     try {
       // Evaluacion del primer factor
           tpFactor1 = factor();
@@ -1899,7 +1899,7 @@ public class Compilador implements CompiladorConstants {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tSI_NO:
         jj_consume_token(tSI_NO);
-        pw.println("; ELSE.");
+        pw.println("; SI_NO.");
         lista_sentencias();
         break;
       default:
@@ -1907,8 +1907,8 @@ public class Compilador implements CompiladorConstants {
         ;
       }
       jj_consume_token(tFSI);
-      pw.println("; Fin SI");
       pw.println(etiqFIN + ":");
+      pw.println("; Fin SI");
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);
     }
@@ -2273,7 +2273,7 @@ public class Compilador implements CompiladorConstants {
         s = tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
 
                 // Incremento de la variable de direccion
-                if (i != dimension - 1)
+                if (i <= dimension - 1)
                 {
                   // Preparar direccion del siguiente parametro si no es el ultimo
                   incrementar_pila();
