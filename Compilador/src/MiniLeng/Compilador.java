@@ -577,7 +577,6 @@ public class Compilador implements CompiladorConstants {
               else
               {
                 pw.println("; Invocacion a " + s.getNombre() + ".");
-                pw.println("\u005ct OSF   " + s.getDir() + "  " + (nivel - s.getNivel()) + " " + s.getEtiqueta());
               }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZDA:
@@ -600,6 +599,11 @@ public class Compilador implements CompiladorConstants {
                         ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + " -  Se esperaban " + argc +
                         " parametros al invocar a la accion " + s.getNombre());
+                }
+                else
+                {
+                  // La invocacion es correcta
+                  pw.println("\u005ct OSF   " + s.getDir() + "  " + (nivel - s.getNivel()) + " " + s.getEtiqueta());
                 }
               }
     } catch (ParseException e) {
@@ -1960,8 +1964,12 @@ public class Compilador implements CompiladorConstants {
   Simbolo s = null;
   Simbolo.Tipo_simbolo tp_Sim;
   boolean ok = false;
+
   // Lista de parametros de la accion
   LinkedList < LinkedList < Simbolo > > listaDeParametros = new LinkedList < LinkedList < Simbolo > > ();
+
+  // Lista de simbolos
+  LinkedList<Simbolo> listaAuxiliar = new LinkedList<Simbolo>();
     try {
       jj_consume_token(tACCION);
       tId = jj_consume_token(tIDENTIFICADOR);
@@ -2001,11 +2009,39 @@ public class Compilador implements CompiladorConstants {
       {
         for (int i = 0; i < listaDeParametros.size(); i++)
         {
-          // Añadir la lista de parametros al simbolo
-          s.anyadirParametrosAccion(listaDeParametros.get(i));
+          // Añadir la lista de parametros al simbolo con la direccion correspondiente
+          s.anyadirParametrosAccion(listaDeParametros.get(i), dir);
+
+                  // Preparar direccion de pila para el proximo parametro
+                  if (i != listaDeParametros.size() - 1)
+                  {
+                incrementar_pila();
+          }
         }
+
+        for (int i = listaDeParametros.size() - 1; i >= 0; i--)
+        {
+           listaAuxiliar = listaDeParametros.get(i);
+
+           for (int j = listaAuxiliar.size() - 1; j >= 0; j--)
+           {
+              s = listaAuxiliar.get(j);
+
+              // Generar codigo de los parametros
+                  pw.println("; rec. parametro " + s.getNombre().toUpperCase() + " de tipo " + s.getVariable().toString() +
+                  " pasado por " + s.getParametro().toString());
+              pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
+              pw.println("\u005ct ASGI");
+           }
+        }
+
         // Limpiar parametros de la posible accion anterior
         tabla.limpiarListaParametros();
+
+                // Fin del procesamiento de parametros
+        String etiqPar = etiq.nueva_etiqueta();
+        pw.println("\u005ct JMP   " + etiqPar);
+        pw.println(etiqPar + ":");
       }
       {if (true) return tId;}
     } catch (ParseException e) {
@@ -2128,26 +2164,6 @@ public class Compilador implements CompiladorConstants {
                         ", columna " + token.beginColumn + "  - Parametro repetido " + identificadorActual);
         }
       }
-
-      // Calculo de longitud de nueva lista sin parametros repetidos
-          dimension = lista.size();
-
-          // Recuperacion de los parametros en orden inverso
-          for (int i = dimension - 1; i >= 0; i--)
-          {
-            // Obtener simbolo inverso
-            s = lista.get(i);
-
-            // Generar codigo de los parametros
-        pw.println("; rec. parametro " + s.getNombre().toUpperCase() + " de tipo " + s.getVariable().toString() +
-                " pasado por " + s.getParametro().toString());
-        pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-        pw.println("\u005ct ASGI");
-          }
-
-      String etiqPar = etiq.nueva_etiqueta();
-      pw.println("\u005ct JMP   " + etiqPar);
-      pw.println(etiqPar + ":");
       {if (true) return lista;}
     } catch (ParseException e) {
     ErrorSintactico eS = new ErrorSintactico(e);

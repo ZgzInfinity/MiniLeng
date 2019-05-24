@@ -303,7 +303,7 @@ public class Simbolo {
 	 * Pre: <<listaDeParametros>> es una lista de parametros asociados a una accion
 	 * Post: Ha asignado a la lista de parametros de la accion la lista <<listaDeParametros>>
 	 */
-	public void anyadirParametrosAccion(LinkedList<Simbolo> listaDeParametros){
+	public void anyadirParametrosAccion(LinkedList<Simbolo> listaDeParametros, long dir){
 		// Calculo del numero de parametros de la accion
 		int dimension = listaDeParametros.size();
 		Simbolo s;
@@ -311,6 +311,9 @@ public class Simbolo {
 		for (int i = 0; i < dimension; i++) {
 			// Extraccion del simbolo
 			s = listaDeParametros.get(i);
+			
+			// Incorporar la direccion
+			s.setDir(dir);
 			
 			this.lista_parametros.add(s);
 		}
