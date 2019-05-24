@@ -2444,8 +2444,9 @@ LinkedList < Simbolo > parametros() :
         pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
         pw.println("\t ASGI");
 	  }
-      
+
       String etiqPar = etiq.nueva_etiqueta();
+      pw.println("\t JMP   " + etiqPar);
       pw.println(etiqPar + ":");
       return lista;
     }

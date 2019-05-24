@@ -2146,6 +2146,7 @@ public class Compilador implements CompiladorConstants {
           }
 
       String etiqPar = etiq.nueva_etiqueta();
+      pw.println("\u005ct JMP   " + etiqPar);
       pw.println(etiqPar + ":");
       {if (true) return lista;}
     } catch (ParseException e) {
