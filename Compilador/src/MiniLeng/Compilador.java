@@ -299,6 +299,7 @@ public class Compilador implements CompiladorConstants {
        {
           pw.println("; Direccion de la variable " + s.getNombre().toUpperCase() + ".");
           pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
+          pw.println("\u005ct DRF");
           tipo = s.getVariable();
        }
       // Procesamiento de la expresion
@@ -534,7 +535,7 @@ public class Compilador implements CompiladorConstants {
               {
                 // Correcto el identificador
 
-                pw.println("; Acceso a la variable " + s.getNombre().toUpperCase());
+                pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
                 pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
                 pw.println("\u005ct DRF");
 
@@ -2012,11 +2013,8 @@ public class Compilador implements CompiladorConstants {
           // Añadir la lista de parametros al simbolo con la direccion correspondiente
           s.anyadirParametrosAccion(listaDeParametros.get(i), dir);
 
-                  // Preparar direccion de pila para el proximo parametro
-                  if (i != listaDeParametros.size() - 1)
-                  {
-                incrementar_pila();
-          }
+                  // Preparar direccion de pila para el proximo parametro o variable
+          incrementar_pila();
         }
 
         for (int i = listaDeParametros.size() - 1; i >= 0; i--)
