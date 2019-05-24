@@ -486,7 +486,8 @@ public class Compilador implements CompiladorConstants {
           if (constCad)
           {
             // La expresion es una cadena
-            pw.println("; cadena '" + t.image + "'.");
+            String cad = t.image.replace("\u005c"","'");
+            pw.println("; cadena " + cad + ".");
 
             // Obtencion de la cadena y la longitud 
             String cadena = t.image;
@@ -1322,7 +1323,7 @@ public class Compilador implements CompiladorConstants {
                       regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
                       break;
                       case RESTA :
-                      pw.println("\u005ct TSB");
+                      pw.println("\u005ct SBT");
                       regResult.valorEnt = regTerm1.valorEnt - regTerm2.valorEnt;
                       break;
                       default :
@@ -1339,7 +1340,7 @@ public class Compilador implements CompiladorConstants {
                       pw.println("\u005ct PLUS");
                       break;
                       case RESTA :
-                      pw.println("\u005ct TSB");
+                      pw.println("\u005ct SBT");
                       break;
                       default :
                       ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +

@@ -771,7 +771,8 @@ void escribible() :
 	  if (constCad)
 	  {
 	    // La expresion es una cadena
-	    pw.println("; cadena '" + t.image + "'.");
+	    String cad = t.image.replace("\"","'");
+	    pw.println("; cadena " + cad + ".");
 
 	    // Obtencion de la cadena y la longitud 
 	    String cadena = t.image;
@@ -1608,7 +1609,7 @@ RegistroExp expresion_simple() :
 	              regResult.valorEnt = regTerm1.valorEnt + regTerm2.valorEnt;
 	              break;
 	              case RESTA :
-	              pw.println("\t TSB"); 
+	              pw.println("\t SBT"); 
 	              regResult.valorEnt = regTerm1.valorEnt - regTerm2.valorEnt;
 	              break;
 	              default : 
@@ -1625,7 +1626,7 @@ RegistroExp expresion_simple() :
 	              pw.println("\t PLUS");            	             
 	              break;
 	              case RESTA :
-	              pw.println("\t TSB"); 	             
+	              pw.println("\t SBT"); 	             
 	              break;
 	              default : 
 	              ErrorSemantico eSM = new ErrorSemantico("linea " + token.beginLine +
