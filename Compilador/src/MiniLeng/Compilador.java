@@ -20,6 +20,8 @@ import Exceptions.ErrorLexico;
 import Exceptions.ErrorSemantico;
 import Exceptions.ErrorSintactico;
 
+import Warnings.DesbordamientoEnteros;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -42,7 +44,6 @@ public class Compilador implements CompiladorConstants {
   public static Etiqueta etiq = new Etiqueta();
 
   public static ErrorLexico eL = new ErrorLexico();
-
 
   public static void iniciar_pila() {
       dir = DIRECCION_INICIAL;
@@ -1332,8 +1333,8 @@ public class Compilador implements CompiladorConstants {
         {
           // La expresion final es entera          
           regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-          if (ErrorSemantico.hayDesbordamientoEntero(regTerm1.getValorEnt())
-          || ErrorSemantico.hayDesbordamientoEntero(regTerm2.getValorEnt()))
+          if (DesbordamientoEnteros.hayDesbordamientoEntero(regTerm1.getValorEnt())
+          || DesbordamientoEnteros.hayDesbordamientoEntero(regTerm2.getValorEnt()))
           {
             ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Valor fuera del rango");
@@ -1484,8 +1485,8 @@ public class Compilador implements CompiladorConstants {
         else
         {
           regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
-          if (ErrorSemantico.hayDesbordamientoEntero(tpFactor1.valorEnt)
-          || ErrorSemantico.hayDesbordamientoEntero(tpFactor2.valorEnt))
+          if (DesbordamientoEnteros.hayDesbordamientoEntero(tpFactor1.valorEnt)
+          || DesbordamientoEnteros.hayDesbordamientoEntero(tpFactor2.valorEnt))
           {
             ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
                         ", columna " + token.beginColumn + "  - Valor fuera del rango");
