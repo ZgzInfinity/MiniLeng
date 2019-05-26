@@ -37,7 +37,7 @@ ACCION primer_dia_anho;
 ACCION primer_dia_mes;
 
 % Calcula el dia de la semana en el cual cayo 
-el dia uno d ese mes
+% el dia uno d ese mes
 % en ese anio
 %-----------------------------------------------------------
 
