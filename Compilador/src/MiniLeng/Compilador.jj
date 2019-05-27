@@ -568,7 +568,6 @@ void asignacion(Token t) :
           pw.println("; Direccion del parametro por referencia " + s.getNombre().toUpperCase() + ".");
           pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\t DRF");
-          pw.println("\t DRF");
         }
       }
       else if (s.es_Simbolo_Accion())
@@ -832,11 +831,18 @@ void escribible() :
           pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\t DRF");
           // Si es parametro
-          if (s.es_Simbolo_Parametro())
+          if (s.getParametro() == Simbolo.Clase_parametro.REF)
           {
             pw.println("\t DRF");
+          }          
+          if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
+          {
+          	pw.println("\t WRT   1");
           }
-          pw.println("\t WRT   1");
+          if (s.getVariable() == Simbolo.Tipo_variable.CHAR)
+          {
+            pw.println("\t WRT	 0");
+          }
         }
       }
     }
@@ -2023,10 +2029,13 @@ RegistroExp factor() :
         result.setTipo(s.getVariable());
         result.setClase(s.getParametro());
         // El identificador es correcto
-        pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
+        pw.println("; Acceso3 a la variable " + s.getNombre().toUpperCase() + ".");
         pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-        pw.println("\t DRF");
-        if (s.es_Simbolo_Parametro())
+		pw.println("\t DRF");
+		
+        System.out.println(s.toString());
+        
+        if (s.getParametro() == Simbolo.Clase_parametro.REF)
         {
           pw.println("\t DRF");
         }
@@ -2197,15 +2206,21 @@ void declaracion_acciones() :
 // Regla de declaracion_Accion OK
 void declaracion_accion() :
 {
-  Token t;
+  Simbolo s;
 }
 {
   try
   {
-    t = cabecera_accion() < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias()
     {
+      System.out.println("DIR : " + dir);
+    }
+    s = cabecera_accion() < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias()
+    {
+      // Recuperar el valor de la direccion
+      System.out.println("IEIIE " + s.toString());
+      dir = s.getDir(); 
       // Detectado el fin de un bloque de sentencias de una accion
-      pw.println("; Fin de la accion / funcion " + t.image.toUpperCase() + ".");
+      pw.println("; Fin de la accion / funcion " + s.getNombre().toUpperCase() + ".");
       pw.println("\t CSF");
       // Eliminacion de variables
       tabla.eliminar_variables(nivel);
@@ -2224,11 +2239,11 @@ void declaracion_accion() :
 }
 
 // Regla de cabecera_accion OK
-Token cabecera_accion() :
+Simbolo cabecera_accion() :
 {
   Token tId = null;
   ;
-  Simbolo s = null;
+  Simbolo s, sAccion = null;
   Simbolo.Tipo_simbolo tp_Sim;
   boolean ok = false;
   // Lista de parametros de la accion
@@ -2249,6 +2264,8 @@ Token cabecera_accion() :
       {
         // Introducir accion en la tabla de simbolos
         s = tabla.introducir_accion(tId.image, nivel, dir);
+
+        
         ok = true;
         // Crear etiqueta para la accion
         String etiqAccion = etiq.nueva_etiqueta();
@@ -2267,6 +2284,9 @@ Token cabecera_accion() :
       nivel++;
       // Incio del marco de la pila
       iniciar_pila();
+
+	  // Guardar el simbolo de la accion
+      sAccion = s;
     }
     // Procesamiento de los parametros
     listaDeParametros = parametros_formales(tId)
@@ -2301,7 +2321,7 @@ Token cabecera_accion() :
         pw.println("\t JMP   " + etiqPar);
         pw.println(etiqPar + ":");
       }
-      return tId;
+      return sAccion;
     }
   }
   catch (ParseException e)

@@ -297,7 +297,6 @@ public class Compilador implements CompiladorConstants {
           pw.println("; Direccion del parametro por referencia " + s.getNombre().toUpperCase() + ".");
           pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\u005ct DRF");
-          pw.println("\u005ct DRF");
         }
       }
       else if (s.es_Simbolo_Accion())
@@ -548,11 +547,18 @@ public class Compilador implements CompiladorConstants {
           pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\u005ct DRF");
           // Si es parametro
-          if (s.es_Simbolo_Parametro())
+          if (s.getParametro() == Simbolo.Clase_parametro.REF)
           {
             pw.println("\u005ct DRF");
           }
-          pw.println("\u005ct WRT   1");
+          if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
+          {
+                pw.println("\u005ct WRT   1");
+          }
+          if (s.getVariable() == Simbolo.Tipo_variable.CHAR)
+          {
+            pw.println("\u005ct WRT\u0009 0");
+          }
         }
       }
     } catch (ParseException e) {
@@ -1745,10 +1751,13 @@ public class Compilador implements CompiladorConstants {
         result.setTipo(s.getVariable());
         result.setClase(s.getParametro());
         // El identificador es correcto
-        pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
+        pw.println("; Acceso3 a la variable " + s.getNombre().toUpperCase() + ".");
         pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-        pw.println("\u005ct DRF");
-        if (s.es_Simbolo_Parametro())
+                pw.println("\u005ct DRF");
+
+        System.out.println(s.toString());
+
+        if (s.getParametro() == Simbolo.Clase_parametro.REF)
         {
           pw.println("\u005ct DRF");
         }
@@ -1914,15 +1923,19 @@ public class Compilador implements CompiladorConstants {
 
 // Regla de declaracion_Accion OK
   static final public void declaracion_accion() throws ParseException {
-  Token t;
+  Simbolo s;
     try {
-      t = cabecera_accion();
+      System.out.println("DIR : " + dir);
+      s = cabecera_accion();
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
       declaracion_acciones();
       bloque_sentencias();
+      // Recuperar el valor de la direccion
+      System.out.println("IEIIE " + s.toString());
+      dir = s.getDir();
       // Detectado el fin de un bloque de sentencias de una accion
-      pw.println("; Fin de la accion / funcion " + t.image.toUpperCase() + ".");
+      pw.println("; Fin de la accion / funcion " + s.getNombre().toUpperCase() + ".");
       pw.println("\u005ct CSF");
       // Eliminacion de variables
       tabla.eliminar_variables(nivel);
@@ -1938,10 +1951,10 @@ public class Compilador implements CompiladorConstants {
   }
 
 // Regla de cabecera_accion OK
-  static final public Token cabecera_accion() throws ParseException {
+  static final public Simbolo cabecera_accion() throws ParseException {
   Token tId = null;
   ;
-  Simbolo s = null;
+  Simbolo s, sAccion = null;
   Simbolo.Tipo_simbolo tp_Sim;
   boolean ok = false;
   // Lista de parametros de la accion
@@ -1957,6 +1970,8 @@ public class Compilador implements CompiladorConstants {
       {
         // Introducir accion en la tabla de simbolos
         s = tabla.introducir_accion(tId.image, nivel, dir);
+
+
         ok = true;
         // Crear etiqueta para la accion
         String etiqAccion = etiq.nueva_etiqueta();
@@ -1975,6 +1990,9 @@ public class Compilador implements CompiladorConstants {
       nivel++;
       // Incio del marco de la pila
       iniciar_pila();
+
+          // Guardar el simbolo de la accion
+      sAccion = s;
       // Procesamiento de los parametros
           listaDeParametros = parametros_formales(tId);
       // Limpiar parametros de la posible acc
@@ -2007,7 +2025,7 @@ public class Compilador implements CompiladorConstants {
         pw.println("\u005ct JMP   " + etiqPar);
         pw.println(etiqPar + ":");
       }
-      {if (true) return tId;}
+      {if (true) return sAccion;}
     } catch (ParseException e) {
     ErrorSintactico.deteccionErrorSintactico(e);
     }
