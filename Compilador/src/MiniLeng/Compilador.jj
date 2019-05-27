@@ -657,7 +657,15 @@ void lista_asignables() :
             pw.println("; Leer variable " + s.getNombre());
             // Mostrar datos de la variable o parametro
             pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-            pw.println("\t RD    1");
+
+            if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
+            { 
+            	pw.println("\t RD    1");
+          	}
+          	else
+          	{
+          	  	pw.println("\t RD    0");
+          	}
           }
         }
         else if (s.es_Simbolo_Parametro())
@@ -677,7 +685,15 @@ void lista_asignables() :
             pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
             pw.println("\t DRF");
             pw.println("\t DRF");
-            pw.println("\t RD    1");
+
+            if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
+            { 
+            	pw.println("\t RD    1");
+          	}
+          	else
+          	{
+          	  	pw.println("\t RD    0");
+          	}
           }
         }
         else if (s.es_Simbolo_Accion())

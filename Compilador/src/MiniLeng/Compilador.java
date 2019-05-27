@@ -377,7 +377,15 @@ public class Compilador implements CompiladorConstants {
             pw.println("; Leer variable " + s.getNombre());
             // Mostrar datos de la variable o parametro
             pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-            pw.println("\u005ct RD    1");
+
+            if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
+            {
+                pw.println("\u005ct RD    1");
+                }
+                else
+                {
+                        pw.println("\u005ct RD    0");
+                }
           }
         }
         else if (s.es_Simbolo_Parametro())
@@ -397,7 +405,15 @@ public class Compilador implements CompiladorConstants {
             pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
             pw.println("\u005ct DRF");
             pw.println("\u005ct DRF");
-            pw.println("\u005ct RD    1");
+
+            if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
+            {
+                pw.println("\u005ct RD    1");
+                }
+                else
+                {
+                        pw.println("\u005ct RD    0");
+                }
           }
         }
         else if (s.es_Simbolo_Accion())
