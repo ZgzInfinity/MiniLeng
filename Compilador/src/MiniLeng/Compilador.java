@@ -1771,7 +1771,6 @@ public class Compilador implements CompiladorConstants {
         pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
                 pw.println("\u005ct DRF");
 
-        System.out.println(s.toString());
 
         if (s.getParametro() == Simbolo.Clase_parametro.REF)
         {
@@ -1948,7 +1947,6 @@ public class Compilador implements CompiladorConstants {
       declaracion_acciones();
       bloque_sentencias();
       // Recuperar el valor de la direccion
-      System.out.println("IEIIE " + s.toString());
       dir = s.getDir();
       // Detectado el fin de un bloque de sentencias de una accion
       pw.println("; Fin de la accion / funcion " + s.getNombre().toUpperCase() + ".");

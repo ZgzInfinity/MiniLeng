@@ -2049,7 +2049,6 @@ RegistroExp factor() :
         pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
 		pw.println("\t DRF");
 		
-        System.out.println(s.toString());
         
         if (s.getParametro() == Simbolo.Clase_parametro.REF)
         {
@@ -2233,7 +2232,6 @@ void declaracion_accion() :
     s = cabecera_accion() < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias()
     {
       // Recuperar el valor de la direccion
-      System.out.println("IEIIE " + s.toString());
       dir = s.getDir(); 
       // Detectado el fin de un bloque de sentencias de una accion
       pw.println("; Fin de la accion / funcion " + s.getNombre().toUpperCase() + ".");
