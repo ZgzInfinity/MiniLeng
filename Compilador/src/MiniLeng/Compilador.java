@@ -23,12 +23,10 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 
 public class Compilador implements CompiladorConstants {
-  // IniCio del nivel de declaraciones anidadas
   public static int nivel = 0;
 
   static final int DIRECCION_INICIAL = 3;
 
-  // Variable de direccion 
   public static long dir = DIRECCION_INICIAL;
 
   public static PrintWriter pw;
@@ -51,7 +49,6 @@ public class Compilador implements CompiladorConstants {
 
   public static void main(String args []) throws ParseException, IOException
   {
-    /* nombre del fichero */
     String nombreArchivo;
     String path = "C:\u005c\u005cUsers\u005c\u005cGord\u005c\u005cDesktop\u005c\u005cprogramas\u005c\u005c";
     if (args [0].equals("-v"))
@@ -64,34 +61,26 @@ public class Compilador implements CompiladorConstants {
       System.out.println("Compilacion sin modo verbose");
       nombreArchivo = args [0];
     }
-    // Ruta del fochero de escritura
     File ficheroSalida = new File("C:\u005c\u005cUsers\u005c\u005cGord\u005c\u005cDesktop\u005c\u005cprogramas\u005c\u005c" + nombreArchivo + ".code");
     FileWriter ficheroCode = new FileWriter(ficheroSalida);
     pw = new PrintWriter(ficheroCode);
-    /* Completar la ruta del path */
+
     path += nombreArchivo + ".ml";
     System.out.println("LEYENDO FICHERO " + nombreArchivo + "\u005cn");
     try
     {
-      /* Crear el parser con respecto al fichero */
       Compilador parser = new Compilador(new java.io.FileInputStream(path));
-      // Inicializacion de la tabla de simbolos
       tabla.inicializar_tabla();
       int res = Compilador.programa();
       if (args [0].equals("-v"))
       {
-        /* Mostrar total de tokens */
         TablaHash.mostrarTokensNormales();
-        /* Mostrar total de identificadores */
         TablaHash.mostrarIdentificadores();
       }
-      // Cierre del flujo de escritura
       ficheroCode.close();
-      // Balance de errores 
       int erroresLexicos = ErrorLexico.getNumErroresLexicos();
       int erroresSintacticos = ErrorSintactico.getNumErroresSintacticos();
       int erroresSemanticos = ErrorSemantico.getNumErroresSemanticos();
-      // Comprobar que el fichero esta libre de errores lexicos, sintacticos o semanticos
       if (erroresLexicos > 0 || erroresSintacticos > 0 || erroresSemanticos > 0)
       {
         System.out.println("Compilacion finalizada con errores");
@@ -99,7 +88,6 @@ public class Compilador implements CompiladorConstants {
         System.out.println("Detectados " + erroresLexicos + " errores lexicos");
         System.out.println("Detectados " + erroresSintacticos + " errores sintacticos");
         System.out.println("Detectados " + erroresSemanticos + " errores semanticos");
-        // Borrado del fichero .code creado
         ficheroSalida.delete();
       }
       else
@@ -108,7 +96,6 @@ public class Compilador implements CompiladorConstants {
         System.out.println("==================================");
         System.out.println("El fichero " + nombreArchivo + " es correcto");
       }
-      // Comprobar que la ejecucion ha ido correctamente
     }
     catch (Exception e)
     {
@@ -118,7 +105,6 @@ public class Compilador implements CompiladorConstants {
     }
     catch (Error e)
     {
-      // Obtencion del error sintactico 
       int fila = CompiladorTokenManager.input_stream.getBeginLine();
       int columna = CompiladorTokenManager.input_stream.getBeginColumn();
       String tokenMalo = CompiladorTokenManager.input_stream.GetImage();
@@ -127,32 +113,23 @@ public class Compilador implements CompiladorConstants {
   }
 
 /* Construccion del analizador sintactico */
-
-// Regla de programa
   static final public int programa() throws ParseException {
   Token tSim, t;
   Simbolo s;
   Simbolo.Tipo_simbolo tp_Sim;
     try {
       jj_consume_token(tPROGRAMA);
-      // Guardado del nombre del programa
-          t = jj_consume_token(tIDENTIFICADOR);
-      // Insertar en la tabla de simbolos el token del programa
-      // no se comprueba porque es el primero
+      t = jj_consume_token(tIDENTIFICADOR);
       s = tabla.introducir_programa(t.image, dir);
-      // Escritura del nombre del programa en el fichero
       pw.println("; Programa " + t.image.toUpperCase() + ".");
-      // Etiqueta inicial del programa
       String etiquetaProg = etiq.nueva_etiqueta();
       pw.println("\u005ct ENP  " + etiquetaProg);
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
       declaracion_acciones();
-      // Mostrar el comienzo del programa con la etiqueta inicial
       pw.println("; Comienzo del programa " + t.image.toUpperCase());
       pw.println(etiquetaProg + ":");
       bloque_sentencias();
-      // Fin del fichero
       pw.println("; Fin del programa " + t.image.toUpperCase() + ".");
       pw.println("\u005ct LVP");
       jj_consume_token(0);
@@ -164,20 +141,17 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla de bloque_sentencias OK
   static final public void bloque_sentencias() throws ParseException {
     try {
       jj_consume_token(tPRINCIPIO);
       lista_sentencias();
       jj_consume_token(tFIN);
-      // Ocultar los parametros del nivel actual
       tabla.ocultar_parametros(nivel);
     } catch (ParseException e) {
     ErrorSintactico.deteccionErrorSintactico(e);
     }
   }
 
-// Regla de lista_sentencias OK EN DUDA
   static final public void lista_sentencias() throws ParseException {
     try {
       label_1:
@@ -201,7 +175,6 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de sentencia OK
   static final public void sentencia() throws ParseException {
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -233,11 +206,9 @@ public class Compilador implements CompiladorConstants {
   }
 
   static final public void asig_invoc() throws ParseException {
-  // Declaracion de variables
   Token t;
     try {
-      // Pasar el token capturado como identificador a la invocacion de la accion
-          t = jj_consume_token(tIDENTIFICADOR);
+      t = jj_consume_token(tIDENTIFICADOR);
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tOPAS:
         asignacion(t);
@@ -256,21 +227,16 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de asignacion OK
   static final public void asignacion(Token t) throws ParseException {
-  // Declaracion de variables
   RegistroExp tpExp;
   Simbolo s;
   Simbolo.Tipo_variable tipo = null;
   boolean ok = true;
     try {
       jj_consume_token(tOPAS);
-      // Se busca el simbolo en la tabla de simbolos
       s = tabla.buscar_simbolo(t.image);
-      // el simbolo se ha encontrado bien
       if (s == null)
       {
-        // Excepcion de simbolo no encontrado
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + "  - Variable desconocida " + t.image +
         " en la parte izquierda de la asignacion");
@@ -282,17 +248,14 @@ public class Compilador implements CompiladorConstants {
       {
         if (s.es_Parametro_Valor())
         {
-          // El parametro es por valor
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
           ", columna " + token.beginColumn + "  - Prohibido asignar a " + s.getNombre() +
           ", es un parametro pasado como valor");
-          // Tipo de simbolo desconocido
           tipo = Simbolo.Tipo_variable.DESCONOCIDO;
           ok = false;
         }
         else
         {
-          // El parametro a asignar es por referencia
           tipo = s.getVariable();
           pw.println("; Direccion del parametro por referencia " + s.getNombre().toUpperCase() + ".");
           pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
@@ -304,7 +267,6 @@ public class Compilador implements CompiladorConstants {
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + "  - Prohibida la asignacion a la accion " +
         s.getNombre());
-        // Tipo de simbolo desconocido
         tipo = Simbolo.Tipo_variable.DESCONOCIDO;
         ok = false;
       }
@@ -314,8 +276,7 @@ public class Compilador implements CompiladorConstants {
         pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
         tipo = s.getVariable();
       }
-      // Procesamiento de la expresion
-          tpExp = expresion();
+      tpExp = expresion();
       jj_consume_token(tPUNTYCOM);
       if (ok && tpExp.getTipo() != tipo && tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
       {
@@ -325,7 +286,6 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // Asignacion evaluada correctamente
         pw.println("; Asignacion.");
         pw.println("\u005ct ASG");
       }
@@ -334,25 +294,16 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de lista_asignables OK
   static final public void lista_asignables() throws ParseException {
-  //Declaracion de variables
   LinkedList < String > listaIdentificadores;
-  // identificador a evaluar
   String idActual;
     try {
-      // Retorno de la lista de identificadores
-          listaIdentificadores = identificadores();
-      // Tamaño de la lista de identificadores
+      listaIdentificadores = identificadores();
       int dimension = listaIdentificadores.size();
-      // Simbolo a evaluar
       Simbolo s;
-      // Recorrido de la lista 
       for (int i = 0; i < dimension; i++)
       {
-        // obtencion del i-esimo identificador
         idActual = listaIdentificadores.get(i);
-        // Busqueda del simbolo en la tabla de simbolos
         s = tabla.buscar_simbolo(idActual);
         if (s == null)
         {
@@ -363,19 +314,15 @@ public class Compilador implements CompiladorConstants {
         else if (s.getTipo() == Simbolo.Tipo_simbolo.VARIABLE
         || s.getVariable() == Simbolo.Tipo_variable.DESCONOCIDO)
         {
-          // es variable o desconocido
           if (s.es_Variable_Booleano() || s.es_Variable_Cadena())
           {
-            // Error semantico en la lista de asignables
             ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
             ", columna " + token.beginColumn + "  - Tipo invalido de variable de lectura, se espera " +
             "entero o caracter");
           }
           else
           {
-            // Lectura de variables      
             pw.println("; Leer variable " + s.getNombre());
-            // Mostrar datos de la variable o parametro
             pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
 
             if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
@@ -392,16 +339,13 @@ public class Compilador implements CompiladorConstants {
         {
           if (s.es_Parametro_Valor())
           {
-            // Error semantico en la lista de asignables
             ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
             ", columna " + token.beginColumn + "  - Variable " + s.getNombre() +
             " por valor en lectura");
           }
           else
           {
-            // Lectura de parametro por referencia      
             pw.println("; Leer parametro por referencia " + s.getNombre());
-            // Mostrar datos de la variable o parametro
             pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
             pw.println("\u005ct DRF");
             pw.println("\u005ct DRF");
@@ -418,7 +362,6 @@ public class Compilador implements CompiladorConstants {
         }
         else if (s.es_Simbolo_Accion())
         {
-          // Error semantico en la lista de asignables
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
           ", columna " + token.beginColumn + "  - Los argumentos de una funcion solo pueden ser" +
           " parametros o variables, encontrado " + s.getNombre() + " de tipo " + s.getTipo().toString());
@@ -429,7 +372,6 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de leer OK
   static final public void leer() throws ParseException {
     try {
       jj_consume_token(tLEER);
@@ -442,7 +384,6 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de escribir OK
   static final public void escribir() throws ParseException {
     try {
       jj_consume_token(tESCRIBIR);
@@ -455,7 +396,6 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de lista_escribibles OK
   static final public void lista_escribibles() throws ParseException {
     try {
       escribible();
@@ -477,9 +417,7 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de lista_escribibles OK
   static final public void escribible() throws ParseException {
-  // Declaracion de variables
   Token t = null;
   Simbolo s;
   RegistroExp regExp = null;
@@ -512,13 +450,10 @@ public class Compilador implements CompiladorConstants {
       }
       if (constCad)
       {
-        // La expresion es una cadena
         String cad = t.image.replace("\u005c"", "'");
         pw.println("; cadena " + cad + ".");
-        // Obtencion de la cadena y la longitud 
         String cadena = t.image;
         int tamanyo = cadena.length();
-        // Escribir el codigo asccii de cada caracter de la cadena
         for (int i = 1; i < tamanyo - 1; i++)
         {
           pw.println("\u005ct STC   " + (int) cadena.charAt(i));
@@ -543,7 +478,6 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // Lo busca bien el token en la tabla de simbolos
         s = tabla.buscar_simbolo(t.image);
         if (s == null)
         {
@@ -558,7 +492,6 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // Correcto el identificador
           pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
           pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\u005ct DRF");
@@ -582,13 +515,10 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de invocacion accion OK
   static final public void invocacion_accion(Token t) throws ParseException {
-  // Declaracion de variables
   Simbolo s = null;
   boolean args = false;
     try {
-      // Busqueda del simbolo en la tabla
       s = tabla.buscar_simbolo(t.image);
       if (s == null)
       {
@@ -596,10 +526,8 @@ public class Compilador implements CompiladorConstants {
         ", columna " + token.beginColumn + "  - Identificador " + t.image +
         " desconocido en llamada a accion");
       }
-      // Busqueda con exito en la tabla de simbolos
       else if (!s.es_Simbolo_Accion())
       {
-        // error al invocar la accion
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + "  - No se puede realizar una llamada" +
         " a una accion sobre el parametro " + t.image);
@@ -618,14 +546,11 @@ public class Compilador implements CompiladorConstants {
         ;
       }
       jj_consume_token(tPUNTYCOM);
-      // Si la accion no existe
       if (s != null)
       {
-        // Comprobar el numero de parametros en caso de que se llame sin ninguno
         int argc = s.getLista_parametros().size();
         if (!args && argc != 0)
         {
-          // Error por falta de parametros
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
           ", columna " + token.beginColumn + " -  Se esperaban " + argc +
           " parametros al invocar a la accion " + s.getNombre());
@@ -641,14 +566,11 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-//Regla de mientras que OK
   static final public void mientras_que() throws ParseException {
-  // Declaracion de variables
   RegistroExp tpExp;
   String etiqMQ, etiqFIN = null;
     try {
       jj_consume_token(tMQ);
-      // Mostrar etiqueta de inicio de bucle
       etiqMQ = etiq.nueva_etiqueta();
       pw.println(etiqMQ + ":");
       pw.println("; MQ.");
@@ -656,20 +578,17 @@ public class Compilador implements CompiladorConstants {
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
       && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
       {
-        // Error en la condicion del mientras que
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + " - La condicion de mientras_que debe ser booleana");
       }
       else
       {
-        // La condicion del bucle es correcta
         etiqFIN = etiq.nueva_etiqueta();
         pw.println("; Salir del bucle si la guarda se evalua a falso.");
         pw.println("\u005ct JMF  " + etiqFIN);
       }
       lista_sentencias();
       jj_consume_token(tFMQ);
-      // Fin de la iteracion del bucle
       pw.println("; Fin de la iteracion. Saltar a la cabecera del bucle.");
       pw.println("\u005ct JMP  " + etiqMQ);
       pw.println(etiqFIN + ":");
@@ -679,9 +598,7 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla para los argumentos OK
   static final public void argumentos(Simbolo s) throws ParseException {
-  //Declaracion de variables
   boolean ok = false;
     try {
       jj_consume_token(tPARENTESIS_IZDA);
@@ -698,7 +615,6 @@ public class Compilador implements CompiladorConstants {
       case tIDENTIFICADOR:
       case tPARENTESIS_IZDA:
         lista_expresiones(s);
-      // Captura bien la expresion
       ok = true;
         break;
       default:
@@ -706,15 +622,11 @@ public class Compilador implements CompiladorConstants {
         ;
       }
       jj_consume_token(tPARENTESIS_DCHA);
-      // Comprobar los parametros de la invocacion en caso de que
-      // se invoque con parametros distintos
       if (s != null)
       {
-        // Si la accion existe
         int argc = s.getLista_parametros().size();
         if (!ok && argc != 0)
         {
-          // Error de invocacion de parametros
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
           " - Se esperaban " + argc + " parametros al invocar a la accion " +
           s.getNombre());
@@ -725,22 +637,17 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de lista de expresiones
   static final public void lista_expresiones(Simbolo s) throws ParseException {
-  // Declaracion de variables
   RegistroExp r;
   int argc = 0;
   boolean ok = true;
   LinkedList < Simbolo > parametros;
     try {
-      // Captura de la primera expresion
-          r = expresion();
+      r = expresion();
       if (s != null && !s.es_Variable_Desconocido())
       {
-        // Obtencion de la lista de parametros de la accion
         parametros = s.getLista_parametros();
         argc++;
-        // Numero de parametros incorrecto
         if (argc > parametros.size())
         {
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
@@ -771,7 +678,6 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // Todo ha ido bien
           ok = false;
         }
       }
@@ -786,14 +692,11 @@ public class Compilador implements CompiladorConstants {
           break label_3;
         }
         jj_consume_token(tCOMA);
-        // Procesamiento de la nueva expresion
-            r = expresion();
+        r = expresion();
       if (s != null && !s.es_Variable_Desconocido())
       {
-        // Obtencion de la lista de parametros de la accion
         parametros = s.getLista_parametros();
         argc++;
-        // Numero de parametros incorrecto
         if (argc > parametros.size())
         {
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
@@ -802,7 +705,6 @@ public class Compilador implements CompiladorConstants {
           " no coindice, se esperaban " + parametros.size());
           ok = false;
         }
-        // Comprobacion de los tipos en la funcion AQUI ESTAMOS
         else if (r.getTipo() != parametros.get(argc - 1).getVariable())
         {
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
@@ -825,7 +727,6 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // Todo ha ido bien
           ok = false;
         }
       }
@@ -835,17 +736,14 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de expresion OK
   static final public RegistroExp expresion() throws ParseException {
-  // Declaracion de expresiones a analizar
   RegistroExp tpExp1 = null, tpExp2 = null;
   TipoOperador op;
   boolean ok = true;
   RegistroExp regResult = new RegistroExp();
   boolean constantes = false;
     try {
-      // Obtencion de la primera expresion
-          tpExp1 = expresion_simple();
+      tpExp1 = expresion_simple();
       label_4:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -862,12 +760,8 @@ public class Compilador implements CompiladorConstants {
           break label_4;
         }
         op = operador_relacional();
-        // Obtencion de la segunda expresion
-            tpExp2 = expresion_simple();
-      // Evaluacion de la expresion
-      // Resultado de evaluar la expresion
+        tpExp2 = expresion_simple();
       regResult = new RegistroExp();
-      // Evaluar primer termino de la expresion
       if (tpExp1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
       {
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
@@ -875,7 +769,6 @@ public class Compilador implements CompiladorConstants {
         "caracter, cadena o booleano");
         ok = false;
       }
-      // Evaluar segundo termino de la expresion
       if (tpExp2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
       {
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
@@ -883,10 +776,8 @@ public class Compilador implements CompiladorConstants {
         "caracter, cadena o booleano");
         ok = false;
       }
-      // Comprobar que todo ha ido bien y evaluar la expresion
       if (ok)
       {
-        // Verficar que los dos operandos son del mismo tipo
         if (tpExp1.getTipo() != tpExp2.getTipo())
         {
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
@@ -896,23 +787,17 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // Tipo de la nueva expresion
           regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-          // Evaluacion del tipo de la expresion
           switch (tpExp1.getTipo())
           {
-            // La expresion puede ser entera
             case ENTERO :
-            // Comprobar que la segunda expresion es tambien entera
             ok = tpExp2.getTipo() == Simbolo.Tipo_variable.ENTERO;
-            // Tipo de la nueva expresion
             regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
             if (!ok)
             {
               // Resul tiene tipo DESCONOCIDO porque no coinciden
               regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
             }
-            // Son constantes
             else if (tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             && tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
@@ -948,7 +833,6 @@ public class Compilador implements CompiladorConstants {
                 break;
               }
             }
-            // Los operadores no son constantes
             else
             {
               switch (op.getOperadorRelacional())
@@ -977,8 +861,6 @@ public class Compilador implements CompiladorConstants {
             }
             break;
             case CHAR :
-            // Cmprobar que la segunda expresion es una cadena
-            // El tipo es booleano
             regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
             ok = tpExp2.getTipo() == Simbolo.Tipo_variable.CHAR;
             if (!ok)
@@ -992,8 +874,6 @@ public class Compilador implements CompiladorConstants {
               constantes = true;
               switch (op.getOperadorRelacional())
               {
-                // Para los caracteres estan definidos todos los caracteres
-                // se pueden obtener los resultados cuando son constantes
                 case IGUAL :
                 pw.println("\u005ct EQ");
                 regResult.valorBool = tpExp1.valorString.equals(tpExp2.valorString);
@@ -1025,7 +905,6 @@ public class Compilador implements CompiladorConstants {
             }
             else
             {
-              // Los operandos no son constantes
               switch (op.getOperadorRelacional())
               {
                 case IGUAL :
@@ -1055,8 +934,6 @@ public class Compilador implements CompiladorConstants {
             }
             break;
             case BOOLEANO :
-            // Cmprobar que la segunda expresion es una cadena
-            // El tipo es booleano
             regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
             ok = tpExp2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
             if (!ok)
@@ -1067,7 +944,6 @@ public class Compilador implements CompiladorConstants {
             && tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
               constantes = true;
-              // Son constantes
               switch (op.getOperadorRelacional())
               {
                 case IGUAL :
@@ -1085,7 +961,6 @@ public class Compilador implements CompiladorConstants {
                 " sobre una booleano");
               }
             }
-            // Los operandos no son constantes
             else
             {
               switch (op.getOperadorRelacional())
@@ -1115,12 +990,10 @@ public class Compilador implements CompiladorConstants {
         }
         if (ok && !constantes)
         {
-          // Es expresion compuesta
           regResult.setExpr_compuesta(true);
         }
       }
       }
-      // Comprobar que la expresion es compuesta
       if (tpExp2 == null)
       {
         {if (true) return tpExp1;}
@@ -1135,45 +1008,37 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla de operador_relacional OK
   static final public TipoOperador operador_relacional() throws ParseException {
-  // Declaracion de variables
   TipoOperador op = new TipoOperador();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tIGUAL:
         jj_consume_token(tIGUAL);
-      // Es el operador =
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.IGUAL);
       {if (true) return op;}
         break;
       case tMENOR:
         jj_consume_token(tMENOR);
-      // Es el operador <
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR);
       {if (true) return op;}
         break;
       case tMEI:
         jj_consume_token(tMEI);
-      // Es el operador <=
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MENOR_IGUAL);
       {if (true) return op;}
         break;
       case tNI:
         jj_consume_token(tNI);
-      // Es el operador <>
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.NO_IGUAL);
       {if (true) return op;}
         break;
       case tMAI:
         jj_consume_token(tMAI);
-      // Es el operador >=
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR_IGUAL);
       {if (true) return op;}
         break;
       case tMAYOR:
         jj_consume_token(tMAYOR);
-      // Es el operador >
       op.setOperadorRelacional(TipoOperador.Tipo_Operador_Relacional.MAYOR);
       {if (true) return op;}
         break;
@@ -1188,27 +1053,22 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla operador aditivo OK
   static final public TipoOperador operador_aditivo() throws ParseException {
-  // Declaracion de variables
   TipoOperador op = new TipoOperador();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPLUS:
         jj_consume_token(tPLUS);
-      // El operador es una suma
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.SUMA);
       {if (true) return op;}
         break;
       case tMINUS:
         jj_consume_token(tMINUS);
-      // El operaodr es una resta
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.RESTA);
       {if (true) return op;}
         break;
       case tOR:
         jj_consume_token(tOR);
-      // El operador es un OR
       op.setOperadorAditivo(TipoOperador.Tipo_Operador_Aditivo.OR);
       {if (true) return op;}
         break;
@@ -1223,16 +1083,13 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// regla de expresion simple OK
   static final public RegistroExp expresion_simple() throws ParseException {
-  // Declaracion de variables
   RegistroExp regTerm1 = null, regTerm2 = null, regResult = null;
   TipoOperador op;
   boolean ok;
   boolean constantes = false;
     try {
-      // Primer termino de la expresion
-          regTerm1 = termino();
+      regTerm1 = termino();
       label_5:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1245,17 +1102,12 @@ public class Compilador implements CompiladorConstants {
           jj_la1[11] = jj_gen;
           break label_5;
         }
-        // Operador de la expresion
-            op = operador_aditivo();
-        // Segundo termino de la expresion
-            regTerm2 = termino();
-      // Resultado de evaluar la expresion
+        op = operador_aditivo();
+        regTerm2 = termino();
       regResult = new RegistroExp();
       ok = true;
-      // Evaluar el simbolo introducido
       if (op.getOperadorAditivo() == TipoOperador.Tipo_Operador_Aditivo.OR)
       {
-        // Comprobar que son los dos booleanos
         ok = regTerm1.getTipo() == Simbolo.Tipo_variable.BOOLEANO
         && regTerm2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
         if (!ok)
@@ -1267,7 +1119,6 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // Comprobar que son desconocidos
           if (regTerm1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
           || regTerm2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
           {
@@ -1291,7 +1142,6 @@ public class Compilador implements CompiladorConstants {
           }
         }
       }
-      // No es operador OR
       else
       {
         // Comprobar que son los dos enteros
@@ -1313,7 +1163,6 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // La expresion final es entera          
           regResult.setTipo(Simbolo.Tipo_variable.ENTERO);
           if (DesbordamientoEnteros.hayDesbordamientoEntero(regTerm1.getValorEnt())
           || DesbordamientoEnteros.hayDesbordamientoEntero(regTerm2.getValorEnt()))
@@ -1324,7 +1173,6 @@ public class Compilador implements CompiladorConstants {
           }
           else
           {
-            // Comprobar que son constantes
             if (regTerm1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             && regTerm2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
@@ -1345,7 +1193,6 @@ public class Compilador implements CompiladorConstants {
                 ", columna " + token.beginColumn + "  - Operador aditivo desconocido");
               }
             }
-            // Los operandos no son constantes
             else
             {
               switch (op.getOperadorAditivo())
@@ -1369,7 +1216,6 @@ public class Compilador implements CompiladorConstants {
         regResult.setExpr_compuesta(true);
       }
       }
-      // Comprobar que la expresion simple es compuesta
       if (regTerm2 == null)
       {
         {if (true) return regTerm1;}
@@ -1384,18 +1230,13 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// LOS OPERADORES SON AND Y ESAS MIERDAS EH
-// Regla de termino OK
   static final public RegistroExp termino() throws ParseException {
-  // Declaracion de factores y expresiones
   RegistroExp tpFactor1 = null, tpFactor2 = null, regResult = null;
-  // Declaracion del operador
   TipoOperador op;
   boolean ok;
   boolean constantes = false;
     try {
-      // Evaluacion del primer factor
-          tpFactor1 = factor();
+      tpFactor1 = factor();
       label_6:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -1410,15 +1251,11 @@ public class Compilador implements CompiladorConstants {
           jj_la1[12] = jj_gen;
           break label_6;
         }
-        // Evaluacion del operador multiplicativo
-            op = operador_multiplicativo();
-        // Evaluacion del segundo factor
-            tpFactor2 = factor();
+        op = operador_multiplicativo();
+        tpFactor2 = factor();
       regResult = new RegistroExp();
-      // El operaodr es una AND
       if (op.getOperadorMultiplicativo() == TipoOperador.Tipo_Operador_Multiplicativo.AND)
       {
-        // Comprobar que son los dos booleanos
         ok = tpFactor1.getTipo() == Simbolo.Tipo_variable.BOOLEANO
         && tpFactor2.getTipo() == Simbolo.Tipo_variable.BOOLEANO;
         if (!ok)
@@ -1437,12 +1274,10 @@ public class Compilador implements CompiladorConstants {
         else
         {
           regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-          // Operador AND
           pw.println("\u005ct AND");
           if (tpFactor1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
           && tpFactor2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
           {
-            // Hacer operacion AND
             regResult.valorBool = tpFactor1.valorBool & tpFactor2.valorBool;
             regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
           }
@@ -1450,7 +1285,6 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // Es un operador multiplicativo distinto de AND
         ok = tpFactor1.getTipo() == Simbolo.Tipo_variable.ENTERO
         && tpFactor2.getTipo() == Simbolo.Tipo_variable.ENTERO;
         if (!ok)
@@ -1472,12 +1306,10 @@ public class Compilador implements CompiladorConstants {
           }
           else
           {
-            // Comprobar que son constantes para operar
             if (tpFactor1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             && tpFactor2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
               constantes = true;
-              // El resultado tambien es constante
               regResult.setSimbolo(Simbolo.Tipo_simbolo.CONST);
               switch (op.getOperadorMultiplicativo())
               {
@@ -1518,7 +1350,6 @@ public class Compilador implements CompiladorConstants {
             }
             else
             {
-              // Los operadores no son constantes
               switch (op.getOperadorMultiplicativo())
               {
                 case MULTIPLICACION :
@@ -1540,11 +1371,9 @@ public class Compilador implements CompiladorConstants {
       }
       if (ok && !constantes)
       {
-        // Es expresion compuesta
         regResult.setExpr_compuesta(true);
       }
       }
-      // Comprobar que es expresion compuesta
       if (tpFactor2 == null)
       {
         {if (true) return tpFactor1;}
@@ -1559,39 +1388,32 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla de operador multiplicativo OK
   static final public TipoOperador operador_multiplicativo() throws ParseException {
-  // Declaracion de variables
   TipoOperador op = new TipoOperador();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tMULTIPLY:
         jj_consume_token(tMULTIPLY);
-      // El operador es una multiplicacion
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MULTIPLICACION);
       {if (true) return op;}
         break;
       case tDIVIDE:
         jj_consume_token(tDIVIDE);
-      // El operador es un cociente (opcion 1)
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       {if (true) return op;}
         break;
       case tDIV:
         jj_consume_token(tDIV);
-      // El operador es un cociente (opcion 2)
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.DIVISION);
       {if (true) return op;}
         break;
       case tMOD:
         jj_consume_token(tMOD);
-      // El operador es un modulo o residuo
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.MOD);
       {if (true) return op;}
         break;
       case tAND:
         jj_consume_token(tAND);
-      // El operador es una AND logica
       op.setOperadorMultiplicativo(TipoOperador.Tipo_Operador_Multiplicativo.AND);
       {if (true) return op;}
         break;
@@ -1606,23 +1428,18 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla de factor OK
   static final public RegistroExp factor() throws ParseException {
-  // Declaracion de factores y expresiones
   RegistroExp tpFactor, tpExp;
   RegistroExp result = new RegistroExp();
-  // Token a procesar
   Token t;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tNOT:
         jj_consume_token(tNOT);
         tpFactor = factor();
-      // Comprobacion de si es o no booleano
       if ((tpFactor.getTipo() != Simbolo.Tipo_variable.BOOLEANO)
       && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
-        // Comprobacion de si es booleano o no 
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + "  - Tipo " + tpFactor.getTipo() + " incompatible con " +
         " operador <>. Se esperaba BOOLEANO ");
@@ -1630,21 +1447,17 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // Operador de negacion
         pw.println("\u005ct NGB");
         result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
       }
-      // Devuelve el tipo de factor
       {if (true) return result;}
         break;
       case tMINUS:
         jj_consume_token(tMINUS);
         tpFactor = factor();
-      // Comprobacion de si es o no booleano
       if ((tpFactor.getTipo() != Simbolo.Tipo_variable.ENTERO)
       && (tpFactor.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
-        // Comprobacion de si es booleano o no 
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + "  - Tipo " + tpFactor.getTipo().toString() +
         " incompatible con operador -. Se esperaba ENTERO");
@@ -1652,18 +1465,15 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // Operador de negacion
         pw.println("\u005ct NGBI");
         result.setTipo(Simbolo.Tipo_variable.ENTERO);
       }
-      // Devuelve el tipo de factor
       {if (true) return result;}
         break;
       case tPARENTESIS_IZDA:
         jj_consume_token(tPARENTESIS_IZDA);
         tpExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
-      // Devuelve la expresiom normal
       {if (true) return tpExp;}
         break;
       case tENTACAR:
@@ -1675,7 +1485,6 @@ public class Compilador implements CompiladorConstants {
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
       && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
-        // Comprobacion de si es booleano o no 
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + "  - Argumento de tipo " + tpExp.getTipo().toString() +
         " incompatible en funcion ENTACAR. Se esperaba ENTERO");
@@ -1683,12 +1492,9 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // Es un entero y se comprueba que no hay desbordamiento
         int valor = tpExp.getValorEnt();
-        // Error de desbordamiento
         if (ErrorSemantico.hayDesbordamientoEntacar(valor))
         {
-          // Comprobacion de si es booleano o no 
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
           ", columna " + token.beginColumn + "  - La operacion ENTACAR debe recibir un par\u00e1metro " +
           "del tipo entero comprendido entre 0 y 255");
@@ -1702,11 +1508,6 @@ public class Compilador implements CompiladorConstants {
             result.setValorString(String.valueOf((char) valor));
             result.setTipo(Simbolo.Tipo_variable.CHAR);
           }
-          else
-          {
-          // GENERADOR DE CODIGO
-          }
-          // Lo guardo en CHAR    
           result.setTipo(Simbolo.Tipo_variable.CHAR);
         }
       }
@@ -1720,7 +1521,6 @@ public class Compilador implements CompiladorConstants {
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.CHAR)
       && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
-        // Comprobacion de si es o no caracter
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + "  - Argumento de tipo " + tpExp.getTipo().toString() +
         " incompatible en funcion CARAENT. Se esperaba CARACTER");
@@ -1730,13 +1530,8 @@ public class Compilador implements CompiladorConstants {
       {
         if (tpExp.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
         {
-          // Obtener el tipo de dato entero del caracter porque es cosnstante
           char cadena = tpExp.valorString.charAt(0);
           result.setValorEnt((int) cadena);
-        }
-        else
-        {
-        // No es constante
         }
         result.setTipo(Simbolo.Tipo_variable.ENTERO);
       }
@@ -1745,7 +1540,6 @@ public class Compilador implements CompiladorConstants {
       case tIDENTIFICADOR:
         t = jj_consume_token(tIDENTIFICADOR);
       Simbolo s;
-      // Busqueda en la tabla de simbolos	
       s = tabla.buscar_simbolo(t.image);
       if (s == null)
       {
@@ -1766,7 +1560,6 @@ public class Compilador implements CompiladorConstants {
       {
         result.setTipo(s.getVariable());
         result.setClase(s.getParametro());
-        // El identificador es correcto
         pw.println("; Acceso3 a la variable " + s.getNombre().toUpperCase() + ".");
         pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
                 pw.println("\u005ct DRF");
@@ -1781,16 +1574,11 @@ public class Compilador implements CompiladorConstants {
         break;
       case tCONSTANTE_NUMERICA:
         t = jj_consume_token(tCONSTANTE_NUMERICA);
-      // Y si es entacar
       int valor = Integer.parseInt(t.image);
       result.setValorEnt(valor);
-      // Tipo de la variable entero
       result.setTipo(Simbolo.Tipo_variable.ENTERO);
-      // El simbolo es una constante
       result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
-      // Escritura de la constante en el fichero
       pw.println("\u005ct STC   " + t.image);
-      // Devolucion del resultado
       {if (true) return result;}
         break;
       case tCONSTCHAR:
@@ -1803,11 +1591,9 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // El simbolo es una constante
         result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
         result.valorString = String.valueOf(t.image.charAt(1));
       }
-      // Escribir constante en el fichero
       pw.println("\u005ct STC   " + t.image);
       result.setTipo(Simbolo.Tipo_variable.CHAR);
       {if (true) return result;}
@@ -1822,40 +1608,27 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // No coger las comillas
-        // El simbolo es una constante
         result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
         result.valorString = String.valueOf(t.image.charAt(1));
       }
-      // Escribir constante en el fichero
       pw.println("\u005ct STC   " + t.image);
       result.setTipo(Simbolo.Tipo_variable.CADENA);
       {if (true) return result;}
         break;
       case tTRUE:
         jj_consume_token(tTRUE);
-      // El simbolo es una constante
       result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
-      // Guardar el contenido de la cadena
       result.setValorBool(true);
-      // Tipo cadena de caracteres
       result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-      // Escribir constante en el fichero
       pw.println("\u005ct STC   1");
-      // Devolucion del resultado
       {if (true) return result;}
         break;
       case tFALSE:
         jj_consume_token(tFALSE);
-      // El simbolo es una constante
       result.setSimbolo(Simbolo.Tipo_simbolo.CONST);
-      // Guardar el contenido de la cadena
       result.setValorBool(false);
-      // Tipo cadena de caracteres
       result.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-      // Escribir constante en el fichero
       pw.println("\u005ct STC   0");
-      // Devolucion del resultado
       {if (true) return result;}
         break;
       default:
@@ -1869,26 +1642,21 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla de seelccion OK
   static final public void seleccion() throws ParseException {
-  // Declaracion de variables
   RegistroExp tpExp;
   String etiqSINO = null, etiqFIN;
     try {
       jj_consume_token(tSI);
       pw.println("; SI.");
       tpExp = expresion();
-      // Evaluacion de la condicion
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO)
       && (tpExp.getTipo() != Simbolo.Tipo_variable.BOOLEANO))
       {
-        // Se esperaba una condicion booleana
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + "  - La condicion en la seleccion debe ser un booleano");
       }
       else
       {
-        // La condicion es correcta
         etiqSINO = etiq.nueva_etiqueta();
         pw.println("\u005ct JMF " + etiqSINO);
       }
@@ -1916,7 +1684,6 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de declaracion_acciones OK
   static final public void declaracion_acciones() throws ParseException {
     try {
       label_7:
@@ -1936,7 +1703,6 @@ public class Compilador implements CompiladorConstants {
     }
   }
 
-// Regla de declaracion_Accion OK
   static final public void declaracion_accion() throws ParseException {
   Simbolo s;
     try {
@@ -1946,48 +1712,37 @@ public class Compilador implements CompiladorConstants {
       declaracion_variables();
       declaracion_acciones();
       bloque_sentencias();
-      // Recuperar el valor de la direccion
       dir = s.getDir();
-      // Detectado el fin de un bloque de sentencias de una accion
       pw.println("; Fin de la accion / funcion " + s.getNombre().toUpperCase() + ".");
       pw.println("\u005ct CSF");
-      // Eliminacion de variables
+
       tabla.eliminar_variables(nivel);
-      // Eliminar las acciones
       tabla.eliminar_acciones(nivel);
-      // Eliminar los parametros ocultos
       tabla.eliminar_parametros_ocultos(nivel);
-      // Decrementar el nivel porque se cierra un bloque       
       nivel--;
     } catch (ParseException e) {
     ErrorSintactico.deteccionErrorSintactico(e);
     }
   }
 
-// Regla de cabecera_accion OK
   static final public Simbolo cabecera_accion() throws ParseException {
   Token tId = null;
   ;
   Simbolo s, sAccion = null;
   Simbolo.Tipo_simbolo tp_Sim;
   boolean ok = false;
-  // Lista de parametros de la accion
   LinkedList < LinkedList < Simbolo > > listaDeParametros = new LinkedList < LinkedList < Simbolo > > ();
-  // Lista de simbolos
   LinkedList < Simbolo > listaAuxiliar = new LinkedList < Simbolo > ();
     try {
       jj_consume_token(tACCION);
       tId = jj_consume_token(tIDENTIFICADOR);
-      // Buscar el simbolo en la tabla de simbolos
       s = tabla.buscar_simbolo(tId.image);
       if ((s == null) || (s.getNivel() != nivel))
       {
-        // Introducir accion en la tabla de simbolos
         s = tabla.introducir_accion(tId.image, nivel, dir);
 
 
         ok = true;
-        // Crear etiqueta para la accion
         String etiqAccion = etiq.nueva_etiqueta();
         s.setEtiqueta(etiqAccion);
         pw.println("; Accion " + tId.image.toUpperCase() + ".");
@@ -2000,23 +1755,16 @@ public class Compilador implements CompiladorConstants {
         ", columna " + token.beginColumn + "  - Accion " + s.getNombre() + " duplicada");
         ok = false;
       }
-      // Incrementar el nivel actual
       nivel++;
-      // Incio del marco de la pila
       iniciar_pila();
 
-          // Guardar el simbolo de la accion
       sAccion = s;
-      // Procesamiento de los parametros
-          listaDeParametros = parametros_formales(tId);
-      // Limpiar parametros de la posible acc
+      listaDeParametros = parametros_formales(tId);
       if (ok)
       {
         for (int i = 0; i < listaDeParametros.size(); i++)
         {
-          // Añadir la lista de parametros al simbolo con la direccion correspondiente
           s.anyadirParametrosAccion(listaDeParametros.get(i), dir);
-          // Preparar direccion de pila para el proximo parametro o variable
           incrementar_pila();
         }
         for (int i = listaDeParametros.size() - 1; i >= 0; i--)
@@ -2025,16 +1773,13 @@ public class Compilador implements CompiladorConstants {
           for (int j = listaAuxiliar.size() - 1; j >= 0; j--)
           {
             s = listaAuxiliar.get(j);
-            // Generar codigo de los parametros
             pw.println("; rec. parametro " + s.getNombre().toUpperCase() + " de tipo " + s.getVariable().toString() +
             " pasado por " + s.getParametro().toString());
             pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
             pw.println("\u005ct ASGI");
           }
         }
-        // Limpiar parametros de la posible accion anterior
         tabla.limpiarListaParametros();
-        // Fin del procesamiento de parametros
         String etiqPar = etiq.nueva_etiqueta();
         pw.println("\u005ct JMP   " + etiqPar);
         pw.println(etiqPar + ":");
@@ -2046,9 +1791,7 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla de parametros formales OK
   static final public LinkedList < LinkedList < Simbolo > > parametros_formales(Token t) throws ParseException {
-  // Lista global de listas de identificadores
   LinkedList < LinkedList < Simbolo > > parametros = new LinkedList < LinkedList < Simbolo > > ();
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -2067,11 +1810,8 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla para lista_parametros OK
   static final public LinkedList < LinkedList < Simbolo > > lista_parametros() throws ParseException {
-  // Lista global de listas de identificadores
   LinkedList < LinkedList < Simbolo > > listaGlobal = new LinkedList < LinkedList < Simbolo > > ();
-  // Lista de identificadores
   LinkedList < Simbolo > lista = new LinkedList < Simbolo > ();
     try {
       jj_consume_token(tPARENTESIS_IZDA);
@@ -2112,44 +1852,29 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla de parametros OK
   static final public LinkedList < Simbolo > parametros() throws ParseException {
-  // Declaracion de variables
-  // Simbolo a guardar en la tabla de simbolos
   Simbolo s;
-  // Clase de parametro y tipo de variable del simbolo a introducir
   Simbolo.Clase_parametro cl_Param;
   Simbolo.Tipo_variable tipo_Var;
-  // Lista de simbolos leidos a almacenar en la tabla de simbolos
   LinkedList < Simbolo > lista = new LinkedList < Simbolo > ();
-  // Lista de identificadores procesados
   LinkedList < String > listaIdentificadores = new LinkedList < String > ();
     try {
       // Lectura del tipo de clase y del tipo de parametro
           cl_Param = clase_parametros();
       tipo_Var = tipos_variables();
       listaIdentificadores = identificadores();
-      // Tamaño de la lista de identificadores
       int dimension = listaIdentificadores.size();
-      // Identificador del simbolo a procesar
       String identificadorActual;
-      // Bucle de recorrido de la lista de identificadores
       for (int i = 0; i < dimension; i++)
       {
-        // Obtener identificador actual
         identificadorActual = listaIdentificadores.get(i);
-        // Comprobar que existe o no simbolo en la tabla
-        // Insercion del parametro en la tabla de simbolos
         s = tabla.introducir_parametro(identificadorActual, tipo_Var, cl_Param, nivel, dir);
-        // Si se ha creado el simbolo
         if (s != null)
         {
-          // Añadir parametro a la lista de parametros
           lista.add(s);
         }
         else
         {
-          // Comprobar que la variable esta en la tabla de simbolos
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
           ", columna " + token.beginColumn + "  - Parametro repetido " + identificadorActual);
         }
@@ -2161,9 +1886,7 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla de declaracion variables OK
   static final public int declaracion_variables() throws ParseException {
-  // Declaracion de variables 
   Token t;
   int total = 0, aux = 0;
     try {
@@ -2190,9 +1913,7 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla para los tipos de variables OK
   static final public Simbolo.Tipo_variable tipos_variables() throws ParseException {
-  // Declaracion de variable
   Token t;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -2210,27 +1931,21 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(-1);
         throw new ParseException();
       }
-      // Control del tipo token
       switch (t.kind)
       {
         case tENTERO :
-        // Es token tENTERO
         {if (true) return Simbolo.Tipo_variable.ENTERO;}
         break;
         case tCARACTER :
-        // Es token tCARACTER
         {if (true) return Simbolo.Tipo_variable.CHAR;}
         break;
         case tCONSTCAD :
-        // Es token tCARACTER
         {if (true) return Simbolo.Tipo_variable.CADENA;}
         break;
         case tBOOLEANO :
-        // Es token tBOOLEANO
         {if (true) return Simbolo.Tipo_variable.BOOLEANO;}
         break;
         default :
-        // No es niguno de los anteriores es DESCONOCIDO
         {if (true) return Simbolo.Tipo_variable.DESCONOCIDO;}
       }
     } catch (ParseException e) {
@@ -2239,42 +1954,30 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla de declaracion OK
   static final public int declaracion() throws ParseException {
-  // Declaracion de variables
   Token t;
   Simbolo.Tipo_variable tp_Var;
   LinkedList < String > lista = new LinkedList < String > ();
-  // Variable para guardar el identificador del simbolo a introducir
   String identificadorActual;
   Simbolo s;
     try {
       tp_Var = tipos_variables();
       lista = identificadores();
-      // Tamaño de la lista de identificadores
       int dimension = lista.size();
-      //Bucle de recorrido de insercion de variables
       for (int i = 0; i < dimension; i++)
       {
-        // Obtencion del identificador actual
         identificadorActual = lista.get(i);
-        // Simbolo ya existente en la tabla de simbolos
-        // introducir el nuevo simbolo
         s = tabla.introducir_variable(identificadorActual, tp_Var, nivel, dir);
-        // Incremento de la variable de direccion
         if (i <= dimension - 1)
         {
-          // Preparar direccion del siguiente parametro si no es el ultimo
           incrementar_pila();
         }
-        // Comprobar que la variable esta en la tabla de simbolos
         if (s == null)
         {
           ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
           ", columna " + token.beginColumn + "  - Variable repetida " + identificadorActual);
         }
       }
-      // Devuelvo el numero de identificadores leidos;
       {if (true) return lista.size();}
     } catch (ParseException e) {
     ErrorSintactico.deteccionErrorSintactico(e);
@@ -2282,16 +1985,11 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla para los identificadores OK
   static final public LinkedList < String > identificadores() throws ParseException {
-  // Declaracion de una lista auxiliar de identificadores
   Token t;
-  // Lista de identificadores (parametros o variables)
   LinkedList < String > listaIdentificadores = new LinkedList < String > ();
     try {
-      // Coger primer identificador
-          t = jj_consume_token(tIDENTIFICADOR);
-      // Añadir el identificador a lista
+      t = jj_consume_token(tIDENTIFICADOR);
       listaIdentificadores.add(t.image);
       label_10:
       while (true) {
@@ -2304,9 +2002,7 @@ public class Compilador implements CompiladorConstants {
           break label_10;
         }
         jj_consume_token(tCOMA);
-        // Coger los siguientes identificadores
-            t = jj_consume_token(tIDENTIFICADOR);
-      // Añadir el identificador a lista
+        t = jj_consume_token(tIDENTIFICADOR);
       listaIdentificadores.add(t.image);
       }
       {if (true) return listaIdentificadores;}
@@ -2316,9 +2012,7 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-// Regla para las clases de parametros OK
   static final public Simbolo.Clase_parametro clase_parametros() throws ParseException {
-  // Declaracion de variables
   Token t;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -2335,22 +2029,17 @@ public class Compilador implements CompiladorConstants {
       }
       if (t.kind == tVAL)
       {
-        // Es token tVAL
         {if (true) return Simbolo.Clase_parametro.VAL;}
       }
       else if (t.kind == tREF)
       {
-        // Es tokeb tREF
         {if (true) return Simbolo.Clase_parametro.REF;}
       }
       else
       {
-        // Clase de parametro erroneo
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + "  - La clase de parametro no es correcta");
       }
-      // El tipo de clase ha sido procesada
-
     } catch (ParseException e) {
     ErrorSintactico.deteccionErrorSintactico(e);
     }
