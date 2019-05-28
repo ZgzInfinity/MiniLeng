@@ -557,7 +557,6 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // La invocacion es correcta
           pw.println("\u005ct OSF   " + s.getDir() + "  " + (nivel - s.getNivel()) + " " + s.getEtiqueta());
         }
       }
@@ -795,7 +794,6 @@ public class Compilador implements CompiladorConstants {
             regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
             if (!ok)
             {
-              // Resul tiene tipo DESCONOCIDO porque no coinciden
               regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
             }
             else if (tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
@@ -867,7 +865,6 @@ public class Compilador implements CompiladorConstants {
             {
               regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
             }
-            // Los datos son constantes y se puede trabajar
             else if (tpExp1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             && tpExp2.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
             {
@@ -1126,11 +1123,8 @@ public class Compilador implements CompiladorConstants {
           }
           else
           {
-            // Son los dos booleanos
-            regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
-            // Imprimir signo OR
+                regResult.setTipo(Simbolo.Tipo_variable.BOOLEANO);
             pw.println("\u005ct OR");
-            // Si son constantes calculamos la expresion
             if (regTerm1.getSimbolo() == Simbolo.Tipo_simbolo.CONST
             && regTerm2.getSimbolo() != Simbolo.Tipo_simbolo.CONST)
             {
@@ -1144,7 +1138,6 @@ public class Compilador implements CompiladorConstants {
       }
       else
       {
-        // Comprobar que son los dos enteros
         ok = regTerm1.getTipo() == Simbolo.Tipo_variable.ENTERO
         && regTerm2.getTipo() == Simbolo.Tipo_variable.ENTERO;
         if (!ok)
@@ -1154,11 +1147,9 @@ public class Compilador implements CompiladorConstants {
           regTerm1.getTipo().toString() + " y " + regTerm2.getTipo().toString());
           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
         }
-        // Comprobar que no son desconocidos
         else if (regTerm1.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
         && regTerm2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
         {
-          // El resultado es desconocido
           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
         }
         else
@@ -1268,7 +1259,6 @@ public class Compilador implements CompiladorConstants {
         else if (tpFactor2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO
         || tpFactor2.getTipo() == Simbolo.Tipo_variable.DESCONOCIDO)
         {
-          // El resultado es desconocido
           regResult.setTipo(Simbolo.Tipo_variable.DESCONOCIDO);
         }
         else
@@ -1481,7 +1471,6 @@ public class Compilador implements CompiladorConstants {
         jj_consume_token(tPARENTESIS_IZDA);
         tpExp = expresion();
         jj_consume_token(tPARENTESIS_DCHA);
-      // Comprobacion de si es entera la expresion
       if ((tpExp.getTipo() != Simbolo.Tipo_variable.ENTERO)
       && (tpExp.getTipo() != Simbolo.Tipo_variable.DESCONOCIDO))
       {
@@ -1501,10 +1490,8 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          // Comprobar que es constante
           if (tpExp.getSimbolo() == Simbolo.Tipo_simbolo.CONST)
           {
-            // Extraigo el numero entero y lo guardo a caracter
             result.setValorString(String.valueOf((char) valor));
             result.setTipo(Simbolo.Tipo_variable.CHAR);
           }
@@ -1563,7 +1550,6 @@ public class Compilador implements CompiladorConstants {
         pw.println("; Acceso3 a la variable " + s.getNombre().toUpperCase() + ".");
         pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
                 pw.println("\u005ct DRF");
-
 
         if (s.getParametro() == Simbolo.Clase_parametro.REF)
         {
@@ -1706,7 +1692,6 @@ public class Compilador implements CompiladorConstants {
   static final public void declaracion_accion() throws ParseException {
   Simbolo s;
     try {
-      System.out.println("DIR : " + dir);
       s = cabecera_accion();
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
@@ -1727,7 +1712,6 @@ public class Compilador implements CompiladorConstants {
 
   static final public Simbolo cabecera_accion() throws ParseException {
   Token tId = null;
-  ;
   Simbolo s, sAccion = null;
   Simbolo.Tipo_simbolo tp_Sim;
   boolean ok = false;
@@ -1740,8 +1724,6 @@ public class Compilador implements CompiladorConstants {
       if ((s == null) || (s.getNivel() != nivel))
       {
         s = tabla.introducir_accion(tId.image, nivel, dir);
-
-
         ok = true;
         String etiqAccion = etiq.nueva_etiqueta();
         s.setEtiqueta(etiqAccion);
@@ -1757,7 +1739,6 @@ public class Compilador implements CompiladorConstants {
       }
       nivel++;
       iniciar_pila();
-
       sAccion = s;
       listaDeParametros = parametros_formales(tId);
       if (ok)
@@ -1859,8 +1840,7 @@ public class Compilador implements CompiladorConstants {
   LinkedList < Simbolo > lista = new LinkedList < Simbolo > ();
   LinkedList < String > listaIdentificadores = new LinkedList < String > ();
     try {
-      // Lectura del tipo de clase y del tipo de parametro
-          cl_Param = clase_parametros();
+      cl_Param = clase_parametros();
       tipo_Var = tipos_variables();
       listaIdentificadores = identificadores();
       int dimension = listaIdentificadores.size();
