@@ -495,11 +495,7 @@ public class Compilador implements CompiladorConstants {
           pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
           pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\u005ct DRF");
-          // Si es parametro
-          if (s.getParametro() == Simbolo.Clase_parametro.REF)
-          {
-            pw.println("\u005ct DRF");
-          }
+
           if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
           {
                 pw.println("\u005ct WRT   1");
@@ -1547,14 +1543,9 @@ public class Compilador implements CompiladorConstants {
       {
         result.setTipo(s.getVariable());
         result.setClase(s.getParametro());
-        pw.println("; Acceso3 a la variable " + s.getNombre().toUpperCase() + ".");
+        pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
         pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
                 pw.println("\u005ct DRF");
-
-        if (s.getParametro() == Simbolo.Clase_parametro.REF)
-        {
-          pw.println("\u005ct DRF");
-        }
       }
       {if (true) return result;}
         break;
@@ -1705,6 +1696,8 @@ public class Compilador implements CompiladorConstants {
       tabla.eliminar_acciones(nivel);
       tabla.eliminar_parametros_ocultos(nivel);
       nivel--;
+
+      incrementar_pila();
     } catch (ParseException e) {
     ErrorSintactico.deteccionErrorSintactico(e);
     }

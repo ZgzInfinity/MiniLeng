@@ -760,11 +760,7 @@ void escribible() :
           pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
           pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\t DRF");
-          // Si es parametro
-          if (s.getParametro() == Simbolo.Clase_parametro.REF)
-          {
-            pw.println("\t DRF");
-          }          
+        
           if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
           {
           	pw.println("\t WRT   1");
@@ -1801,14 +1797,9 @@ RegistroExp factor() :
       {
         result.setTipo(s.getVariable());
         result.setClase(s.getParametro());
-        pw.println("; Acceso3 a la variable " + s.getNombre().toUpperCase() + ".");
+        pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
         pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
 		pw.println("\t DRF");
-		
-        if (s.getParametro() == Simbolo.Clase_parametro.REF)
-        {
-          pw.println("\t DRF");
-        }
       }
       return result;	
     }
@@ -1964,6 +1955,8 @@ void declaracion_accion() :
       tabla.eliminar_acciones(nivel);
       tabla.eliminar_parametros_ocultos(nivel);
       nivel--;
+
+      incrementar_pila();
     }
   }
   catch (ParseException e)
