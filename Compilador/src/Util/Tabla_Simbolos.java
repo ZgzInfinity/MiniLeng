@@ -333,8 +333,8 @@ public class Tabla_Simbolos {
 			}
 	 }
 	 
-	 
-	 
+
+
 	 
 	 /*
 	  * Pre: ----

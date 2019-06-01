@@ -37,7 +37,10 @@ public class Compilador
   public static int nivel = 0;
 
   static final int DIRECCION_INICIAL = 3;
-
+  static final int RETORNO_CARRO = 10;
+  static final int SALTO_LINEA = 13;
+  static final int TABULADOR = 9;
+  
   public static long dir = DIRECCION_INICIAL;
 
   public static PrintWriter pw;
@@ -47,6 +50,10 @@ public class Compilador
   public static Etiqueta etiq = new Etiqueta();
   
   public static ErrorLexico eL = new ErrorLexico();
+
+  public static boolean flag_invocacion = false;
+
+  public static boolean derechaAsig = false;
   
   public static void iniciar_pila()
   {
@@ -392,7 +399,7 @@ int programa() :
       pw.println("; Comienzo del programa " + t.image.toUpperCase());
       pw.println(etiquetaProg + ":");
     }
-    bloque_sentencias()
+    bloque_sentencias(s)
     {
       pw.println("; Fin del programa " + t.image.toUpperCase() + ".");
       pw.println("\t LVP");
@@ -409,12 +416,31 @@ int programa() :
   }
 }
 
-void bloque_sentencias() :
+void bloque_sentencias(Simbolo s) :
 {
+  LinkedList<Simbolo> listaAuxiliar = new LinkedList<Simbolo>();
+  Simbolo par;
 }
 {
   try
   {
+    {
+      pw.println("; Accion " + s.getNombre().toUpperCase() + ".");
+
+      if (!s.es_Simbolo_Programa())
+      { 
+      	pw.println(s.getEtiqueta() + ":");
+      }
+      listaAuxiliar = s.getLista_parametros();
+      for (int j = listaAuxiliar.size() - 1; j >= 0; j--)
+      {
+         par = listaAuxiliar.get(j);
+         pw.println("; rec. parametro " + par.getNombre().toUpperCase() + " de tipo " + par.getVariable().toString() + 
+         " pasado por " + par.getParametro().toString());
+         pw.println("\t SRF   " + (nivel - par.getNivel()) + "  " + par.getDir());
+         pw.println("\t ASGI");
+      }
+    }
     < tPRINCIPIO > lista_sentencias() < tFIN >
     {
       tabla.ocultar_parametros(nivel);
@@ -512,6 +538,7 @@ void asignacion(Token t) :
           pw.println("; Direccion del parametro por referencia " + s.getNombre().toUpperCase() + ".");
           pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\t DRF");
+          derechaAsig = true;
         }
       }
       else if (s.es_Simbolo_Accion())
@@ -527,6 +554,7 @@ void asignacion(Token t) :
         pw.println("; Direccion de la variable " + s.getNombre().toUpperCase() + ".");
         pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
         tipo = s.getVariable();
+        derechaAsig = true;
       }
     }
     tpExp = expresion() < tPUNTYCOM >
@@ -542,6 +570,7 @@ void asignacion(Token t) :
         pw.println("; Asignacion.");
         pw.println("\t ASG");
       }
+      derechaAsig = false;
     }
   }
   catch (ParseException e)
@@ -609,8 +638,6 @@ void lista_asignables() :
             pw.println("; Leer parametro por referencia " + s.getNombre());
             pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
             pw.println("\t DRF");
-            pw.println("\t DRF");
-
             if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
             { 
             	pw.println("\t RD    1");
@@ -692,7 +719,7 @@ void escribible() :
   Simbolo s;
   RegistroExp regExp = null;
   RegistroExp result = new RegistroExp();
-  boolean constCad = false, entCad = false;
+  boolean constCad = false, entCad = false, caracter_especial = false;
 }
 {
   try
@@ -721,8 +748,34 @@ void escribible() :
         int tamanyo = cadena.length();
         for (int i = 1; i < tamanyo - 1; i++)
         {
-          pw.println("\t STC   " + (int) cadena.charAt(i));
-          pw.println("\t WRT   0");
+          if (cadena.charAt(i) == '\\')
+          {
+            caracter_especial = true;
+          }
+          else if ((cadena.charAt(i) == 'n') && caracter_especial)
+          {
+          	pw.println("\t STC   10" );
+          	pw.println("\t WRT   0");
+          	caracter_especial = false;
+          }
+          else if ((cadena.charAt(i) == 'r') && caracter_especial)
+          {
+          	pw.println("\t STC   13" );
+          	pw.println("\t WRT   0");
+          	caracter_especial = false;
+          }
+          else if ((cadena.charAt(i) == 't') && caracter_especial)
+          {
+          	pw.println("\t STC   9" );
+          	pw.println("\t WRT   0");
+          	caracter_especial = false;
+          } 
+          else
+          {
+            pw.println("\t STC   " + (int)cadena.charAt(i));
+          	pw.println("\t WRT   0");
+          	caracter_especial = false;
+          }
         }
         result.setTipo(Simbolo.Tipo_variable.CADENA);
       }
@@ -737,7 +790,14 @@ void escribible() :
         }
         else
         {
-          pw.println("\t WRT   0");
+          if (regExp.valorEnt == RETORNO_CARRO || regExp.valorEnt == SALTO_LINEA)
+          {
+            pw.println("\t WRT   0");
+          }
+          else
+          { 
+          	pw.println("\t WRT   1");
+          }
           result.setTipo(Simbolo.Tipo_variable.ENTERO);
         }
       }
@@ -760,7 +820,11 @@ void escribible() :
           pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
           pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\t DRF");
-        
+
+          if (s.es_Simbolo_Parametro() && s.es_Parametro_Referencia())
+          {
+          	pw.println("\t DRF"); 
+          }
           if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
           {
           	pw.println("\t WRT   1");
@@ -781,13 +845,15 @@ void escribible() :
 
 void invocacion_accion(Token t) :
 {
-  Simbolo s = null;
+  Simbolo s = null, par = null;
   boolean args = false;
 }
 {
-  try
-  {
+try
+   { 
     {
+      flag_invocacion = true;
+      
       s = tabla.buscar_simbolo(t.image);
       if (s == null)
       {
@@ -800,10 +866,6 @@ void invocacion_accion(Token t) :
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine + 
         ", columna " + token.beginColumn + "  - No se puede realizar una llamada" + 
         " a una accion sobre el parametro " + t.image);
-      }
-      else
-      {
-        pw.println("; Invocacion a " + s.getNombre().toUpperCase() + ".");
       }
     }
     (argumentos(s)
@@ -823,9 +885,11 @@ void invocacion_accion(Token t) :
         }
         else
         {
-          pw.println("\t OSF   " + s.getDir() + "  " + (nivel - s.getNivel()) + " " + s.getEtiqueta());
+          pw.println("; Invocando a " + s.getNombre().toUpperCase());
+          pw.println("\t OSF   " + (s.getDir() - 1) + "  " + (nivel - s.getNivel()) + " " + s.getEtiqueta());
         }
       }
+      flag_invocacion = false;
     }
   }
   catch (ParseException e)
@@ -954,6 +1018,11 @@ void lista_expresiones(Simbolo s) :
         }
         else
         {
+          if (flag_invocacion && (parametros.get(argc - 1).es_Parametro_Valor())
+          	  && !r.isExpr_compuesta())
+          {
+            pw.println("\t DRF");
+          }
           ok = false;
         }	
       }
@@ -1799,7 +1868,22 @@ RegistroExp factor() :
         result.setClase(s.getParametro());
         pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
         pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-		pw.println("\t DRF");
+        
+        if (flag_invocacion)
+        {
+          	if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
+          	{
+		  		pw.println("\t DRF");
+		 	}
+		}
+		else
+		{
+		   	pw.println("\t DRF");
+		   	if (derechaAsig && s.es_Simbolo_Parametro() && s.es_Parametro_Referencia())
+		   	{
+		   	    pw.println("\t DRF");	
+		   	}
+		}
       }
       return result;	
     }
@@ -1945,7 +2029,7 @@ void declaracion_accion() :
 {
   try
   {
-    s = cabecera_accion() < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias()
+    s = cabecera_accion() < tPUNTYCOM > declaracion_variables() declaracion_acciones() bloque_sentencias(s)
     {
       dir = s.getDir(); 
       pw.println("; Fin de la accion / funcion " + s.getNombre().toUpperCase() + ".");
@@ -1986,9 +2070,6 @@ Simbolo cabecera_accion() :
         ok = true;
         String etiqAccion = etiq.nueva_etiqueta();
         s.setEtiqueta(etiqAccion);
-        pw.println("; Accion " + tId.image.toUpperCase() + ".");
-        pw.println(etiqAccion + ":");
-        pw.println("; Comienzo de la accion " + tId.image.toUpperCase() + ".");
       }
       else
       {
@@ -2008,23 +2089,8 @@ Simbolo cabecera_accion() :
         {
           s.anyadirParametrosAccion(listaDeParametros.get(i), dir);
           incrementar_pila();
-        }
-        for (int i = listaDeParametros.size() - 1; i >= 0; i--)
-        {
-          listaAuxiliar = listaDeParametros.get(i);
-          for (int j = listaAuxiliar.size() - 1; j >= 0; j--)
-          {
-            s = listaAuxiliar.get(j);
-            pw.println("; rec. parametro " + s.getNombre().toUpperCase() + " de tipo " + s.getVariable().toString() + 
-            " pasado por " + s.getParametro().toString());
-            pw.println("\t SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-            pw.println("\t ASGI");
-          }
-        }
+        }     
         tabla.limpiarListaParametros();
-        String etiqPar = etiq.nueva_etiqueta();
-        pw.println("\t JMP   " + etiqPar);
-        pw.println(etiqPar + ":");
       }
       return sAccion;
     }

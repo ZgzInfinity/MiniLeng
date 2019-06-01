@@ -26,6 +26,9 @@ public class Compilador implements CompiladorConstants {
   public static int nivel = 0;
 
   static final int DIRECCION_INICIAL = 3;
+  static final int RETORNO_CARRO = 10;
+  static final int SALTO_LINEA = 13;
+  static final int TABULADOR = 9;
 
   public static long dir = DIRECCION_INICIAL;
 
@@ -36,6 +39,10 @@ public class Compilador implements CompiladorConstants {
   public static Etiqueta etiq = new Etiqueta();
 
   public static ErrorLexico eL = new ErrorLexico();
+
+  public static boolean flag_invocacion = false;
+
+  public static boolean derechaAsig = false;
 
   public static void iniciar_pila()
   {
@@ -129,7 +136,7 @@ public class Compilador implements CompiladorConstants {
       declaracion_acciones();
       pw.println("; Comienzo del programa " + t.image.toUpperCase());
       pw.println(etiquetaProg + ":");
-      bloque_sentencias();
+      bloque_sentencias(s);
       pw.println("; Fin del programa " + t.image.toUpperCase() + ".");
       pw.println("\u005ct LVP");
       jj_consume_token(0);
@@ -141,8 +148,25 @@ public class Compilador implements CompiladorConstants {
     throw new Error("Missing return statement in function");
   }
 
-  static final public void bloque_sentencias() throws ParseException {
+  static final public void bloque_sentencias(Simbolo s) throws ParseException {
+  LinkedList<Simbolo> listaAuxiliar = new LinkedList<Simbolo>();
+  Simbolo par;
     try {
+      pw.println("; Accion " + s.getNombre().toUpperCase() + ".");
+
+      if (!s.es_Simbolo_Programa())
+      {
+        pw.println(s.getEtiqueta() + ":");
+      }
+      listaAuxiliar = s.getLista_parametros();
+      for (int j = listaAuxiliar.size() - 1; j >= 0; j--)
+      {
+         par = listaAuxiliar.get(j);
+         pw.println("; rec. parametro " + par.getNombre().toUpperCase() + " de tipo " + par.getVariable().toString() +
+         " pasado por " + par.getParametro().toString());
+         pw.println("\u005ct SRF   " + (nivel - par.getNivel()) + "  " + par.getDir());
+         pw.println("\u005ct ASGI");
+      }
       jj_consume_token(tPRINCIPIO);
       lista_sentencias();
       jj_consume_token(tFIN);
@@ -260,6 +284,7 @@ public class Compilador implements CompiladorConstants {
           pw.println("; Direccion del parametro por referencia " + s.getNombre().toUpperCase() + ".");
           pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\u005ct DRF");
+          derechaAsig = true;
         }
       }
       else if (s.es_Simbolo_Accion())
@@ -275,6 +300,7 @@ public class Compilador implements CompiladorConstants {
         pw.println("; Direccion de la variable " + s.getNombre().toUpperCase() + ".");
         pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
         tipo = s.getVariable();
+        derechaAsig = true;
       }
       tpExp = expresion();
       jj_consume_token(tPUNTYCOM);
@@ -289,6 +315,7 @@ public class Compilador implements CompiladorConstants {
         pw.println("; Asignacion.");
         pw.println("\u005ct ASG");
       }
+      derechaAsig = false;
     } catch (ParseException e) {
     ErrorSintactico.deteccionErrorSintactico(e);
     }
@@ -348,8 +375,6 @@ public class Compilador implements CompiladorConstants {
             pw.println("; Leer parametro por referencia " + s.getNombre());
             pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
             pw.println("\u005ct DRF");
-            pw.println("\u005ct DRF");
-
             if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
             {
                 pw.println("\u005ct RD    1");
@@ -422,7 +447,7 @@ public class Compilador implements CompiladorConstants {
   Simbolo s;
   RegistroExp regExp = null;
   RegistroExp result = new RegistroExp();
-  boolean constCad = false, entCad = false;
+  boolean constCad = false, entCad = false, caracter_especial = false;
     try {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tCONSTCHAR:
@@ -456,8 +481,34 @@ public class Compilador implements CompiladorConstants {
         int tamanyo = cadena.length();
         for (int i = 1; i < tamanyo - 1; i++)
         {
-          pw.println("\u005ct STC   " + (int) cadena.charAt(i));
-          pw.println("\u005ct WRT   0");
+          if (cadena.charAt(i) == '\u005c\u005c')
+          {
+            caracter_especial = true;
+          }
+          else if ((cadena.charAt(i) == 'n') && caracter_especial)
+          {
+                pw.println("\u005ct STC   10" );
+                pw.println("\u005ct WRT   0");
+                caracter_especial = false;
+          }
+          else if ((cadena.charAt(i) == 'r') && caracter_especial)
+          {
+                pw.println("\u005ct STC   13" );
+                pw.println("\u005ct WRT   0");
+                caracter_especial = false;
+          }
+          else if ((cadena.charAt(i) == 't') && caracter_especial)
+          {
+                pw.println("\u005ct STC   9" );
+                pw.println("\u005ct WRT   0");
+                caracter_especial = false;
+          }
+          else
+          {
+            pw.println("\u005ct STC   " + (int)cadena.charAt(i));
+                pw.println("\u005ct WRT   0");
+                caracter_especial = false;
+          }
         }
         result.setTipo(Simbolo.Tipo_variable.CADENA);
       }
@@ -472,7 +523,14 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          pw.println("\u005ct WRT   0");
+          if (regExp.valorEnt == RETORNO_CARRO || regExp.valorEnt == SALTO_LINEA)
+          {
+            pw.println("\u005ct WRT   0");
+          }
+          else
+          {
+                pw.println("\u005ct WRT   1");
+          }
           result.setTipo(Simbolo.Tipo_variable.ENTERO);
         }
       }
@@ -496,6 +554,10 @@ public class Compilador implements CompiladorConstants {
           pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
           pw.println("\u005ct DRF");
 
+          if (s.es_Simbolo_Parametro() && s.es_Parametro_Referencia())
+          {
+                pw.println("\u005ct DRF");
+          }
           if (s.getVariable() == Simbolo.Tipo_variable.ENTERO)
           {
                 pw.println("\u005ct WRT   1");
@@ -512,9 +574,11 @@ public class Compilador implements CompiladorConstants {
   }
 
   static final public void invocacion_accion(Token t) throws ParseException {
-  Simbolo s = null;
+  Simbolo s = null, par = null;
   boolean args = false;
     try {
+      flag_invocacion = true;
+
       s = tabla.buscar_simbolo(t.image);
       if (s == null)
       {
@@ -527,10 +591,6 @@ public class Compilador implements CompiladorConstants {
         ErrorSemantico.deteccionErrorSemantico("linea " + token.beginLine +
         ", columna " + token.beginColumn + "  - No se puede realizar una llamada" +
         " a una accion sobre el parametro " + t.image);
-      }
-      else
-      {
-        pw.println("; Invocacion a " + s.getNombre().toUpperCase() + ".");
       }
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
       case tPARENTESIS_IZDA:
@@ -553,9 +613,11 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
-          pw.println("\u005ct OSF   " + s.getDir() + "  " + (nivel - s.getNivel()) + " " + s.getEtiqueta());
+          pw.println("; Invocando a " + s.getNombre().toUpperCase());
+          pw.println("\u005ct OSF   " + (s.getDir() - 1) + "  " + (nivel - s.getNivel()) + " " + s.getEtiqueta());
         }
       }
+      flag_invocacion = false;
     } catch (ParseException e) {
     ErrorSintactico.deteccionErrorSintactico(e);
     }
@@ -673,6 +735,11 @@ public class Compilador implements CompiladorConstants {
         }
         else
         {
+          if (flag_invocacion && (parametros.get(argc - 1).es_Parametro_Valor())
+                  && !r.isExpr_compuesta())
+          {
+            pw.println("\u005ct DRF");
+          }
           ok = false;
         }
       }
@@ -1545,7 +1612,22 @@ public class Compilador implements CompiladorConstants {
         result.setClase(s.getParametro());
         pw.println("; Acceso a la variable " + s.getNombre().toUpperCase() + ".");
         pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-                pw.println("\u005ct DRF");
+
+        if (flag_invocacion)
+        {
+                if (s.es_Simbolo_Parametro() && s.es_Parametro_Valor())
+                {
+                                pw.println("\u005ct DRF");
+                        }
+                }
+                else
+                {
+                        pw.println("\u005ct DRF");
+                        if (derechaAsig && s.es_Simbolo_Parametro() && s.es_Parametro_Referencia())
+                        {
+                            pw.println("\u005ct DRF");
+                        }
+                }
       }
       {if (true) return result;}
         break;
@@ -1687,7 +1769,7 @@ public class Compilador implements CompiladorConstants {
       jj_consume_token(tPUNTYCOM);
       declaracion_variables();
       declaracion_acciones();
-      bloque_sentencias();
+      bloque_sentencias(s);
       dir = s.getDir();
       pw.println("; Fin de la accion / funcion " + s.getNombre().toUpperCase() + ".");
       pw.println("\u005ct CSF");
@@ -1720,9 +1802,6 @@ public class Compilador implements CompiladorConstants {
         ok = true;
         String etiqAccion = etiq.nueva_etiqueta();
         s.setEtiqueta(etiqAccion);
-        pw.println("; Accion " + tId.image.toUpperCase() + ".");
-        pw.println(etiqAccion + ":");
-        pw.println("; Comienzo de la accion " + tId.image.toUpperCase() + ".");
       }
       else
       {
@@ -1741,22 +1820,7 @@ public class Compilador implements CompiladorConstants {
           s.anyadirParametrosAccion(listaDeParametros.get(i), dir);
           incrementar_pila();
         }
-        for (int i = listaDeParametros.size() - 1; i >= 0; i--)
-        {
-          listaAuxiliar = listaDeParametros.get(i);
-          for (int j = listaAuxiliar.size() - 1; j >= 0; j--)
-          {
-            s = listaAuxiliar.get(j);
-            pw.println("; rec. parametro " + s.getNombre().toUpperCase() + " de tipo " + s.getVariable().toString() +
-            " pasado por " + s.getParametro().toString());
-            pw.println("\u005ct SRF   " + (nivel - s.getNivel()) + "  " + s.getDir());
-            pw.println("\u005ct ASGI");
-          }
-        }
         tabla.limpiarListaParametros();
-        String etiqPar = etiq.nueva_etiqueta();
-        pw.println("\u005ct JMP   " + etiqPar);
-        pw.println(etiqPar + ":");
       }
       {if (true) return sAccion;}
     } catch (ParseException e) {

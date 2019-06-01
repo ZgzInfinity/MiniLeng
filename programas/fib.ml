@@ -15,7 +15,7 @@ accion dato (ref entero dato);
 booleano correcto;
 
   %-----------------------------------------------------------
-  accion pedir_dato ;
+  accion pedir_dato;
   %-----------------------------------------------------------
   Principio
      escribir ("Escribe un numero: ");
@@ -26,7 +26,7 @@ Principio
   dato := 0;
   correcto := FALSE;
   Mq not correcto
-     pedir_dato ;
+     pedir_dato;
      correcto := dato > 0;
      Si not correcto ent
         escribir ("El numero debe ser postivo.");

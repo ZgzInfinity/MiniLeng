@@ -2,20 +2,23 @@
 Programa suma_n_terminos;
 %----------------------------------------
 
-entero res, n;
+entero res, n, inicio;
 
 %---------------------------------------
 principio
 %---------------------------------------
 
 	res := 0;
-	leer(n);
 	
+	escribir("Introduce un numero natural: ");
+	leer(n);
+	inicio := n;
+
 	mq (n > 0)
 		res := res + n;
 		n := n - 1;
 	fmq
 
-	escribir ("La suma de los primeros " , n, " numeros es ", res);
+	escribir ("La suma de los primeros " , inicio, " numeros es ", res);
 
 fin

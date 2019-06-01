@@ -122,6 +122,17 @@ public class Simbolo {
 	// Etiqueta del nodo
 	String etiqueta;
 	
+	// Numero de variables locales de la accion
+	int num_vars;
+
+	public int getNum_vars() {
+		return num_vars;
+	}
+
+
+	public void setNum_vars(int num_vars) {
+		this.num_vars = num_vars;
+	}
 
 
 	// CONSTRUCTOR DEL DATO SIMBOLO
@@ -136,6 +147,7 @@ public class Simbolo {
 			this.dir = dir;
 			this.lista_parametros = new LinkedList<Simbolo>();
 			this.etiqueta = "";
+			num_vars = 0;
 	}
 	
 	
@@ -295,7 +307,7 @@ public class Simbolo {
 		// Mostrar el simbolo por pantalla
 		return "Simbolo [nombre=" + nombre + ", nivel=" + nivel + ", tipo=" + tipo + ", variable=" + variable
 				+ ", parametro=" + parametro + ", visible=" + visible + ", lista_parametros=" + mostrarParametros()
-				+ ", dir=" + dir + "]";
+				+ ", dir=" + dir + ", num_vars=" + num_vars + "]";
 	}
 	
 	
@@ -303,7 +315,7 @@ public class Simbolo {
 	 * Pre: <<listaDeParametros>> es una lista de parametros asociados a una accion
 	 * Post: Ha asignado a la lista de parametros de la accion la lista <<listaDeParametros>>
 	 */
-	public void anyadirParametrosAccion(LinkedList<Simbolo> listaDeParametros, long dir){
+	public long anyadirParametrosAccion(LinkedList<Simbolo> listaDeParametros, long dir){
 		// Calculo del numero de parametros de la accion
 		int dimension = listaDeParametros.size();
 		Simbolo s;
@@ -315,8 +327,12 @@ public class Simbolo {
 			// Incorporar la direccion
 			s.setDir(dir);
 			
+			// Aumento de la direccion
+			dir++;
+			
 			this.lista_parametros.add(s);
 		}
+		return dir;
 	}
 	
 	
