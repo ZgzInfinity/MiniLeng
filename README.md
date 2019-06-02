@@ -89,7 +89,7 @@ las secuencias de tokens reconocidas por el analizador léxico, implementado y v
 notación BNF de javacc. Mediante la construcción del analizador sintáctico se ha logrado definir el conjunto de reglas de 
 producción de la grámatica del lenguaje de MiniLeng. Seguidamente se muestran las reglas que componen dicha gramática.
 
-Programa ::= <tPROGRAMA> <tIDENTIFICADOR> ";" 
+Programa ::= <tPROGRAMA> <tIDENTIFICADOR> ";"
 declaracion_variables declaracion_acciones bloque_sentencias
 declaracion_variables ::= ( declaracion ";" )* 
 declaracion ::= tipo_variables identificadores 
@@ -148,4 +148,47 @@ manejador de errores léxico sí lo hace.
 
 ### Analizador semántico (parte 1)
 
-Posteriormente se ha procedido a desarrollar la primera parte del analizador semántico del compilador de MiniLeng
+Posteriormente se ha procedido a desarrollar la primera parte del analizador semántico del compilador de MiniLeng. Para ello, se
+ha creado una tabla de simbolos, utilizada por el compilador para almacenar información (atributos) asociada a los símbolos 
+declarados en el programa en tiempo de compilación. Seguidamente se ha implementado una verificación semántica sencilla 
+utilizando dicha la tabla.
+
+La tabla de símbolos se ha implementado por medio de un TAD que ofrece una colección de métodos para poder trabajar con los 
+datos almacenados en ella. La tabla de símbolos se ha implementado a modo de tabla Hash, por medio de de un vector de listas 
+enlazadas a modo de matriz bidimensional. Como algoritmo de cifrado de Hash o función de dispersión se ha empleado la función 
+de Pearson dadas las numerosas ventajas que proporciona su uso. Los símbolos que se almacenan en la tabla pueden ser programas,
+variables, acciones y parámetros. Para cada símbolo se guarda el nivel de ejecución para controlar el ámbito de vida, su nombre 
+y el tipo de símbolo. 
+
+IMAGEN
+
+Se permite añadir un símbolo de tipo programa, accion, parámeto y variable. También se puede buscar un símbolo en la tabla por
+medio de su identificador, ocultar los parámetros de una accion en un nivel, borrar un símbolo de la tabla y eliminar los
+parámetros ocultos de una acción. La inserción de un símbolo se realiza por la izquierda para maximizar la eficiencia de forma
+que el coste de la operación es constante, y en caso de borrado, el coste es lineal ya que los símbolos se insertan por orden de
+nivel. Para poder manejar los símbolos almacenados en la tabla se ha creado un TAD Símbolo para poder representar toda la 
+información a guardar en la tabla de símbolos. 
+
+IMAGEN
+
+### Analizador semántico (parte 2)
+
+Una vez implementada la tabla de símbolos se ha implementado el conjunto de restricciones necesarias para poder completar el
+analizador semántico de MiniLeng, así como el manejador de errores semánticos en caso de detectar un fallo semántico. De este
+modo se tiene total control de posibles desbordamientos, operaciones matemáticas erróneas, incompatibilidad de tipos en 
+expresiones, variables repetidas, invocación a funciones con distinto número de parámetros, etcétera. Posteriormente se han
+elaborado un conjunto de programas para poder determinar que el analizador semántico funciona 
+adecuadamente.
+
+IMAGEN BIEN
+
+IMAGEN MAL
+
+### Generación de código
+
+Tras haber completado el analizador semántico, se ha procedido a realizar la generación de código ensamblador para la evaluación
+completa de programas escritos en MiniLeng. Para ello, se ha utilizado la generación de código secuencial ya que permite la
+unificación de los pasos en tiempo de compilación. De este modo se logra a partir de un fichero escrito en MiniLeng, generar el
+código ensamblador correspondiente que después puede ejecutarse en la máquina P facilitada por el profesorado de la asignatura.
+
+
