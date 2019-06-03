@@ -1,7 +1,8 @@
 # Compilador del lenguaje MiniLeng
-# Proyecto de Procesadores de lenguajes
 
-## Descripcion
+![alt text](https://i.ibb.co/5T1K7zc/logo.png)
+
+## Descripción
 
 En este proyecto se ha procedido a desarrollar un compilador para un lenguaje customizado utilizando el entorno de programación eclipse y el metacompilador javacc. 
 
@@ -30,7 +31,9 @@ Separador de sentencias y variables: ; , (  )
 Palabras reservadas y token asociados que debéis generar:
 
 tPROGRAMA -> programa 
+
 tVAR -> var 
+
 tAND -> and 
 tOR -> or 
 tNOT -> not 
@@ -79,8 +82,12 @@ continuación.
 "ERROR LÉXICO (<línea, columna>): símbolo no reconocido: <símbolo>"
 
 Seguidamente se muestra una imagen del contenido mostrado en la tabla cuando se ejecuta un programa con el flag -v 
-(modo verbose). En la imagen aparece el contenido de dos tablas Hash, una para contar la frecuencia de cada palabra reservadas o
-token y otra para contar la frecuencia de aparación de cada identificador.
+(modo verbose). En las imágenes aparece el contenido de dos tablas Hash, una para contar la frecuencia de cada palabra
+reservada o oken y otra para contar la frecuencia de aparación de cada identificador. 
+
+![alt text](https://i.ibb.co/HYXgzjn/8.png)
+
+![alt text](https://i.ibb.co/kmqfgZw/7.png)
 
 ### Analizador sintáctico
 
@@ -160,7 +167,7 @@ de Pearson dadas las numerosas ventajas que proporciona su uso. Los símbolos qu
 variables, acciones y parámetros. Para cada símbolo se guarda el nivel de ejecución para controlar el ámbito de vida, su nombre 
 y el tipo de símbolo. 
 
-IMAGEN
+![alt text](https://i.ibb.co/PWHj28z/6.jpg)
 
 Se permite añadir un símbolo de tipo programa, accion, parámeto y variable. También se puede buscar un símbolo en la tabla por
 medio de su identificador, ocultar los parámetros de una accion en un nivel, borrar un símbolo de la tabla y eliminar los
@@ -168,8 +175,6 @@ parámetros ocultos de una acción. La inserción de un símbolo se realiza por 
 que el coste de la operación es constante, y en caso de borrado, el coste es lineal ya que los símbolos se insertan por orden de
 nivel. Para poder manejar los símbolos almacenados en la tabla se ha creado un TAD Símbolo para poder representar toda la 
 información a guardar en la tabla de símbolos. 
-
-IMAGEN
 
 ### Analizador semántico (parte 2)
 
@@ -180,15 +185,66 @@ expresiones, variables repetidas, invocación a funciones con distinto número d
 elaborado un conjunto de programas para poder determinar que el analizador semántico funciona 
 adecuadamente.
 
-IMAGEN BIEN
+La siguiente imagen muestra el resultado de compilar un fichero libre de errores
 
-IMAGEN MAL
+![alt text](https://i.ibb.co/VMSNxcW/5.png)
+
+A continuacuón se muestra una imagen del resultado mostrado al compilar un fichero con errores semánticos
+
+![alt text](https://i.ibb.co/RDmGXQK/9.png)
 
 ### Generación de código
 
 Tras haber completado el analizador semántico, se ha procedido a realizar la generación de código ensamblador para la evaluación
 completa de programas escritos en MiniLeng. Para ello, se ha utilizado la generación de código secuencial ya que permite la
 unificación de los pasos en tiempo de compilación. De este modo se logra a partir de un fichero escrito en MiniLeng, generar el
-código ensamblador correspondiente que después puede ejecutarse en la máquina P facilitada por el profesorado de la asignatura.
+código ensamblador correspondiente que después puede ejecutarse en la máquina P facilitada por el profesorado de la asignatura
+en hendrix.
 
+Seguidamente muestra un fragmento del código en ensamblador obtenido cuando se compila un fichero escrito en MiniLeng libre de
+errores.
 
+![alt text](https://i.ibb.co/sw4S7Ng/2.png)
+
+## Compilación en eclipse
+
+En este apartado se procede a explicar como se lleva a cabo la compilación del proyecto eclipse para que dado un fichero escrito
+en lenguaje MiniLeng con extensión .ml, y seleccionando o no la compilación en modo verbose genere un fichero en lenguaje 
+ensamblador con extensión .code. Para poder seleccionar las opciones se debe ir a la opción "Run Configurations" del IDE eclipse
+y seleccionar la opción "Arguments" tal y como muestran las imágenes siguientes.
+
+![alt text](https://i.ibb.co/Xj5HjC4/0.png)
+
+![alt text](https://i.ibb.co/xGdY7hQ/1.png)
+
+## Optimización y ejecución en hendrix
+
+Una vez generado el fichero ensamblador .code, se procede a moverlo al servidor de hendrix para realizar la optimización del
+código ensamblador y la generación del archivo ejecutable por medio del ensamblador e interprete proporcionados por el 
+profesorado. Tras introducir las credenciales de la cuenta de hendrix, preferiblemente en un directorio distinto del raíz, se
+debe optimizar y generar el código ejecutable utilizando el ensamblador. Para poder generar el ejecutable se debe invocar al 
+ensamblador junto con el fichero en cuestión sin añadir la extensión .code, tal y como muestra la siguiente imagen.
+
+![alt text](https://i.ibb.co/Mcvb1rQ/0.jpg)
+
+Como resultado de la operación, se genera un archivo ejecutable por la máquina P con extensión .x, que para ser ejecutado se 
+debe invocar al interprete junto el nombre del fichero pero sin la extensión .x. A continuación se muestra una imagen de la 
+ejecución de un programa que cálculo números de la sucesión de Fibonacci.
+
+![alt text](https://i.ibb.co/TYhCMP8/1.jpg)
+
+En la siguiente captura se muestran todos los ficheros de código ensamblador y ejcutables usados para poder determinar el
+correcto comportamiento del compilador.
+
+![alt text](https://i.ibb.co/dKV2ZSY/3.png)
+
+## Mejoras
+
+Como mejoras adicionales se ha añadido un tipo de dato para poder representar las CONSTANTES en MiniLeng. De este modo se 
+permite la evalucación de expresiones solo con constantes, independientemente del tipo, durante el proceso de análisis 
+semántico y no durante la generación de código ensamblador, reduciéndose así, el número de instrucciones del programa. 
+Adicionalmente se ha incorporado la función de poder escribir ciertos caracteres especiales como el tabulador o el salto de
+linea. De este modo si se lee una cadena con caracteres como el \t o el \n, el compilador los procesa y los sustituye por 
+tabuladores o saltos de linea tal y como muestra la siguiente captura.
+
+![alt text](https://i.ibb.co/9NHkpZN/0.png)
