@@ -34,37 +34,68 @@ tPROGRAMA -> programa
 
 tVAR -> var 
 
-tAND -> and 
+tAND -> and
+
 tOR -> or 
+
 tNOT -> not 
+
 tPRINCIPIO -> principio 
+
 tFIN -> fin 
+
 tSI -> si 
+
 tENT -> ent 
+
 tSI_NO -> si_no
+
 tFSI -> fsi
+
 tMQ -> mq
+
 tFMQ -> fmq
+
 tESCRIBIR -> escribir
+
 tLEER -> leer
+
 tMOD -> mod
+
 tDIV -> div (es equivalente al símbolo /)
+
 tENTERO -> entero
+
 tBOOLEANO -> booleano
+
 tCARACTER -> caracter
+
 tTRUE -> true
+
 tFALSE -> false
+
 tENTACAR -> entacar
+
 tCARAENT -> caraent
+
 tACCION -> accion
+
 tVAL -> val
+
 tREF -> ref
+
 tMAYOR -> >
+
 tMENOR -> <
+
 tIGUAL -> =
+
 tMAI -> >=
+
 tMEI -> <=
+
 tNI -> <>
+
 tOPAS -> :=
 
 Además, se han considerado los identificadores, las constantes numéricas, los caracteres y las cadenas (ambos delimitados entre
@@ -98,41 +129,72 @@ producción de la grámatica del lenguaje de MiniLeng. Seguidamente se muestran 
 
 Programa ::= <tPROGRAMA> <tIDENTIFICADOR> ";"
 declaracion_variables declaracion_acciones bloque_sentencias
+
 declaracion_variables ::= ( declaracion ";" )* 
+
 declaracion ::= tipo_variables identificadores 
+
 tipo_variables ::= <tENTERO> | <tCARACTER> | <tBOOLEANO>  
+  
 identificadores ::= <tIDENTIFICADOR> ( "," <tIDENTIFICADOR> )* 
+  
 declaracion_acciones ::= ( declaracion_accion )* 
+
 declaracion_accion ::= cabecera_accion ";" declaracion_variables declaracion_acciones bloque_sentencias
+
 cabecera_accion ::= <tACCION> <tIDENTIFICADOR> parametros_formales 
+  
 parametros_formales ::= (lista_parametros)?
+
 lista_parametros::= "(" ( parametros ";" (parametros)* ")" | ")" )
+
 parametros ::= clase_parametros tipo_variables identificadores 
+
 clase_parametros ::= <tVAL> | <tREF> 
+  
 bloque_sentencias ::= <tPRINCIPIO> lista_sentencias <tFIN>
+  
 lista_sentencias::= (sentencia)+
+
 sentencia ::= leer ";"| escribir ";" | asignacion |invocacion_accion |seleccion | mientras_que
+
 leer ::= <tLEER> "(" lista_asignables ")"
+  
 lista_asignables ::= identificadores
 escribir ::= <tESCRIBIR> "(" lista_escribibles ")"
+  
 lista_escribibles  ::= (escribible)+
+
 escribible ::=  <tCONSTCHAR> 
               | <tCONSTCAD>
               | <tIDENTIFICADOR> 
               | <tENTACAR> <tPARENTESIS_IZDA> expresion <tPARENTESIS_DCHA>
+  
 asig_invoc ::= <tIDENTIFICADOR> (invocacion_accion | asignacion)
+  
 asignacion ::= <tOPAS> expresion ";" 
+  
 invocacion_accion ::= argumentos ";" 
 mientras_que ::= <tMQ> expresion lista_sentencias <tFMQ> 
+  
 seleccion ::= <tSI> expresion <tENT> lista_sentencias (<tSI_NO> lista_sentencias)? <tFSI>
+  
 argumentos ::= "(" ( lista_expresiones )? ")" 
+
 lista_expresiones ::= expresion ("," expresion)*
+
 expresion ::= expresion_simple (operador_relacional expresion_simple)*
+
 operador_relacional ::= <tIGUAL> | <tMENOR> | <tMEI> | <tNI> | <tMAI> | <tMAYOR>
+  
 expresion_simple ::= termino (operador_aditivo termino)* 
+
 operador_aditivo::= <tPLUS> | <tMINUS> | <tOR>
+  
 termino::= factor (operador_multiplicativo factor)*
+
 operador_multiplicativo::= <tMULTPIPLY> | <tDIVIDE> | <tDIV> | <tMOD> | <tAND>
+  
 factor::= "-" factor
           | <tNOT> factor 
           | "(" expresion ")" 
