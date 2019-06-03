@@ -1,10 +1,20 @@
 /*
- * Implementacion de la tabla Hash 
+ ******************************************************
+ *** Proyecto: 		Compilador de lenguaje MiniLeng
+ *** Asignatura:	Procesadores de lenguajes
+ *** Autor:			Rubén Rodríguez (ZgzInfinity)
+ *** NIP:			737215
+ *** Fecha:			3-6-2019
+ ****************************************************** 
  */
 
 package Util;
 
 import java.util.Enumeration;
+
+/*
+ * Implementacion de la tabla Hash 
+ */
 
 public class TablaHash {
 	

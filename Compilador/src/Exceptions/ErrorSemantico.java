@@ -1,3 +1,13 @@
+/*
+ ******************************************************
+ *** Proyecto: 		Compilador de lenguaje MiniLeng
+ *** Asignatura:	Procesadores de lenguajes
+ *** Autor:			Rubén Rodríguez (ZgzInfinity)
+ *** NIP:			737215
+ *** Fecha:			3-6-2019
+ ****************************************************** 
+ */
+
 package Exceptions;
 
 /*

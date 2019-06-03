@@ -2,6 +2,16 @@
  * JavaCC template file created by SF JavaCC plugin 1.5.28+ wizard for JavaCC 1.5.0+
  */
 
+/*
+ ******************************************************
+ *** Proyecto: 		Compilador de lenguaje MiniLeng
+ *** Asignatura:	Procesadores de lenguajes
+ *** Autor:			Rubén Rodríguez (ZgzInfinity)
+ *** NIP:			737215
+ *** Fecha:			3-6-2019
+ ****************************************************** 
+ */
+
 options
 {
   static = true;

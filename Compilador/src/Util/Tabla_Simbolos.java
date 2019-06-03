@@ -1,7 +1,16 @@
+/*
+ ******************************************************
+ *** Proyecto: 		Compilador de lenguaje MiniLeng
+ *** Asignatura:	Procesadores de lenguajes
+ *** Autor:			Rubén Rodríguez (ZgzInfinity)
+ *** NIP:			737215
+ *** Fecha:			3-6-2019
+ ****************************************************** 
+ */
+
 package Util;
 
 import java.util.ArrayList;
-
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Random;
@@ -10,6 +19,10 @@ import java.util.concurrent.ThreadLocalRandom;
 import Util.Simbolo.Clase_parametro;
 import Util.Simbolo.Tipo_variable;
 import Util.Simbolo.Tipo_simbolo;
+
+/*
+ * Estructura de la tabla de simbolos
+ */
 
 public class Tabla_Simbolos {
 	
