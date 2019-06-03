@@ -102,19 +102,19 @@ Además, se han considerado los identificadores, las constantes numéricas, los 
 comillas dobles).
 
 Posteriormente se han creado dos tablas Hash haciendo uso del tipo de dato predefinido HashTable de las librerías de Java para 
-poder almcenar el número de veces que ha aparecido cada palabra reservada del lenguaje, así como el número  de  identificadores,
-de constantes enteras, de booleanos, etc si y solo si el programa es invocado con el flag de ejecución -v (modo verbose) y
+poder almcenar el número de veces que ha aparecido cada palabra reservada del lenguaje, así como el número de identificadores,
+de constantes enteras, de booleanos, etcétera si y solo si el programa es invocado con el flag de ejecución -v (modo verbose) y
 finalmente se muestra una tabla con toda la información anteriormente comentada. 
 
 Para poder detectar errores léxicos en programas se ha implementado un analizador de errores léxicos, de tal forma que si ha
 habido un error en un fichero, muestra la línea y columna, junto con el error léxico localizado tal y como se muestra a 
 continuación.
 
-"ERROR LÉXICO (<línea, columna>): símbolo no reconocido: <símbolo>"
+"ERROR LÉXICO (<línea, columna>): símbolo no reconocido: <símbolo>".
 
 Seguidamente se muestra una imagen del contenido mostrado en la tabla cuando se ejecuta un programa con el flag -v 
 (modo verbose). En las imágenes aparece el contenido de dos tablas Hash, una para contar la frecuencia de cada palabra
-reservada o oken y otra para contar la frecuencia de aparación de cada identificador. 
+reservada o token y otra para contar la frecuencia de aparación de cada identificador. 
 
 ![alt text](https://i.ibb.co/HYXgzjn/8.png)
 
@@ -212,7 +212,7 @@ de factorización, como es el caso de la producción asig_invoc.
 
 Seguidamente se ha implementado un manejador de errores sintácticos mediante el uso de excepciones. De este modo cuando en un
 fichero hay un error sintáctico, éste se captura que y se muestra por terminal el tipo de error en cuestión, igual que
-con el manejador de errores léxico con la diferencia de que el manejador de errores sintácticos no detiene la compilación y el
+con el manejador de errores léxicos con la diferencia de que el manejador de errores sintácticos no detiene la compilación y el
 manejador de errores léxico sí lo hace.
 
 ### Analizador semántico (parte 1)
@@ -226,26 +226,26 @@ La tabla de símbolos se ha implementado por medio de un TAD que ofrece una cole
 datos almacenados en ella. La tabla de símbolos se ha implementado a modo de tabla Hash, por medio de de un vector de listas 
 enlazadas a modo de matriz bidimensional. Como algoritmo de cifrado de Hash o función de dispersión se ha empleado la función 
 de Pearson dadas las numerosas ventajas que proporciona su uso. Los símbolos que se almacenan en la tabla pueden ser programas,
-variables, acciones y parámetros. Para cada símbolo se guarda el nivel de ejecución para controlar el ámbito de vida, su nombre 
-y el tipo de símbolo. 
-
-![alt text](https://i.ibb.co/PWHj28z/6.jpg)
+variables, acciones y parámetros. Para cada símbolo se guarda el nivel de ejecución para controlar el ámbito de vida, su nombre,
+la dirección de memoria y el tipo de símbolo. 
 
 Se permite añadir un símbolo de tipo programa, accion, parámeto y variable. También se puede buscar un símbolo en la tabla por
 medio de su identificador, ocultar los parámetros de una accion en un nivel, borrar un símbolo de la tabla y eliminar los
-parámetros ocultos de una acción. La inserción de un símbolo se realiza por la izquierda para maximizar la eficiencia de forma
-que el coste de la operación es constante, y en caso de borrado, el coste es lineal ya que los símbolos se insertan por orden de
-nivel. Para poder manejar los símbolos almacenados en la tabla se ha creado un TAD Símbolo para poder representar toda la 
-información a guardar en la tabla de símbolos. 
+parámetros ocultos de una acción. 
+
+La inserción de un símbolo se realiza por la izquierda para maximizar la eficiencia de formaque el coste de la operación es 
+constante, y en caso de borrado, el coste es lineal ya que los símbolos se insertan por orden de nivel. Para poder manejar los
+símbolos almacenados en la tabla se ha creado un TAD Símbolo para poder representar toda la información.
+
+![alt text](https://i.ibb.co/PWHj28z/6.jpg)
 
 ### Analizador semántico (parte 2)
 
-Una vez implementada la tabla de símbolos se ha implementado el conjunto de restricciones necesarias para poder completar el
+Una vez hecha la tabla de símbolos, se ha implementado el conjunto de restricciones necesarias para poder completar el
 analizador semántico de MiniLeng, así como el manejador de errores semánticos en caso de detectar un fallo semántico. De este
 modo se tiene total control de posibles desbordamientos, operaciones matemáticas erróneas, incompatibilidad de tipos en 
 expresiones, variables repetidas, invocación a funciones con distinto número de parámetros, etcétera. Posteriormente se han
-elaborado un conjunto de programas para poder determinar que el analizador semántico funciona 
-adecuadamente.
+elaborado un conjunto de programas para poder determinar que el analizador semántico funciona adecuadamente.
 
 La siguiente imagen muestra el resultado de compilar un fichero libre de errores
 
@@ -271,7 +271,7 @@ errores.
 ## Compilación en eclipse
 
 En este apartado se procede a explicar como se lleva a cabo la compilación del proyecto eclipse para que dado un fichero escrito
-en lenguaje MiniLeng con extensión .ml, y seleccionando o no la compilación en modo verbose genere un fichero en lenguaje 
+en lenguaje MiniLeng con extensión .ml, y seleccionando o no la compilación en modo verbose, genere un fichero en lenguaje 
 ensamblador con extensión .code. Para poder seleccionar las opciones se debe ir a la opción "Run Configurations" del IDE eclipse
 y seleccionar la opción "Arguments" tal y como muestran las imágenes siguientes.
 
@@ -282,10 +282,10 @@ y seleccionar la opción "Arguments" tal y como muestran las imágenes siguiente
 ## Optimización y ejecución en hendrix
 
 Una vez generado el fichero ensamblador .code, se procede a moverlo al servidor de hendrix para realizar la optimización del
-código ensamblador y la generación del archivo ejecutable por medio del ensamblador e interprete proporcionados por el 
-profesorado. Tras introducir las credenciales de la cuenta de hendrix, preferiblemente en un directorio distinto del raíz, se
-debe optimizar y generar el código ejecutable utilizando el ensamblador. Para poder generar el ejecutable se debe invocar al 
-ensamblador junto con el fichero en cuestión sin añadir la extensión .code, tal y como muestra la siguiente imagen.
+código y la generación del archivo ejecutable por medio del ensamblador e interprete proporcionados por el profesorado. Tras
+introducir las credenciales de la cuenta de hendrix, preferiblemente en un directorio distinto del raíz, se debe optimizar y 
+generar el código ejecutable utilizando el ensamblador. Para poder generar el ejecutable se debe invocar al ensamblador junto
+con el fichero en cuestión sin añadir la extensión .code, tal y como muestra la siguiente imagen.
 
 ![alt text](https://i.ibb.co/Mcvb1rQ/0.jpg)
 
