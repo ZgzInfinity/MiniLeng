@@ -7,8 +7,13 @@ comida palabra identificador
 %---------------------------------
 
 fin 
-
-
+si
+si_no
+fsi
+_comida
+"escribir"
+que_pasa
+33939
 
 
 
